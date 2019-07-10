@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Forecasting on Moritz Mueller-Navarra</title>
+    <link>/tags/forecasting/</link>
+    <description>Recent content in Forecasting on Moritz Mueller-Navarra</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator>
+    <language>en-us</language>
+    <copyright> &amp;copy; Moritz Mueller-Navarra</copyright>
+    <lastBuildDate>Sun, 07 Jul 2019 00:00:00 +0000</lastBuildDate>
+    
+	    <atom:link href="/tags/forecasting/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Offcast</title>
+      <link>/project/offcast-project/</link>
+      <pubDate>Sun, 07 Jul 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/project/offcast-project/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

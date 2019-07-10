@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Authors on Moritz Mueller-Navarra</title>
+    <link>/authors/</link>
+    <description>Recent content in Authors on Moritz Mueller-Navarra</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator>
+    <language>en-us</language>
+    <copyright> &amp;copy; Moritz Mueller-Navarra</copyright>
+    <lastBuildDate>Fri, 05 Jul 2019 00:00:00 +0000</lastBuildDate>
+    
+	    <atom:link href="/authors/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title></title>
+      <link>/authors/admin/</link>
+      <pubDate>Fri, 05 Jul 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/authors/admin/</guid>
+      <description>&lt;p&gt;I am a freelancer applying Data Science using &lt;em&gt;R&lt;/em&gt;. I studied engineering and economics and have an advanced university degree, which is called &lt;em&gt;Dipl.-Ing. oec.&lt;/em&gt; from the &lt;em&gt;Technical University Hamburg&lt;/em&gt;. The degree is equivalent to an Masters degree (engineering &amp;amp; economics) today. I started using &lt;em&gt;R&lt;/em&gt; during my advanced statistics courses and instantly fell in love with it. For my thesis I used &lt;em&gt;R&lt;/em&gt; to train partial recurrent neural networks for time series forecasting. Since then I never stopped using &lt;em&gt;R&lt;/em&gt; for Machine Learning &amp;amp; Data Science, now working as freelancer.&lt;/p&gt;
+
+&lt;p&gt;I believe that interacting with other programmers is fundamental to improving your skills. I constantly visit &lt;em&gt;R&lt;/em&gt; conferences (UseR! 2017 Brussels, eRum2018 Budapest and SatRday 2019 in Berlin) to learn new skills and meet with other &lt;em&gt;R&lt;/em&gt; developers.&lt;/p&gt;
+
+&lt;p&gt;In the past years my projects focused around tidal data and offshore windenergy.&lt;br /&gt;
+In my spare time I work on Mobile Apps with &lt;em&gt;Java&lt;/em&gt; and recently &lt;em&gt;Dart&lt;/em&gt; using the &lt;em&gt;Flutter&lt;/em&gt; Framework.&lt;/p&gt;
+
+&lt;p&gt;Furthermore I like do any kind of sports and recently started doing yoga.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

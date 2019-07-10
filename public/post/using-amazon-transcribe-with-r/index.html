@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.3.1">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Moritz Mueller-Navarra">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="Amazon Transcribe &amp; RHi, in this post, I will show you some ideas on how to generate subtitles with a time stamp using R and Amazon Transcribe. At first you need a mp3 file, or like in my case, 139. If you want to use this code, you need to set up an aws (Amazon Web Services) account, which might cost you money, depending on how much you use the services.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="/post/using-amazon-transcribe-with-r/">
+
+  
+
+
+  
+
+  
+  
+  
+  <meta name="theme-color" content="#2962ff">
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.0/css/all.css" integrity="sha384-aOkxzJ5uQz7WBObEZcHvV5JvRW3TUc2rNPA7pe3AwnsUohiw1Vj2Rgx2KSOkF5+h" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" integrity="sha256-ygkqlh3CYSUri3LhQxzdcm0n1EQvH2Y+U5S2idbLtxs=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css" crossorigin="anonymous" title="hl-light">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark" disabled>
+        
+      
+    
+
+    
+
+    
+
+  
+
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700|Roboto:400,400italic,700|Roboto+Mono&display=swap">
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.min.3834c081887e44130d565828d71a7178.css">
+
+  
+
+  
+  
+  
+
+  
+
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="icon" type="image/png" href="/img/icon.png">
+  <link rel="apple-touch-icon" type="image/png" href="/img/icon-192.png">
+
+  <link rel="canonical" href="/post/using-amazon-transcribe-with-r/">
+
+  
+  
+  
+  
+    
+    
+  
+  <meta property="twitter:card" content="summary">
+  
+  <meta property="twitter:site" content="@NavarraMoritz">
+  <meta property="twitter:creator" content="@NavarraMoritz">
+  
+  <meta property="og:site_name" content="Moritz Mueller-Navarra">
+  <meta property="og:url" content="/post/using-amazon-transcribe-with-r/">
+  <meta property="og:title" content="USING AMAZON TRANSCRIBE WITH R | Moritz Mueller-Navarra">
+  <meta property="og:description" content="Amazon Transcribe &amp; RHi, in this post, I will show you some ideas on how to generate subtitles with a time stamp using R and Amazon Transcribe. At first you need a mp3 file, or like in my case, 139. If you want to use this code, you need to set up an aws (Amazon Web Services) account, which might cost you money, depending on how much you use the services."><meta property="og:image" content="/img/icon-192.png">
+  <meta property="twitter:image" content="/img/icon-192.png"><meta property="og:locale" content="en-us">
+  
+  <meta property="article:published_time" content="2019-07-05T00:00:00&#43;00:00">
+  
+  <meta property="article:modified_time" content="2019-07-05T17:07:56&#43;02:00">
+  
+
+  
+
+
+  
+
+
+
+
+
+  <title>USING AMAZON TRANSCRIBE WITH R | Moritz Mueller-Navarra</title>
+
+</head>
+
+
+<body id="top" data-spy="scroll" data-target="#TableOfContents" data-offset="71" >
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" role="textbox" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+<nav class="navbar navbar-light fixed-top navbar-expand-lg py-0 compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+      <a class="navbar-brand" href="/">Moritz Mueller-Navarra</a>
+      
+      <button type="button" class="navbar-toggler" data-toggle="collapse"
+              data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+        <span><i class="fas fa-bars"></i></span>
+      </button>
+      
+
+    
+    <div class="collapse navbar-collapse" id="navbar">
+
+      
+      
+      <ul class="navbar-nav mr-auto">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#about"><span>Home</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts"><span>Posts</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#projects"><span>Projects</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#contact"><span>Contact</span></a>
+        </li>
+
+        
+        
+
+      
+      </ul>
+      <ul class="navbar-nav ml-auto">
+      
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-search" href="#"><i class="fas fa-search" aria-hidden="true"></i></a>
+        </li>
+        
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-dark-toggle" href="#"><i class="fas fa-moon" aria-hidden="true"></i></a>
+        </li>
+        
+
+      </ul>
+
+    </div>
+  </div>
+</nav>
+
+
+  <article class="article" itemscope itemtype="http://schema.org/Article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1 itemprop="name">USING AMAZON TRANSCRIBE WITH R</h1>
+
+  
+
+  
+    
+
+
+
+<meta content="2019-07-05 00:00:00 &#43;0000 UTC" itemprop="datePublished">
+<meta content="2019-07-05 17:07:56 &#43;0200 CEST" itemprop="dateModified">
+
+<div class="article-metadata">
+
+  
+  
+  
+  
+  <div>
+    
+
+
+
+  <span itemprop="author name" itemtype="http://schema.org/Person"><a href="/authors/admin/">Moritz Mueller-Navarra</a></span>
+
+  </div>
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+          Last updated on
+      
+    
+    <time>Jul 5, 2019</time>
+  </span>
+  
+
+  
+
+  
+  <span class="middot-divider"></span>
+  <span class="article-reading-time">
+    8 min read
+  </span>
+  
+
+  
+  
+
+  
+  
+
+  
+    
+<div class="share-box" aria-hidden="true">
+  <ul class="share">
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://twitter.com/intent/tweet?url=/post/using-amazon-transcribe-with-r/&amp;text=USING%20AMAZON%20TRANSCRIBE%20WITH%20R" target="_blank" rel="noopener" class="share-btn-twitter">
+          <i class="fab fa-twitter"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.facebook.com/sharer.php?u=/post/using-amazon-transcribe-with-r/&amp;t=USING%20AMAZON%20TRANSCRIBE%20WITH%20R" target="_blank" rel="noopener" class="share-btn-facebook">
+          <i class="fab fa-facebook-f"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="mailto:?subject=USING%20AMAZON%20TRANSCRIBE%20WITH%20R&amp;body=/post/using-amazon-transcribe-with-r/" target="_blank" rel="noopener" class="share-btn-email">
+          <i class="fas fa-envelope"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.linkedin.com/shareArticle?url=/post/using-amazon-transcribe-with-r/&amp;title=USING%20AMAZON%20TRANSCRIBE%20WITH%20R" target="_blank" rel="noopener" class="share-btn-linkedin">
+          <i class="fab fa-linkedin-in"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://web.whatsapp.com/send?text=USING%20AMAZON%20TRANSCRIBE%20WITH%20R%20/post/using-amazon-transcribe-with-r/" target="_blank" rel="noopener" class="share-btn-whatsapp">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://service.weibo.com/share/share.php?url=/post/using-amazon-transcribe-with-r/&amp;title=USING%20AMAZON%20TRANSCRIBE%20WITH%20R" target="_blank" rel="noopener" class="share-btn-weibo">
+          <i class="fab fa-weibo"></i>
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+
+  
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style" itemprop="articleBody">
+      
+
+
+<div id="amazon-transcribe-r" class="section level1">
+<h1>Amazon Transcribe &amp; R</h1>
+<p>Hi, in this post, I will show you some ideas on how to generate subtitles with a time stamp using <strong>R</strong> and <strong>Amazon Transcribe</strong>. At first you need a <em>mp3</em> file, or like in my case, 139. If you want to use this code, you need to set up an <strong>aws</strong> (Amazon Web Services) account, which might cost you money, depending on how much you use the services. There is a free tier available on aws, but be careful when using this code! You need and <em>iam role</em> that has access to an <strong>s3</strong> folder and is allowed to use <strong>Amazon Transcribe</strong>.</p>
+<p>In my case I actually have <em>mp4</em> video files. I generated the <em>mp3</em> files with the beautiful <strong>ffmpeg</strong>. We are not going to cover that in this post, rather showing you the <strong>R</strong> code for communicating with <strong>Amazon S3</strong> and <strong>Amazon Transcribe</strong>. Your end goal is to create a <em>VTT</em> file, which looks like this:</p>
+<pre class="r"><code>1
+00:00:01,000 --&gt; 00:00:06,000
+Willkommen zur ersten Lektion Einf?hrungen er Vektoren und Tim Wir
+
+2
+00:00:06,000 --&gt; 00:00:11,000
+besprechen zun?chst die variablen Definition Ich habe euch hier ein
+
+3
+00:00:11,000 --&gt; 00:00:17,000
+kleines Skript vorbereitet, indem wir der variable A den Wert
+
+4
+00:00:17,000 --&gt; 00:00:22,000
+eins zuordnen im zweiten Schritt die variable A um den</code></pre>
+<p>If you understand german, you will notice that there are a few errors. It is not too bad though.<br />
+Now let us jump into the code!</p>
+<div id="load-packages" class="section level2">
+<h2>Load packages</h2>
+<pre class="r"><code>library(data.table)
+library(aws.s3)
+library(aws.transcribe)
+library(rjson)</code></pre>
+<p>We use <code>data.table</code> for some data wrangling, <code>aws.3</code> &amp; <code>aws.transcribe</code> to communicate with <strong>aws</strong> and <code>rjson</code> to handle <em>json</em>. Thanks to all package developers!</p>
+</div>
+<div id="list-files-upload" class="section level2">
+<h2>List files &amp; upload</h2>
+<pre class="r"><code>#define file path where your mp3 live
+#replace &quot;yourpath&quot; with your path
+file_path &lt;- file.path(&quot;yourpath&quot;)
+
+#List files mp3 in your folder
+
+path_mp3  &lt;- list.files(file_path, 
+                        pattern = &quot;.mp3&quot;,
+                        full.names = TRUE)
+#basename returns only the file name
+files_mp3 &lt;- basename(path_files_mp3)</code></pre>
+<p>Now we upload the mp3 to a <strong>s3-bucket</strong></p>
+<pre class="r"><code>#define key and secret for your s3 bucket
+#Do not store your key &amp; secret this way
+
+key    &lt;- &quot;yourkey&quot;
+secret &lt;- &quot;yoursecret&quot;
+
+#upload files to s3 bucket
+
+for(i in seq_along(path_mp3)) {
+  print(i)
+  aws.s3::put_object(file = path_mp3[i], 
+                     object = files_mp3[i], 
+                     bucket = &quot;yourbucket&quot;, 
+                     key = key, 
+                     secret = secret)
+}</code></pre>
+</div>
+<div id="start-a-transcribe-job" class="section level2">
+<h2>Start a transcribe job</h2>
+<p>First we need to understand what the package <code>aws.transcribe</code> does.
+We need the <code>start_transcription</code> function</p>
+<pre class="r"><code>aws.transcribe::start_transcription</code></pre>
+<pre><code>## function (name, url, format = tools::file_ext(url), language = &quot;en-US&quot;, 
+##     hertz = NULL, ...) 
+## {
+##     bod &lt;- list(Media = list(MediaFileUri = url))
+##     bod$MediaFormat &lt;- format
+##     bod$LanguageCode &lt;- language
+##     if (!is.null(hertz)) {
+##         bod$MediaSampleRateHertz &lt;- hertz
+##     }
+##     bod$TranscriptionJobName &lt;- name
+##     transcribeHTTP(action = &quot;StartTranscriptionJob&quot;, body = bod, 
+##         ...)
+## }
+## &lt;bytecode: 0x0000000015b96340&gt;
+## &lt;environment: namespace:aws.transcribe&gt;</code></pre>
+<p>The main takeaway here is that we define a list <code>bod</code> and then call the <code>transcribeHTTP</code> function. We can check the <strong>Amazon Transcribe</strong> documentation to understand, how we should define a request body which is called <code>bod</code> in this function.</p>
+<p><a href="https://docs.aws.amazon.com/de_de/transcribe/latest/dg/API_StartTranscriptionJob.html" class="uri">https://docs.aws.amazon.com/de_de/transcribe/latest/dg/API_StartTranscriptionJob.html</a></p>
+<p>Since I want to define the <em>OutputBucketName</em>, because we are going to write the actual transcribes (json) to a specific bucket, simply add an argument to the <code>start_transcription</code> function. I call the new function <code>StartTranscription</code>.</p>
+<pre class="r"><code>StartTranscription &lt;- function (name, url, format = tools::file_ext(url), language = &quot;en-US&quot;, 
+          hertz = NULL, outputbucketname = &quot;yourbucketname&quot;, ...) 
+{
+  bod &lt;- list(Media = list(MediaFileUri = url))
+  bod$MediaFormat &lt;- format
+  bod$LanguageCode &lt;- language
+  bod$OutputBucketName &lt;- outputbucketname # added
+  if (!is.null(hertz)) {
+    bod$MediaSampleRateHertz &lt;- hertz
+  }
+  bod$TranscriptionJobName &lt;- name
+  transcribeHTTP(action = &quot;StartTranscriptionJob&quot;, body = bod, 
+                 ...)
+}</code></pre>
+<p>The <code>transcribeHTTP</code> function is a bit more complex.</p>
+<pre class="r"><code>aws.transcribe::transcribeHTTP</code></pre>
+<pre><code>## function (action, query = list(), body = NULL, version = &quot;v1&quot;, 
+##     region = NULL, key = NULL, secret = NULL, session_token = NULL, 
+##     ...) 
+## {
+##     d_timestamp &lt;- format(Sys.time(), &quot;%Y%m%dT%H%M%SZ&quot;, tz = &quot;UTC&quot;)
+##     if (is.null(region) || region == &quot;&quot;) {
+##         region &lt;- &quot;us-east-1&quot;
+##     }
+##     url &lt;- paste0(&quot;https://transcribe.&quot;, region, &quot;.amazonaws.com&quot;)
+##     Sig &lt;- signature_v4_auth(datetime = d_timestamp, region = region, 
+##         service = &quot;transcribe&quot;, verb = &quot;POST&quot;, action = &quot;/&quot;, 
+##         query_args = query, canonical_headers = list(host = paste0(&quot;transcribe.&quot;, 
+##             region, &quot;.amazonaws.com&quot;), `x-amz-date` = d_timestamp, 
+##             `X-Amz-Target` = paste0(&quot;Transcribe.&quot;, action), `Content-Type` = &quot;application/x-amz-json-1.1&quot;), 
+##         request_body = if (is.null(body)) 
+##             &quot;&quot;
+##         else toJSON(body, auto_unbox = TRUE), key = key, secret = secret, 
+##         session_token = session_token)
+##     headers &lt;- list()
+##     headers[[&quot;X-Amz-Target&quot;]] &lt;- paste0(&quot;Transcribe.&quot;, action)
+##     headers[[&quot;Content-Type&quot;]] &lt;- &quot;application/x-amz-json-1.1&quot;
+##     headers[[&quot;x-amz-date&quot;]] &lt;- d_timestamp
+##     headers[[&quot;x-amz-content-sha256&quot;]] &lt;- Sig$BodyHash
+##     if (!is.null(session_token) &amp;&amp; session_token != &quot;&quot;) {
+##         headers[[&quot;x-amz-security-token&quot;]] &lt;- session_token
+##     }
+##     headers[[&quot;Authorization&quot;]] &lt;- Sig[[&quot;SignatureHeader&quot;]]
+##     H &lt;- do.call(add_headers, headers)
+##     if (length(query)) {
+##         r &lt;- POST(url, H, query = query, body = body, encode = &quot;json&quot;, 
+##             ...)
+##     }
+##     else {
+##         r &lt;- POST(url, H, body = body, encode = &quot;json&quot;, ...)
+##     }
+##     if (http_error(r)) {
+##         x &lt;- fromJSON(content(r, &quot;text&quot;, encoding = &quot;UTF-8&quot;))
+##         warn_for_status(r)
+##         h &lt;- headers(r)
+##         out &lt;- structure(x, headers = h, class = &quot;aws_error&quot;)
+##         attr(out, &quot;request_canonical&quot;) &lt;- Sig$CanonicalRequest
+##         attr(out, &quot;request_string_to_sign&quot;) &lt;- Sig$StringToSign
+##         attr(out, &quot;request_signature&quot;) &lt;- Sig$SignatureHeader
+##     }
+##     else {
+##         out &lt;- try(fromJSON(content(r, &quot;text&quot;, encoding = &quot;UTF-8&quot;)), 
+##             silent = TRUE)
+##         if (inherits(out, &quot;try-error&quot;)) {
+##             out &lt;- structure(content(r, &quot;text&quot;, encoding = &quot;UTF-8&quot;), 
+##                 &quot;unknown&quot;)
+##         }
+##     }
+##     return(out)
+## }
+## &lt;bytecode: 0x000000001365dfc0&gt;
+## &lt;environment: namespace:aws.transcribe&gt;</code></pre>
+<p>We call this function inside <code>StartTranscription</code> with <code>action = "StartTransciptionJob</code> and <code>body = bod</code>. We use the <code>...</code> argument to pass our secret and key, which are then passed to the <code>POST</code> function from the <code>httr</code>package. If you want more information on how to send requests to <strong>aws</strong>, please read up on <a href="https://docs.aws.amazon.com/de_de/transcribe/latest/dg/CommonParameters.html" class="uri">https://docs.aws.amazon.com/de_de/transcribe/latest/dg/CommonParameters.html</a> and <a href="https://docs.aws.amazon.com/de_de/general/latest/gr/signature-version-4.html" class="uri">https://docs.aws.amazon.com/de_de/general/latest/gr/signature-version-4.html</a>. Thanks to <em>Thomas J. Leeper</em> (aws.s3 &amp; aws.transcribe) that we do not have to fiddle with that for now!</p>
+<p>Now i am defining a url, which points to the <strong>s3 bucket</strong> where I want to save the transcribes as <em>json</em>.</p>
+<pre class="r"><code>full_url &lt;- paste0(&quot;https://s3.eu-central-1.amazonaws.com/yourbucket/&quot;, files_mp3)</code></pre>
+<div id="start-transcription" class="section level3">
+<h3>Start transcription</h3>
+<p>We use <code>files_mp3</code> as the job name. Please change <code>language</code> and <code>region</code> to your desired values. I simply loop along the vector <code>full_url</code>. I added a <code>Sys.sleep</code>, because i do not want to trigger <strong>aws</strong> by sending too many requests. I am sure you can get away with way shorter timings. Change the value and test different timings.</p>
+<pre class="r"><code>for(i in seq_along(full_url)) {
+
+StartTranscription(name = files_mp3[i], 
+                   language = &quot;de-DE&quot;, 
+                   url = full_url[i], 
+                   key = &quot;yourkey&quot;,
+                   secret = &quot;yoursecret&quot;, 
+                   region = &quot;eu-central-1&quot;
+                   )
+  
+Sys.sleep(time = 60)
+paste(i)
+  
+}</code></pre>
+<p>You can check the progress in your <strong>Amazon Transcribe</strong> console.</p>
+</div>
+</div>
+<div id="download-the-json-files" class="section level2">
+<h2>Download the json files</h2>
+<p>I actually need <em>vtt</em> files, because most video editing software are using this file type to include transcriptions. I wrote three helper functions to deal with downloading, formatting the <em>json</em> files and generate <em>vtt</em> files.</p>
+<div id="functions" class="section level3">
+<h3>Functions</h3>
+<p>The first function <code>DownloadTransJson</code> calls <code>FormatJsonObject</code> and <code>WriteVtt</code> after listing and downloading the files from the bucket where we wrote the <em>json</em> files to.</p>
+<pre class="r"><code>DownloadTransJson &lt;- function(){
+  list_bucket &lt;- data.table::rbindlist(aws.s3::get_bucket(
+    bucket = &quot;yourbucket&quot;, 
+    key = &quot;yourkey&quot;, 
+    secret = &quot;yoursecret&quot;))
+  #only the json files
+  list_bucket &lt;- grep(x = list_bucket$Key, 
+                      pattern = &quot;mp3.json&quot;, 
+                      value = TRUE)
+  #download files in list_bucket
+  for(i in list_bucket) {
+  json_object    &lt;- aws.s3::get_object(object =i,
+                                       bucket = &quot;yourbucket&quot;, 
+                                       key = &quot;yourkey&quot;, 
+                                       secret = &quot;yoursecret&quot;)
+  formatted_json &lt;- FormatJsonObject(jsonobject = json_object)
+  WriteVtt(i, formatted_json)
+  }
+}</code></pre>
+<p>The <code>FormatJsonObject</code> function formats the response we get from <code>aws.s3::getobject</code>.</p>
+<pre class="r"><code>FormatJsonObject &lt;- function(jsonobject){
+  trans_00 &lt;- rjson::fromJSON(rawToChar(jsonobject))
+  
+  transcript &lt;- trans_00$results$transcripts[[1]]$transcript
+  #split words
+  words      &lt;- unlist(strsplit(transcript, split = &quot; &quot;))
+  
+  #bind the list items
+  timing_dt &lt;- rbindlist(trans_00$results$items, 
+                         fill = TRUE)
+  #Getting rid of punctuation for now
+  timing_dt &lt;- timing_dt[type != &quot;punctuation&quot;]
+  timing_dt[, word := words]
+  
+  #simple conversion to numeric
+  timing_dt[, start_time := as.numeric(start_time)]
+  timing_dt[, end_time := as.numeric(end_time)]
+  
+  #define a group for every ten words
+  #so that ten words form a group
+  timing_dt[, group := (1:.N - 1) %/% 10]
+  
+  #Collapse word to a phrase by group
+  timing_dt[, phrase := lapply(.SD, paste, collapse = &quot; &quot;), 
+            by = group, .SDcols = &quot;word&quot;]
+  
+  #get min start_time and max start time for a phrase
+  timing_dt[, `:=` (min_start_time = min(start_time), max_end_time = max(end_time)), 
+            by = &quot;group&quot;]
+  
+  #Need only one phrase per group, as they are redundant.
+  unique_dt &lt;- timing_dt[, .SD[1], by = &quot;group&quot;]
+  
+  unique_dt &lt;- unique_dt[,.SD, .SDcols = c(&quot;phrase&quot;, 
+                                           &quot;min_start_time&quot;, 
+                                           &quot;max_end_time&quot;)]
+  
+  #
+  unique_dt[, time_stamp := paste(paste0(as.ITime(min_start_time),&quot;,000&quot;), 
+                                  paste0(as.ITime(max_end_time),&quot;,000&quot;), 
+                                  sep = &quot; --&gt; &quot;)]
+  return(unique_dt)
+}</code></pre>
+<p>And now simply write a file per transcription as <em>VTT</em>.</p>
+<pre class="r"><code>WriteVtt &lt;- function(name, jsondt) {
+  
+  file.create(paste0(name,&quot;.VTT&quot;))
+  con_file &lt;- file(paste0(name,&quot;.VTT&quot;))
+  ##writing to vtt
+  #might be os specific
+  writeLines(paste0(1 : nrow(jsondt),&quot;\n&quot;,
+                    jsondt$time_stamp,&quot;\n&quot;,
+                    jsondt$phrase,&quot;\n&quot;), 
+                    con_file)
+}</code></pre>
+<p>Now we actually call the function.</p>
+<pre class="r"><code>DownloadTransJson()</code></pre>
+<p>Done? Not quite. You now need to check your transciptions. Did <strong>Amazon Transcribe</strong> understand what your were saying? Unfortunately not in every case. It seems like mixing german with english, as I did not “translate” english R expressions into german, is problematic. I am sure it works way better, when you are trying to transcribe english. What are your experiences with <strong>Amazon Transcribe</strong> ?<br />
+I know one can define a vocabulary to improve the job, which I am going to try for sure!</p>
+<p>Anyways, i hope you can take something away from this post.<br />
+Have a great day!
+Moritz</p>
+</div>
+</div>
+</div>
+
+    </div>
+
+    
+
+<div class="article-tags">
+  
+  <a class="badge badge-light" href="/tags/r/">R</a>
+  
+  <a class="badge badge-light" href="/tags/aws/">aws</a>
+  
+  <a class="badge badge-light" href="/tags/aws-transcribe/">aws transcribe</a>
+  
+  <a class="badge badge-light" href="/tags/cloud/">cloud</a>
+  
+</div>
+
+
+
+    
+      
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+  
+
+
+
+
+
+  
+  
+  
+    
+  
+  
+  <div class="media author-card" itemscope itemtype="http://schema.org/Person">
+    
+      
+      <img class="portrait mr-3" src="/authors/admin/avatar_hucacfa7e6a5d02d8a2e7c8f6bdeba0e03_169166_250x250_fill_lanczos_center_2.png" itemprop="image" alt="Avatar">
+    
+
+    <div class="media-body">
+      <h5 class="card-title" itemprop="name"><a href="/">Moritz Mueller-Navarra</a></h5>
+      
+      <p class="card-text" itemprop="description">A Data Scientist using R</p>
+      <ul class="network-icon" aria-hidden="true">
+        
+          
+          
+          
+            
+          
+          
+          
+          
+          
+            
+          
+          <li>
+            <a itemprop="sameAs" href="/#contact" >
+              <i class="fas fa-envelope"></i>
+            </a>
+          </li>
+        
+          
+          
+          
+            
+          
+          
+          
+          
+          
+            
+          
+          <li>
+            <a itemprop="sameAs" href="https://twitter.com/NavarraMoritz" target="_blank" rel="noopener">
+              <i class="fab fa-twitter"></i>
+            </a>
+          </li>
+        
+          
+          
+          
+            
+          
+          
+          
+          
+          
+            
+          
+          <li>
+            <a itemprop="sameAs" href="https://github.com/moritzmn" target="_blank" rel="noopener">
+              <i class="fab fa-github"></i>
+            </a>
+          </li>
+        
+          
+          
+          
+            
+          
+          
+          
+          
+          
+            
+          
+          <li>
+            <a itemprop="sameAs" href="https://stackoverflow.com/users/6244387/mmn" target="_blank" rel="noopener">
+              <i class="fab fa-stack-overflow"></i>
+            </a>
+          </li>
+        
+          
+          
+          
+            
+          
+          
+          
+          
+          
+            
+          
+          <li>
+            <a itemprop="sameAs" href="https://www.linkedin.com/in/moritz-m%C3%BCller-navarra-917285110/" target="_blank" rel="noopener">
+              <i class="fab fa-linkedin-in"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+
+      
+      
+      <div class="article-widget">
+        <div class="hr-light"></div>
+        <h3>Related</h3>
+        <ul>
+          
+          <li><a href="/post/new-r-course-on-udemy-com/">NEW R COURSE ON UDEMY</a></li>
+          
+        </ul>
+      </div>
+      
+    
+
+    
+
+    
+
+
+  </div>
+</article>
+
+      
+
+    
+    
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" integrity="sha256-X5PoE3KU5l+JcX+w09p/wHl9AzK333C4hJ2I9S5mD4M=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js" integrity="sha256-aYTdUrn6Ow1DDgh5JTc3aDGnnju48y/1c8s1dgkYPQ8=" crossorigin="anonymous"></script>
+        
+      
+
+      
+      
+    
+
+    
+    
+
+    
+    
+    
+
+    
+    
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    
+    
+    <script>
+      const search_index_filename = "/index.json";
+      const i18n = {
+        'placeholder': "Search...",
+        'results': "results found",
+        'no_results': "No results found"
+      };
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks"
+        };
+    </script>
+    
+
+    
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.2e38db8060788d4ad8568291459b9649.js"></script>
+
+    
+
+
+
+
+
+
+  
+  <div class="container">
+    <footer class="site-footer">
+  
+  <p class="powered-by">
+    <a href="/privacy/">Privacy Policy</a>
+  </p>
+  
+
+  <p class="powered-by">
+    &copy; Moritz Mueller-Navarra &middot; 
+
+    Powered by the
+    <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
+    <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>.
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" id="back_to_top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
+
+  </div>
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

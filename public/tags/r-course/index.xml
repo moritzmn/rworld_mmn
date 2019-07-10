@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>R course on Moritz Mueller-Navarra</title>
+    <link>/tags/r-course/</link>
+    <description>Recent content in R course on Moritz Mueller-Navarra</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator>
+    <language>en-us</language>
+    <copyright> &amp;copy; Moritz Mueller-Navarra</copyright>
+    <lastBuildDate>Fri, 05 Jul 2019 00:00:00 +0000</lastBuildDate>
+    
+	    <atom:link href="/tags/r-course/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>NEW R COURSE ON UDEMY</title>
+      <link>/post/new-r-course-on-udemy-com/</link>
+      <pubDate>Fri, 05 Jul 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/post/new-r-course-on-udemy-com/</guid>
+      <description>
+
+
+&lt;p&gt;The first real post and already a shameless plug for my &lt;strong&gt;R course&lt;/strong&gt; on &lt;a href=&#34;https://www.udemy.com&#34; class=&#34;uri&#34;&gt;https://www.udemy.com&lt;/a&gt; …
+As I just uploaded the course I thought, you might be interested in taking this course,
+where I talk about the basics of &lt;strong&gt;R&lt;/strong&gt; for beginners. Unfortunately the course is in german for now,
+but I am going to add english subtitles as soon as I figured out how to correctly use &lt;strong&gt;Amazon Transcribe&lt;/strong&gt; with &lt;strong&gt;R&lt;/strong&gt; to generate german subtitles with a timestamp, which I can then translate into english. I will post more on this topic later this week. Back to the course, as this is a plug for it ;-)&lt;/p&gt;
+&lt;p&gt;I mainly teach:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Basics of the R language&lt;/li&gt;
+&lt;li&gt;Intro to &lt;strong&gt;tidyverse&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;Intro to &lt;strong&gt;data.table&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;Plots (&lt;strong&gt;base&lt;/strong&gt;, &lt;strong&gt;ggplot2&lt;/strong&gt;, &lt;strong&gt;plotly&lt;/strong&gt;)&lt;/li&gt;
+&lt;li&gt;Intro to &lt;strong&gt;shiny&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;As for as I know &lt;strong&gt;data.table&lt;/strong&gt; has been unrecognized (correct me if I am wrong) by most of the instructors of &lt;strong&gt;udemy&lt;/strong&gt; who are teaching &lt;strong&gt;R&lt;/strong&gt;, despite being one of the best package for R! I cover the basics of the package. If you need an intro to &lt;strong&gt;data.table&lt;/strong&gt;, consider taking my course :-).&lt;/p&gt;
+&lt;p&gt;Most of the code you will encounter on this blog will start with&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(data.table)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Anyway, you finde my course under this link: &lt;a href=&#34;https://www.udemy.com/r-basics-u/&#34; class=&#34;uri&#34;&gt;https://www.udemy.com/r-basics-u/&lt;/a&gt;, it is called&lt;br /&gt;
+&lt;strong&gt;R Basics - Programmierung und Datenanalyse&lt;/strong&gt;. Using this link you get the course for 9.99$
+&lt;a href=&#34;https://www.udemy.com/r-basics-u/?couponCode=WELCOME_R_KURS&#34; class=&#34;uri&#34;&gt;https://www.udemy.com/r-basics-u/?couponCode=WELCOME_R_KURS&lt;/a&gt;, limited to the first 50 subscribers!&lt;/p&gt;
+&lt;p&gt;See you soon!&lt;br /&gt;
+Moritz&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

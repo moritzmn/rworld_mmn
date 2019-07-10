@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Moritz Mueller-Navarra</title>
+    <link>/authors/admin/</link>
+    <description>Recent content on Moritz Mueller-Navarra</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator>
+    <language>en-us</language>
+    <copyright> &amp;copy; Moritz Mueller-Navarra</copyright>
+    <lastBuildDate>Fri, 05 Jul 2019 00:00:00 +0000</lastBuildDate>
+    
+	    <atom:link href="/authors/admin/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>NEW R COURSE ON UDEMY</title>
+      <link>/post/new-r-course-on-udemy-com/</link>
+      <pubDate>Fri, 05 Jul 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/post/new-r-course-on-udemy-com/</guid>
+      <description>
+
+
+&lt;p&gt;The first real post and already a shameless plug for my &lt;strong&gt;R course&lt;/strong&gt; on &lt;a href=&#34;https://www.udemy.com&#34; class=&#34;uri&#34;&gt;https://www.udemy.com&lt;/a&gt; …
+As I just uploaded the course I thought, you might be interested in taking this course,
+where I talk about the basics of &lt;strong&gt;R&lt;/strong&gt; for beginners. Unfortunately the course is in german for now,
+but I am going to add english subtitles as soon as I figured out how to correctly use &lt;strong&gt;Amazon Transcribe&lt;/strong&gt; with &lt;strong&gt;R&lt;/strong&gt; to generate german subtitles with a timestamp, which I can then translate into english. I will post more on this topic later this week. Back to the course, as this is a plug for it ;-)&lt;/p&gt;
+&lt;p&gt;I mainly teach:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Basics of the R language&lt;/li&gt;
+&lt;li&gt;Intro to &lt;strong&gt;tidyverse&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;Intro to &lt;strong&gt;data.table&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;Plots (&lt;strong&gt;base&lt;/strong&gt;, &lt;strong&gt;ggplot2&lt;/strong&gt;, &lt;strong&gt;plotly&lt;/strong&gt;)&lt;/li&gt;
+&lt;li&gt;Intro to &lt;strong&gt;shiny&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;As for as I know &lt;strong&gt;data.table&lt;/strong&gt; has been unrecognized (correct me if I am wrong) by most of the instructors of &lt;strong&gt;udemy&lt;/strong&gt; who are teaching &lt;strong&gt;R&lt;/strong&gt;, despite being one of the best package for R! I cover the basics of the package. If you need an intro to &lt;strong&gt;data.table&lt;/strong&gt;, consider taking my course :-).&lt;/p&gt;
+&lt;p&gt;Most of the code you will encounter on this blog will start with&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(data.table)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Anyway, you finde my course under this link: &lt;a href=&#34;https://www.udemy.com/r-basics-u/&#34; class=&#34;uri&#34;&gt;https://www.udemy.com/r-basics-u/&lt;/a&gt;, it is called&lt;br /&gt;
+&lt;strong&gt;R Basics - Programmierung und Datenanalyse&lt;/strong&gt;. Using this link you get the course for 9.99$
+&lt;a href=&#34;https://www.udemy.com/r-basics-u/?couponCode=WELCOME_R_KURS&#34; class=&#34;uri&#34;&gt;https://www.udemy.com/r-basics-u/?couponCode=WELCOME_R_KURS&lt;/a&gt;, limited to the first 50 subscribers!&lt;/p&gt;
+&lt;p&gt;See you soon!&lt;br /&gt;
+Moritz&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>USING AMAZON TRANSCRIBE WITH R</title>
+      <link>/post/using-amazon-transcribe-with-r/</link>
+      <pubDate>Fri, 05 Jul 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/post/using-amazon-transcribe-with-r/</guid>
+      <description>
+
+
+&lt;div id=&#34;amazon-transcribe-r&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Amazon Transcribe &amp;amp; R&lt;/h1&gt;
+&lt;p&gt;Hi, in this post, I will show you some ideas on how to generate subtitles with a time stamp using &lt;strong&gt;R&lt;/strong&gt; and &lt;strong&gt;Amazon Transcribe&lt;/strong&gt;. At first you need a &lt;em&gt;mp3&lt;/em&gt; file, or like in my case, 139. If you want to use this code, you need to set up an &lt;strong&gt;aws&lt;/strong&gt; (Amazon Web Services) account, which might cost you money, depending on how much you use the services. There is a free tier available on aws, but be careful when using this code! You need and &lt;em&gt;iam role&lt;/em&gt; that has access to an &lt;strong&gt;s3&lt;/strong&gt; folder and is allowed to use &lt;strong&gt;Amazon Transcribe&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;In my case I actually have &lt;em&gt;mp4&lt;/em&gt; video files. I generated the &lt;em&gt;mp3&lt;/em&gt; files with the beautiful &lt;strong&gt;ffmpeg&lt;/strong&gt;. We are not going to cover that in this post, rather showing you the &lt;strong&gt;R&lt;/strong&gt; code for communicating with &lt;strong&gt;Amazon S3&lt;/strong&gt; and &lt;strong&gt;Amazon Transcribe&lt;/strong&gt;. Your end goal is to create a &lt;em&gt;VTT&lt;/em&gt; file, which looks like this:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;1
+00:00:01,000 --&amp;gt; 00:00:06,000
+Willkommen zur ersten Lektion Einf?hrungen er Vektoren und Tim Wir
+
+2
+00:00:06,000 --&amp;gt; 00:00:11,000
+besprechen zun?chst die variablen Definition Ich habe euch hier ein
+
+3
+00:00:11,000 --&amp;gt; 00:00:17,000
+kleines Skript vorbereitet, indem wir der variable A den Wert
+
+4
+00:00:17,000 --&amp;gt; 00:00:22,000
+eins zuordnen im zweiten Schritt die variable A um den&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;If you understand german, you will notice that there are a few errors. It is not too bad though.&lt;br /&gt;
+Now let us jump into the code!&lt;/p&gt;
+&lt;div id=&#34;load-packages&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Load packages&lt;/h2&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(data.table)
+library(aws.s3)
+library(aws.transcribe)
+library(rjson)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We use &lt;code&gt;data.table&lt;/code&gt; for some data wrangling, &lt;code&gt;aws.3&lt;/code&gt; &amp;amp; &lt;code&gt;aws.transcribe&lt;/code&gt; to communicate with &lt;strong&gt;aws&lt;/strong&gt; and &lt;code&gt;rjson&lt;/code&gt; to handle &lt;em&gt;json&lt;/em&gt;. Thanks to all package developers!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;list-files-upload&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;List files &amp;amp; upload&lt;/h2&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#define file path where your mp3 live
+#replace &amp;quot;yourpath&amp;quot; with your path
+file_path &amp;lt;- file.path(&amp;quot;yourpath&amp;quot;)
+
+#List files mp3 in your folder
+
+path_mp3  &amp;lt;- list.files(file_path, 
+                        pattern = &amp;quot;.mp3&amp;quot;,
+                        full.names = TRUE)
+#basename returns only the file name
+files_mp3 &amp;lt;- basename(path_files_mp3)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now we upload the mp3 to a &lt;strong&gt;s3-bucket&lt;/strong&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#define key and secret for your s3 bucket
+#Do not store your key &amp;amp; secret this way
+
+key    &amp;lt;- &amp;quot;yourkey&amp;quot;
+secret &amp;lt;- &amp;quot;yoursecret&amp;quot;
+
+#upload files to s3 bucket
+
+for(i in seq_along(path_mp3)) {
+  print(i)
+  aws.s3::put_object(file = path_mp3[i], 
+                     object = files_mp3[i], 
+                     bucket = &amp;quot;yourbucket&amp;quot;, 
+                     key = key, 
+                     secret = secret)
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;start-a-transcribe-job&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Start a transcribe job&lt;/h2&gt;
+&lt;p&gt;First we need to understand what the package &lt;code&gt;aws.transcribe&lt;/code&gt; does.
+We need the &lt;code&gt;start_transcription&lt;/code&gt; function&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;aws.transcribe::start_transcription&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## function (name, url, format = tools::file_ext(url), language = &amp;quot;en-US&amp;quot;, 
+##     hertz = NULL, ...) 
+## {
+##     bod &amp;lt;- list(Media = list(MediaFileUri = url))
+##     bod$MediaFormat &amp;lt;- format
+##     bod$LanguageCode &amp;lt;- language
+##     if (!is.null(hertz)) {
+##         bod$MediaSampleRateHertz &amp;lt;- hertz
+##     }
+##     bod$TranscriptionJobName &amp;lt;- name
+##     transcribeHTTP(action = &amp;quot;StartTranscriptionJob&amp;quot;, body = bod, 
+##         ...)
+## }
+## &amp;lt;bytecode: 0x0000000015b96340&amp;gt;
+## &amp;lt;environment: namespace:aws.transcribe&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The main takeaway here is that we define a list &lt;code&gt;bod&lt;/code&gt; and then call the &lt;code&gt;transcribeHTTP&lt;/code&gt; function. We can check the &lt;strong&gt;Amazon Transcribe&lt;/strong&gt; documentation to understand, how we should define a request body which is called &lt;code&gt;bod&lt;/code&gt; in this function.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://docs.aws.amazon.com/de_de/transcribe/latest/dg/API_StartTranscriptionJob.html&#34; class=&#34;uri&#34;&gt;https://docs.aws.amazon.com/de_de/transcribe/latest/dg/API_StartTranscriptionJob.html&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Since I want to define the &lt;em&gt;OutputBucketName&lt;/em&gt;, because we are going to write the actual transcribes (json) to a specific bucket, simply add an argument to the &lt;code&gt;start_transcription&lt;/code&gt; function. I call the new function &lt;code&gt;StartTranscription&lt;/code&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;StartTranscription &amp;lt;- function (name, url, format = tools::file_ext(url), language = &amp;quot;en-US&amp;quot;, 
+          hertz = NULL, outputbucketname = &amp;quot;yourbucketname&amp;quot;, ...) 
+{
+  bod &amp;lt;- list(Media = list(MediaFileUri = url))
+  bod$MediaFormat &amp;lt;- format
+  bod$LanguageCode &amp;lt;- language
+  bod$OutputBucketName &amp;lt;- outputbucketname # added
+  if (!is.null(hertz)) {
+    bod$MediaSampleRateHertz &amp;lt;- hertz
+  }
+  bod$TranscriptionJobName &amp;lt;- name
+  transcribeHTTP(action = &amp;quot;StartTranscriptionJob&amp;quot;, body = bod, 
+                 ...)
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The &lt;code&gt;transcribeHTTP&lt;/code&gt; function is a bit more complex.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;aws.transcribe::transcribeHTTP&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## function (action, query = list(), body = NULL, version = &amp;quot;v1&amp;quot;, 
+##     region = NULL, key = NULL, secret = NULL, session_token = NULL, 
+##     ...) 
+## {
+##     d_timestamp &amp;lt;- format(Sys.time(), &amp;quot;%Y%m%dT%H%M%SZ&amp;quot;, tz = &amp;quot;UTC&amp;quot;)
+##     if (is.null(region) || region == &amp;quot;&amp;quot;) {
+##         region &amp;lt;- &amp;quot;us-east-1&amp;quot;
+##     }
+##     url &amp;lt;- paste0(&amp;quot;https://transcribe.&amp;quot;, region, &amp;quot;.amazonaws.com&amp;quot;)
+##     Sig &amp;lt;- signature_v4_auth(datetime = d_timestamp, region = region, 
+##         service = &amp;quot;transcribe&amp;quot;, verb = &amp;quot;POST&amp;quot;, action = &amp;quot;/&amp;quot;, 
+##         query_args = query, canonical_headers = list(host = paste0(&amp;quot;transcribe.&amp;quot;, 
+##             region, &amp;quot;.amazonaws.com&amp;quot;), `x-amz-date` = d_timestamp, 
+##             `X-Amz-Target` = paste0(&amp;quot;Transcribe.&amp;quot;, action), `Content-Type` = &amp;quot;application/x-amz-json-1.1&amp;quot;), 
+##         request_body = if (is.null(body)) 
+##             &amp;quot;&amp;quot;
+##         else toJSON(body, auto_unbox = TRUE), key = key, secret = secret, 
+##         session_token = session_token)
+##     headers &amp;lt;- list()
+##     headers[[&amp;quot;X-Amz-Target&amp;quot;]] &amp;lt;- paste0(&amp;quot;Transcribe.&amp;quot;, action)
+##     headers[[&amp;quot;Content-Type&amp;quot;]] &amp;lt;- &amp;quot;application/x-amz-json-1.1&amp;quot;
+##     headers[[&amp;quot;x-amz-date&amp;quot;]] &amp;lt;- d_timestamp
+##     headers[[&amp;quot;x-amz-content-sha256&amp;quot;]] &amp;lt;- Sig$BodyHash
+##     if (!is.null(session_token) &amp;amp;&amp;amp; session_token != &amp;quot;&amp;quot;) {
+##         headers[[&amp;quot;x-amz-security-token&amp;quot;]] &amp;lt;- session_token
+##     }
+##     headers[[&amp;quot;Authorization&amp;quot;]] &amp;lt;- Sig[[&amp;quot;SignatureHeader&amp;quot;]]
+##     H &amp;lt;- do.call(add_headers, headers)
+##     if (length(query)) {
+##         r &amp;lt;- POST(url, H, query = query, body = body, encode = &amp;quot;json&amp;quot;, 
+##             ...)
+##     }
+##     else {
+##         r &amp;lt;- POST(url, H, body = body, encode = &amp;quot;json&amp;quot;, ...)
+##     }
+##     if (http_error(r)) {
+##         x &amp;lt;- fromJSON(content(r, &amp;quot;text&amp;quot;, encoding = &amp;quot;UTF-8&amp;quot;))
+##         warn_for_status(r)
+##         h &amp;lt;- headers(r)
+##         out &amp;lt;- structure(x, headers = h, class = &amp;quot;aws_error&amp;quot;)
+##         attr(out, &amp;quot;request_canonical&amp;quot;) &amp;lt;- Sig$CanonicalRequest
+##         attr(out, &amp;quot;request_string_to_sign&amp;quot;) &amp;lt;- Sig$StringToSign
+##         attr(out, &amp;quot;request_signature&amp;quot;) &amp;lt;- Sig$SignatureHeader
+##     }
+##     else {
+##         out &amp;lt;- try(fromJSON(content(r, &amp;quot;text&amp;quot;, encoding = &amp;quot;UTF-8&amp;quot;)), 
+##             silent = TRUE)
+##         if (inherits(out, &amp;quot;try-error&amp;quot;)) {
+##             out &amp;lt;- structure(content(r, &amp;quot;text&amp;quot;, encoding = &amp;quot;UTF-8&amp;quot;), 
+##                 &amp;quot;unknown&amp;quot;)
+##         }
+##     }
+##     return(out)
+## }
+## &amp;lt;bytecode: 0x000000001365dfc0&amp;gt;
+## &amp;lt;environment: namespace:aws.transcribe&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We call this function inside &lt;code&gt;StartTranscription&lt;/code&gt; with &lt;code&gt;action = &#34;StartTransciptionJob&lt;/code&gt; and &lt;code&gt;body = bod&lt;/code&gt;. We use the &lt;code&gt;...&lt;/code&gt; argument to pass our secret and key, which are then passed to the &lt;code&gt;POST&lt;/code&gt; function from the &lt;code&gt;httr&lt;/code&gt;package. If you want more information on how to send requests to &lt;strong&gt;aws&lt;/strong&gt;, please read up on &lt;a href=&#34;https://docs.aws.amazon.com/de_de/transcribe/latest/dg/CommonParameters.html&#34; class=&#34;uri&#34;&gt;https://docs.aws.amazon.com/de_de/transcribe/latest/dg/CommonParameters.html&lt;/a&gt; and &lt;a href=&#34;https://docs.aws.amazon.com/de_de/general/latest/gr/signature-version-4.html&#34; class=&#34;uri&#34;&gt;https://docs.aws.amazon.com/de_de/general/latest/gr/signature-version-4.html&lt;/a&gt;. Thanks to &lt;em&gt;Thomas J. Leeper&lt;/em&gt; (aws.s3 &amp;amp; aws.transcribe) that we do not have to fiddle with that for now!&lt;/p&gt;
+&lt;p&gt;Now i am defining a url, which points to the &lt;strong&gt;s3 bucket&lt;/strong&gt; where I want to save the transcribes as &lt;em&gt;json&lt;/em&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;full_url &amp;lt;- paste0(&amp;quot;https://s3.eu-central-1.amazonaws.com/yourbucket/&amp;quot;, files_mp3)&lt;/code&gt;&lt;/pre&gt;
+&lt;div id=&#34;start-transcription&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Start transcription&lt;/h3&gt;
+&lt;p&gt;We use &lt;code&gt;files_mp3&lt;/code&gt; as the job name. Please change &lt;code&gt;language&lt;/code&gt; and &lt;code&gt;region&lt;/code&gt; to your desired values. I simply loop along the vector &lt;code&gt;full_url&lt;/code&gt;. I added a &lt;code&gt;Sys.sleep&lt;/code&gt;, because i do not want to trigger &lt;strong&gt;aws&lt;/strong&gt; by sending too many requests. I am sure you can get away with way shorter timings. Change the value and test different timings.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;for(i in seq_along(full_url)) {
+
+StartTranscription(name = files_mp3[i], 
+                   language = &amp;quot;de-DE&amp;quot;, 
+                   url = full_url[i], 
+                   key = &amp;quot;yourkey&amp;quot;,
+                   secret = &amp;quot;yoursecret&amp;quot;, 
+                   region = &amp;quot;eu-central-1&amp;quot;
+                   )
+  
+Sys.sleep(time = 60)
+paste(i)
+  
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;You can check the progress in your &lt;strong&gt;Amazon Transcribe&lt;/strong&gt; console.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;download-the-json-files&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Download the json files&lt;/h2&gt;
+&lt;p&gt;I actually need &lt;em&gt;vtt&lt;/em&gt; files, because most video editing software are using this file type to include transcriptions. I wrote three helper functions to deal with downloading, formatting the &lt;em&gt;json&lt;/em&gt; files and generate &lt;em&gt;vtt&lt;/em&gt; files.&lt;/p&gt;
+&lt;div id=&#34;functions&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Functions&lt;/h3&gt;
+&lt;p&gt;The first function &lt;code&gt;DownloadTransJson&lt;/code&gt; calls &lt;code&gt;FormatJsonObject&lt;/code&gt; and &lt;code&gt;WriteVtt&lt;/code&gt; after listing and downloading the files from the bucket where we wrote the &lt;em&gt;json&lt;/em&gt; files to.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;DownloadTransJson &amp;lt;- function(){
+  list_bucket &amp;lt;- data.table::rbindlist(aws.s3::get_bucket(
+    bucket = &amp;quot;yourbucket&amp;quot;, 
+    key = &amp;quot;yourkey&amp;quot;, 
+    secret = &amp;quot;yoursecret&amp;quot;))
+  #only the json files
+  list_bucket &amp;lt;- grep(x = list_bucket$Key, 
+                      pattern = &amp;quot;mp3.json&amp;quot;, 
+                      value = TRUE)
+  #download files in list_bucket
+  for(i in list_bucket) {
+  json_object    &amp;lt;- aws.s3::get_object(object =i,
+                                       bucket = &amp;quot;yourbucket&amp;quot;, 
+                                       key = &amp;quot;yourkey&amp;quot;, 
+                                       secret = &amp;quot;yoursecret&amp;quot;)
+  formatted_json &amp;lt;- FormatJsonObject(jsonobject = json_object)
+  WriteVtt(i, formatted_json)
+  }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The &lt;code&gt;FormatJsonObject&lt;/code&gt; function formats the response we get from &lt;code&gt;aws.s3::getobject&lt;/code&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;FormatJsonObject &amp;lt;- function(jsonobject){
+  trans_00 &amp;lt;- rjson::fromJSON(rawToChar(jsonobject))
+  
+  transcript &amp;lt;- trans_00$results$transcripts[[1]]$transcript
+  #split words
+  words      &amp;lt;- unlist(strsplit(transcript, split = &amp;quot; &amp;quot;))
+  
+  #bind the list items
+  timing_dt &amp;lt;- rbindlist(trans_00$results$items, 
+                         fill = TRUE)
+  #Getting rid of punctuation for now
+  timing_dt &amp;lt;- timing_dt[type != &amp;quot;punctuation&amp;quot;]
+  timing_dt[, word := words]
+  
+  #simple conversion to numeric
+  timing_dt[, start_time := as.numeric(start_time)]
+  timing_dt[, end_time := as.numeric(end_time)]
+  
+  #define a group for every ten words
+  #so that ten words form a group
+  timing_dt[, group := (1:.N - 1) %/% 10]
+  
+  #Collapse word to a phrase by group
+  timing_dt[, phrase := lapply(.SD, paste, collapse = &amp;quot; &amp;quot;), 
+            by = group, .SDcols = &amp;quot;word&amp;quot;]
+  
+  #get min start_time and max start time for a phrase
+  timing_dt[, `:=` (min_start_time = min(start_time), max_end_time = max(end_time)), 
+            by = &amp;quot;group&amp;quot;]
+  
+  #Need only one phrase per group, as they are redundant.
+  unique_dt &amp;lt;- timing_dt[, .SD[1], by = &amp;quot;group&amp;quot;]
+  
+  unique_dt &amp;lt;- unique_dt[,.SD, .SDcols = c(&amp;quot;phrase&amp;quot;, 
+                                           &amp;quot;min_start_time&amp;quot;, 
+                                           &amp;quot;max_end_time&amp;quot;)]
+  
+  #
+  unique_dt[, time_stamp := paste(paste0(as.ITime(min_start_time),&amp;quot;,000&amp;quot;), 
+                                  paste0(as.ITime(max_end_time),&amp;quot;,000&amp;quot;), 
+                                  sep = &amp;quot; --&amp;gt; &amp;quot;)]
+  return(unique_dt)
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And now simply write a file per transcription as &lt;em&gt;VTT&lt;/em&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;WriteVtt &amp;lt;- function(name, jsondt) {
+  
+  file.create(paste0(name,&amp;quot;.VTT&amp;quot;))
+  con_file &amp;lt;- file(paste0(name,&amp;quot;.VTT&amp;quot;))
+  ##writing to vtt
+  #might be os specific
+  writeLines(paste0(1 : nrow(jsondt),&amp;quot;\n&amp;quot;,
+                    jsondt$time_stamp,&amp;quot;\n&amp;quot;,
+                    jsondt$phrase,&amp;quot;\n&amp;quot;), 
+                    con_file)
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now we actually call the function.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;DownloadTransJson()&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Done? Not quite. You now need to check your transciptions. Did &lt;strong&gt;Amazon Transcribe&lt;/strong&gt; understand what your were saying? Unfortunately not in every case. It seems like mixing german with english, as I did not “translate” english R expressions into german, is problematic. I am sure it works way better, when you are trying to transcribe english. What are your experiences with &lt;strong&gt;Amazon Transcribe&lt;/strong&gt; ?&lt;br /&gt;
+I know one can define a vocabulary to improve the job, which I am going to try for sure!&lt;/p&gt;
+&lt;p&gt;Anyways, i hope you can take something away from this post.&lt;br /&gt;
+Have a great day!
+Moritz&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>/authors/admin/</link>
+      <pubDate>Fri, 05 Jul 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/authors/admin/</guid>
+      <description>&lt;p&gt;I am a freelancer applying Data Science using &lt;em&gt;R&lt;/em&gt;. I studied engineering and economics and have an advanced university degree, which is called &lt;em&gt;Dipl.-Ing. oec.&lt;/em&gt; from the &lt;em&gt;Technical University Hamburg&lt;/em&gt;. The degree is equivalent to an Masters degree (engineering &amp;amp; economics) today. I started using &lt;em&gt;R&lt;/em&gt; during my advanced statistics courses and instantly fell in love with it. For my thesis I used &lt;em&gt;R&lt;/em&gt; to train partial recurrent neural networks for time series forecasting. Since then I never stopped using &lt;em&gt;R&lt;/em&gt; for Machine Learning &amp;amp; Data Science, now working as freelancer.&lt;/p&gt;
+
+&lt;p&gt;I believe that interacting with other programmers is fundamental to improving your skills. I constantly visit &lt;em&gt;R&lt;/em&gt; conferences (UseR! 2017 Brussels, eRum2018 Budapest and SatRday 2019 in Berlin) to learn new skills and meet with other &lt;em&gt;R&lt;/em&gt; developers.&lt;/p&gt;
+
+&lt;p&gt;In the past years my projects focused around tidal data and offshore windenergy.&lt;br /&gt;
+In my spare time I work on Mobile Apps with &lt;em&gt;Java&lt;/em&gt; and recently &lt;em&gt;Dart&lt;/em&gt; using the &lt;em&gt;Flutter&lt;/em&gt; Framework.&lt;/p&gt;
+
+&lt;p&gt;Furthermore I like do any kind of sports and recently started doing yoga.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
