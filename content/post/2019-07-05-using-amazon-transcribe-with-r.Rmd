@@ -1,0 +1,282 @@
+---
+title: USING AMAZON TRANSCRIBE WITH R
+author: Moritz Mueller-Navarra
+date: '2019-07-05'
+slug: using-amazon-transcribe-with-r
+categories: []
+tags:
+  - R
+  - aws
+  - aws transcribe
+  - cloud
+subtitle: ''
+summary: ''
+authors: [admin]
+lastmod: '2019-07-05T17:07:56+02:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+# Amazon Transcribe & R
+
+Hi, in this post, I will show you some ideas on how to generate subtitles with a time stamp using **R** and **Amazon Transcribe**. At first you need a *mp3* file, or like in my case, 139. If you want to use this code, you need to set up an **aws** (Amazon Web Services) account, which might cost you money, depending on how much you use the services. There is a free tier available on aws, but be careful when using this code! You need and *iam role* that has access to an **s3** folder and is allowed to use **Amazon Transcribe**.
+
+In my case I actually have *mp4* video files. I generated the *mp3* files with the beautiful **ffmpeg**. We are not going to cover that in this post, rather showing you the **R** code for communicating with **Amazon S3** and **Amazon Transcribe**. Your end goal is to create a *VTT* file, which looks like this:
+
+
+```{r eval=FALSE, include=TRUE}
+1
+00:00:01,000 --> 00:00:06,000
+Willkommen zur ersten Lektion Einf?hrungen er Vektoren und Tim Wir
+
+2
+00:00:06,000 --> 00:00:11,000
+besprechen zun?chst die variablen Definition Ich habe euch hier ein
+
+3
+00:00:11,000 --> 00:00:17,000
+kleines Skript vorbereitet, indem wir der variable A den Wert
+
+4
+00:00:17,000 --> 00:00:22,000
+eins zuordnen im zweiten Schritt die variable A um den
+```
+
+If you understand german, you will notice that there are a few errors. It is not too bad though.  
+Now let us jump into the code!
+
+
+## Load packages
+
+```{r eval=FALSE, include=TRUE}
+library(data.table)
+library(aws.s3)
+library(aws.transcribe)
+library(rjson)
+```
+
+We use `data.table` for some data wrangling, `aws.3` & `aws.transcribe` to communicate with **aws** and `rjson` to handle *json*. Thanks to all package developers!
+
+## List files & upload
+
+```{r eval=FALSE, include=TRUE}
+#define file path where your mp3 live
+#replace "yourpath" with your path
+file_path <- file.path("yourpath")
+
+#List files mp3 in your folder
+
+path_mp3  <- list.files(file_path, 
+                        pattern = ".mp3",
+                        full.names = TRUE)
+#basename returns only the file name
+files_mp3 <- basename(path_files_mp3)
+
+```
+
+
+Now we upload the mp3 to a **s3-bucket**
+
+```{r eval=FALSE, include=TRUE}
+#define key and secret for your s3 bucket
+#Do not store your key & secret this way
+
+key    <- "yourkey"
+secret <- "yoursecret"
+
+#upload files to s3 bucket
+
+for(i in seq_along(path_mp3)) {
+  print(i)
+  aws.s3::put_object(file = path_mp3[i], 
+                     object = files_mp3[i], 
+                     bucket = "yourbucket", 
+                     key = key, 
+                     secret = secret)
+}
+
+```
+
+## Start a transcribe job
+
+First we need to understand what the package `aws.transcribe` does.
+We need the `start_transcription` function
+
+```{r eval=TRUE, include=TRUE}
+
+aws.transcribe::start_transcription
+
+```
+
+The main takeaway here is that we define a list `bod` and then call the `transcribeHTTP` function. We can check the **Amazon Transcribe** documentation to understand, how we should define a request body which is called `bod` in this function. 
+
+<https://docs.aws.amazon.com/de_de/transcribe/latest/dg/API_StartTranscriptionJob.html>
+
+Since I want to define the *OutputBucketName*, because we are going to write the actual transcribes (json) to a specific bucket, simply add an argument to the `start_transcription` function. I call the new function `StartTranscription`.
+
+```{r eval=FALSE, include=TRUE}
+StartTranscription <- function (name, url, format = tools::file_ext(url), language = "en-US", 
+          hertz = NULL, outputbucketname = "yourbucketname", ...) 
+{
+  bod <- list(Media = list(MediaFileUri = url))
+  bod$MediaFormat <- format
+  bod$LanguageCode <- language
+  bod$OutputBucketName <- outputbucketname # added
+  if (!is.null(hertz)) {
+    bod$MediaSampleRateHertz <- hertz
+  }
+  bod$TranscriptionJobName <- name
+  transcribeHTTP(action = "StartTranscriptionJob", body = bod, 
+                 ...)
+}
+```
+
+The `transcribeHTTP` function is a bit more complex.
+
+```{r eval=TRUE, include=TRUE}
+
+aws.transcribe::transcribeHTTP
+
+```
+
+We call this function inside `StartTranscription` with `action = "StartTransciptionJob` and `body = bod`. We use the `...` argument to pass our secret and key, which are then passed to the `POST` function from the `httr`package. If you want more information on how to send requests to **aws**, please read up on <https://docs.aws.amazon.com/de_de/transcribe/latest/dg/CommonParameters.html> and <https://docs.aws.amazon.com/de_de/general/latest/gr/signature-version-4.html>. Thanks to *Thomas J. Leeper* (aws.s3 & aws.transcribe) that we do not have to fiddle with that for now!
+
+Now i am defining a url, which points to the **s3 bucket** where I want to save the transcribes as *json*.
+
+```{r eval=FALSE, include=TRUE}
+full_url <- paste0("https://s3.eu-central-1.amazonaws.com/yourbucket/", files_mp3)
+```
+
+### Start transcription
+
+We use `files_mp3` as the job name. Please change `language` and `region` to your desired values. I simply loop along the vector `full_url`. I added a `Sys.sleep`, because i do not want to trigger **aws** by sending too many requests. I am sure you can get away with way shorter timings. Change the value and test different timings.
+
+```{r eval=FALSE, include=TRUE}
+for(i in seq_along(full_url)) {
+
+StartTranscription(name = files_mp3[i], 
+                   language = "de-DE", 
+                   url = full_url[i], 
+                   key = "yourkey",
+                   secret = "yoursecret", 
+                   region = "eu-central-1"
+                   )
+  
+Sys.sleep(time = 60)
+paste(i)
+  
+}
+```
+
+You can check the progress in your **Amazon Transcribe** console.
+
+## Download the json files
+
+I actually need *vtt* files, because most video editing software are using this file type to include transcriptions. I wrote three helper functions to deal with downloading, formatting the *json* files and generate *vtt* files.
+
+### Functions
+
+The first function `DownloadTransJson` calls `FormatJsonObject` and `WriteVtt` after listing and downloading the files from the bucket where we wrote the *json* files to. 
+
+```{r eval=FALSE, include=TRUE}
+DownloadTransJson <- function(){
+  list_bucket <- data.table::rbindlist(aws.s3::get_bucket(
+    bucket = "yourbucket", 
+    key = "yourkey", 
+    secret = "yoursecret"))
+  #only the json files
+  list_bucket <- grep(x = list_bucket$Key, 
+                      pattern = "mp3.json", 
+                      value = TRUE)
+  #download files in list_bucket
+  for(i in list_bucket) {
+  json_object    <- aws.s3::get_object(object =i,
+                                       bucket = "yourbucket", 
+                                       key = "yourkey", 
+                                       secret = "yoursecret")
+  formatted_json <- FormatJsonObject(jsonobject = json_object)
+  WriteVtt(i, formatted_json)
+  }
+}
+```
+
+The `FormatJsonObject` function formats the response we get from `aws.s3::getobject`. 
+
+```{r eval=FALSE, include=TRUE}
+FormatJsonObject <- function(jsonobject){
+  trans_00 <- rjson::fromJSON(rawToChar(jsonobject))
+  
+  transcript <- trans_00$results$transcripts[[1]]$transcript
+  #split words
+  words      <- unlist(strsplit(transcript, split = " "))
+  
+  #bind the list items
+  timing_dt <- rbindlist(trans_00$results$items, 
+                         fill = TRUE)
+  #Getting rid of punctuation for now
+  timing_dt <- timing_dt[type != "punctuation"]
+  timing_dt[, word := words]
+  
+  #simple conversion to numeric
+  timing_dt[, start_time := as.numeric(start_time)]
+  timing_dt[, end_time := as.numeric(end_time)]
+  
+  #define a group for every ten words
+  #so that ten words form a group
+  timing_dt[, group := (1:.N - 1) %/% 10]
+  
+  #Collapse word to a phrase by group
+  timing_dt[, phrase := lapply(.SD, paste, collapse = " "), 
+            by = group, .SDcols = "word"]
+  
+  #get min start_time and max start time for a phrase
+  timing_dt[, `:=` (min_start_time = min(start_time), max_end_time = max(end_time)), 
+            by = "group"]
+  
+  #Need only one phrase per group, as they are redundant.
+  unique_dt <- timing_dt[, .SD[1], by = "group"]
+  
+  unique_dt <- unique_dt[,.SD, .SDcols = c("phrase", 
+                                           "min_start_time", 
+                                           "max_end_time")]
+  
+  #
+  unique_dt[, time_stamp := paste(paste0(as.ITime(min_start_time),",000"), 
+                                  paste0(as.ITime(max_end_time),",000"), 
+                                  sep = " --> ")]
+  return(unique_dt)
+}
+```
+
+And now simply write a file per transcription as *VTT*.
+
+```{r eval=FALSE, include=TRUE}
+WriteVtt <- function(name, jsondt) {
+  
+  file.create(paste0(name,".VTT"))
+  con_file <- file(paste0(name,".VTT"))
+  ##writing to vtt
+  #might be os specific
+  writeLines(paste0(1 : nrow(jsondt),"\n",
+                    jsondt$time_stamp,"\n",
+                    jsondt$phrase,"\n"), 
+                    con_file)
+}
+```
+
+Now we actually call the function.
+
+```{r eval=FALSE, include=TRUE}
+DownloadTransJson()
+```
+
+Done? Not quite. You now need to check your transciptions. Did **Amazon Transcribe** understand what your were saying? Unfortunately not in every case. It seems like mixing german with english, as I did not "translate" english R expressions into german, is problematic. I am sure it works way better, when you are trying to transcribe english. What are your experiences with **Amazon Transcribe** ?  
+I know one can define a vocabulary to improve the job, which I am going to try for sure! 
+
+Anyways, i hope you can take something away from this post.  
+Have a great day!
+Moritz

@@ -1,0 +1,48 @@
+---
+title: NEW R COURSE ON UDEMY
+author: Moritz Mueller-Navarra
+date: '2019-07-05'
+slug: new-r-course-on-udemy-com
+categories: []
+tags:
+  - R
+  - R course
+subtitle: ''
+summary: ''
+authors: [admin]
+lastmod: '2019-07-05T17:04:13+02:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+The first real post and already a shameless plug for my **R course** on <https://www.udemy.com> ...
+As I just uploaded the course I thought, you might be interested in taking this course,
+where I talk about the basics of **R** for beginners. Unfortunately the course is in german for now,
+but I am going to add english subtitles as soon as I figured out how to correctly use **Amazon Transcribe** with **R** to generate german subtitles with a timestamp, which I can then translate into english. I will post more on this topic later this week. Back to the course, as this is a plug for it ;-)
+
+I mainly teach:
+
+- Basics of the R language
+- Intro to **tidyverse**
+- Intro to **data.table**
+- Plots (**base**, **ggplot2**, **plotly**)
+- Intro to **shiny**
+
+As for as I know **data.table** has been unrecognized (correct me if I am wrong) by most of the instructors of **udemy** who are teaching **R**, despite being one of the best package for R! I cover the basics of the package. If you need an intro to **data.table**, consider taking my course :-).
+
+Most of the code you will encounter on this blog will start with 
+
+```{r}
+library(data.table)
+```
+
+Anyway, you finde my course under this link: <https://www.udemy.com/r-basics-u/>, it is called  
+**R Basics - Programmierung und Datenanalyse**. Using this link you get the course for 9.99$ 
+<https://www.udemy.com/r-basics-u/?couponCode=WELCOME_R_KURS>, limited to the first 50 subscribers!
+
+See you soon!  
+Moritz
