@@ -23,7 +23,7 @@ projects: []
 
 # Amazon Transcribe & R
 
-Hi, in this post, I will show you some ideas on how to generate subtitles with a time stamp using **R** and **Amazon Transcribe**. At first you need a *mp3* file, or like in my case, 139. If you want to use this code, you need to set up an **aws** (Amazon Web Services) account, which might cost you money, depending on how much you use the services. There is a free tier available on aws, but be careful when using this code! You need and *iam role* that has access to an **s3** folder and is allowed to use **Amazon Transcribe**.
+Hi, in this post, I will show you some ideas on how to generate subtitles with a time stamp using **R** and **Amazon Transcribe**. At first you need at least *mp3* file, or like in my case, 139 files. If you want to use this code, you need to set up an **aws** (Amazon Web Services) account, which might cost you money, depending on how much you use the services. There is a free tier available on aws, but be careful when using this code! You need and *iam role* that has access to an **s3** folder and is allowed to use **Amazon Transcribe**.
 
 In my case I actually have *mp4* video files. I generated the *mp3* files with the beautiful **ffmpeg**. We are not going to cover that in this post, rather showing you the **R** code for communicating with **Amazon S3** and **Amazon Transcribe**. Your end goal is to create a *VTT* file, which looks like this:
 
