@@ -10,7 +10,7 @@ tags:
 subtitle: ''
 summary: ''
 authors: [admin]
-lastmod: '2019-07-05T17:04:13+02:00'
+lastmod: '2019-08-28T17:04:13+02:00'
 featured: no
 image:
   caption: ''
@@ -42,7 +42,7 @@ library(data.table)
 
 Anyway, you finde my course under this link: <https://www.udemy.com/r-basics-u/>, it is called  
 **R Basics - Programmierung und Datenanalyse**. Using this link you get the course for 9.99$ 
-<https://www.udemy.com/r-basics-u/?couponCode=WELCOME_R_KURS>, limited to the first 50 subscribers!
+<https://www.udemy.com/r-basics-u/?couponCode=WELCOME_R_KURS_1>, limited to the first 200 subscribers!
 
 See you soon!  
 Moritz
