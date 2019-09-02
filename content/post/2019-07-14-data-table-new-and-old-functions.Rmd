@@ -73,7 +73,7 @@ We can also name the outcome of the column directly. The `.()` is an alias for `
 ```{r}
 DT[, .(sumA = sum(valA)), by = id]
 ```
-When you pass a column to the `by` argument, internally the number of the unique values for that column gets evaluated. Afterwards the rows gets associated to the respective group. Then the expression provided in `j`, `sum(valA)` gets evaluated for the groups. 
+When you pass a column to the `by` argument, internally the number of the unique values for that column gets evaluated. Afterwards the rows are associated to the respective group. Then the expression provided in `j`, `sum(valA)` gets evaluated for the groups. 
 
 This is a very simple example, but illustrates the general form quite nicely. *Arun* introduces another simple example by passing an expression to the *i* argument. 
 
@@ -81,7 +81,7 @@ This is a very simple example, but illustrates the general form quite nicely. *A
 DT[code != "b", .(sumA = sum(valA)), by = id]
 ```
 
-Here we simply state that code should be not equal to "b". Very easy and logical syntax.
+Here we simply state that `code` should be not equal to "b". Very easy and logical syntax.
 
 
 ## Explaining .SD & .SDcols
@@ -121,7 +121,7 @@ Easy :-)
 DT[code != "b", lapply(.SD, sum), .SDcols = patterns("^val"), by = "id"]
 ```
 The `patterns` function only returns columns starting with *val*. 
-`.SD` stands for *Subset of Data* and contains all the columns, except for the grouping columns supplied in `by`, for each group.
+`.SD` contains all the columns, except for the grouping columns supplied in `by`, for each group.
 
 ```{r}
 DT[code != "b", print(.SD), .SDcols = c("code","valA", "valB"), by = id]
@@ -132,7 +132,7 @@ Once you grouped by `id` only the columns `valA` and `valB` are being considered
 DT[code != "b", print(.SD), .SDcols = c("valA", "valB"), by = id]
 ```
 
-So how does this `lapply(.SD, sum)` work? `lapply` is the infamous base function which returns a list. We operate on `.SD` and compute the sum of every column in `.SD`. We take a step back and look at the `class` and `typeof`of `DT`
+So how does this `lapply(.SD, sum)` work? `lapply` is the infamous base function which returns a list. We operate on `.SD` and compute the sum of every column in `.SD`. We take a step back and look at the `class` and `typeof` of `DT`
 
 ```{r}
 class(DT)
@@ -175,7 +175,7 @@ system.time(dt[x %in% 1000:2000])
 This takes a while (~17s on my laptop), but running the expression a second time results in a substantial speed up (~4s total). Please note that this not a proper benchmark. The second time we call this the expression, it reuses the index created in the first run. This currently works for `==` and `%in%` and is called *Auto indexing*. The index is stored within the `data.table` as an attribute.
 
 
-Now we create a `data.table` with 20 columns and 50 million rows to demonstrate that expression in `i`can run in parallel.
+Now we create a `data.table` with 20 columns and 50 million rows to demonstrate that expressions in `i` can run in parallel.
 
 ```{r eval=FALSE, include=TRUE}
 dt <- setDT(lapply(1:20, function(x) sample(100, 5e7, TRUE))) 
@@ -198,11 +198,10 @@ setDTTthreads(threads = 2L)
 
 ### Optimisation in "by"
 
-Recently the radix order has been parallelised. We define a new data set.
+Recently the radix order has been parallelised. We define a new data set (200 million rows, 2 cols, ~3GB).
 
 ```{r eval=FALSE, include=TRUE}
 dt <- data.table(x=sample(1e5, 2e8, TRUE), y=runif(2e8))
-#200 million rows, 2 cols, ~3GB
 ```
 
 Now we run this expression, which returns the occurences grouped by `x`.
@@ -262,7 +261,7 @@ nafill(x, type=c("const","locf","nocb"), fill=NA,
 #(DT <- nafill(DT, "locf"))
 ```
 
-Above code will throw an error indicating that we can only fill columns with type `numeric`(double & integer). Here the `setnafill`functions comes in handy:
+Above code will throw an error indicating that we can only fill columns with type `numeric` (double & integer). Here the `setnafill` functions comes in handy:
 
 ```{r}
 #getting numeric cols
@@ -278,7 +277,7 @@ This updates `DT` by reference.
 
 ### frollmean & frollsum
 
-Now we are going to explore the `frollmean`and `frollsum` functions. These functions allow us to compute rolling means and rolling sums 
+Now we are going to explore the `frollmean` and `frollsum` functions. These functions allow us to compute rolling means and rolling sums. 
 
 ```{r}
 DT[, lapply(.SD, frollmean, 3), .SDcols = numeric_cols]
@@ -292,7 +291,7 @@ DT[, lapply(.SD, frollsum, 3), .SDcols = numeric_cols]
 
 ### coalesce
 
-The `coalesce` function fills missing values in a vector by trying to pull values from one or more candidate vectors 
+The `coalesce` function fills missing values in a vector by trying to pull values from one or more candidate vectors. 
 
 ```{r}
 x <- c(11L, NA, 13L, NA, 15L, NA)
@@ -306,10 +305,9 @@ Given above syntax `coalesce` tries to fill missing values in `x` by looking at 
 
 ## Helpful links
 
-The talk: - <https://www.youtube.com/watch?v=tWx1ooBSxFc>
-Slides: - <http://www.user2019.fr/static/pres/t258038.pdf>
-github: - <https://github.com/Rdatatable>
-        -  <https://github.com/Rdatatable/data.table/wiki>
+-The talk: <https://www.youtube.com/watch?v=tWx1ooBSxFc>
+- Slides: <http://www.user2019.fr/static/pres/t258038.pdf>
+- github: <https://github.com/Rdatatable>, <https://github.com/Rdatatable/data.table/wiki>
 
 
 See you soon!
