@@ -1,0 +1,291 @@
+---
+title: data.table - UseR!2019 I
+author: admin
+date: '2019-07-14'
+slug: data-table-new-and-old-functions
+categories: []
+tags:
+  - data.table
+  - UseR!2019
+subtitle: ''
+summary: ''
+authors: [admin]
+lastmod: '2019-08-27T13:40:04+02:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+
+
+<p>This is the first post looking at the <strong>data.table</strong> presentations from <strong>UseR!2019</strong> which was held in Toulouse from 2019-07-07-2019-10-10. For starters we are going to take a look at the presentations from <em>Arun Srinivasan</em>, one of the main developers of <strong>data.table</strong>. His talk is called <strong>THE #RDATATABLEPACKAGE
+for fast, flexible and memory efficient data wrangling</strong>.</p>
+<p>Talk Agenda:</p>
+<ul>
+<li>General data.table syntax</li>
+<li>Explaining .SD &amp; .SDcols</li>
+<li>optimisation &amp; new functionalities</li>
+</ul>
+<div id="general-data.table-syntax" class="section level2">
+<h2>General data.table syntax</h2>
+<p>Following code chunk installs the development version of the package, which is needed for some functions explained below.</p>
+<pre class="r"><code>install.packages(&quot;data.table&quot;, repos=&quot;https://Rdatatable.gitlab.io/data.table&quot;)</code></pre>
+<p>We start of with a simple expample.</p>
+<pre class="r"><code>library(data.table)</code></pre>
+<p>We define a data.table DT using the <code>fread</code> function.</p>
+<pre class="r"><code>(DT &lt;- fread(&quot;id code valA valB
+1 c 1 10
+1 b 2 11
+1 c 3 12
+1 c 4 13
+2 a 5 14
+2 a 6 15
+1 b 7 16
+2 a 8 17
+1 c 9 18&quot;))</code></pre>
+<pre><code>##    id code valA valB
+## 1:  1    c    1   10
+## 2:  1    b    2   11
+## 3:  1    c    3   12
+## 4:  1    c    4   13
+## 5:  2    a    5   14
+## 6:  2    a    6   15
+## 7:  1    b    7   16
+## 8:  2    a    8   17
+## 9:  1    c    9   18</code></pre>
+<p>The general data.table syntax is <code>DT[i, j, by]</code>, which you can translate into: <em>i = on which rows, j = what to do (columns), grouped by what</em>. So when we want to get the sum of <em>valA</em>, we can simply do.</p>
+<pre class="r"><code>DT[, sum(valA)]</code></pre>
+<pre><code>## [1] 45</code></pre>
+<p>We have not defined a <em>i</em> nor <em>by</em> argument here. This simply means we want to compute for all rows and grouping is not relevant. Now we group by id.</p>
+<pre class="r"><code>DT[, sum(valA), by = id]</code></pre>
+<pre><code>##    id V1
+## 1:  1 26
+## 2:  2 19</code></pre>
+<p>We can also name the outcome of the column directly. The <code>.()</code> is an alias for <code>list</code>.</p>
+<pre class="r"><code>DT[, .(sumA = sum(valA)), by = id]</code></pre>
+<pre><code>##    id sumA
+## 1:  1   26
+## 2:  2   19</code></pre>
+<p>When you pass a column to the <code>by</code> argument, internally the number of the unique values for that column gets evaluated. Afterwards the rows gets associated to the respective group. Then the expression provided in <code>j</code>, <code>sum(valA)</code> gets evaluated for the groups.</p>
+<p>This is a very simple example, but illustrates the general form quite nicely. <em>Arun</em> introduces another simple example by passing an expression to the <em>i</em> argument.</p>
+<pre class="r"><code>DT[code != &quot;b&quot;, .(sumA = sum(valA)), by = id]</code></pre>
+<pre><code>##    id sumA
+## 1:  1   17
+## 2:  2   19</code></pre>
+<p>Here we simply state that code should be not equal to “b”. Very easy and logical syntax.</p>
+</div>
+<div id="explaining-.sd-.sdcols" class="section level2">
+<h2>Explaining .SD &amp; .SDcols</h2>
+<p>We are still operating on DT.</p>
+<pre class="r"><code>DT</code></pre>
+<pre><code>##    id code valA valB
+## 1:  1    c    1   10
+## 2:  1    b    2   11
+## 3:  1    c    3   12
+## 4:  1    c    4   13
+## 5:  2    a    5   14
+## 6:  2    a    6   15
+## 7:  1    b    7   16
+## 8:  2    a    8   17
+## 9:  1    c    9   18</code></pre>
+<p><code>.SD</code> stands for <em>Subset of Data</em>. Together with <code>.SDcols</code> we can use it to simply subset <code>DT</code> by column names and then compute on this subset.</p>
+<p>You could do this:</p>
+<pre class="r"><code>DT[, .SD, .SDcols = &quot;valA&quot;]</code></pre>
+<pre><code>##    valA
+## 1:    1
+## 2:    2
+## 3:    3
+## 4:    4
+## 5:    5
+## 6:    6
+## 7:    7
+## 8:    8
+## 9:    9</code></pre>
+<p>Which returns a <code>data.table</code> object with one column <code>valA</code>. You can of course pass more columns.</p>
+<pre class="r"><code>DT[, .SD, .SDcols = c(&quot;valA&quot;, &quot;valB&quot;)]</code></pre>
+<pre><code>##    valA valB
+## 1:    1   10
+## 2:    2   11
+## 3:    3   12
+## 4:    4   13
+## 5:    5   14
+## 6:    6   15
+## 7:    7   16
+## 8:    8   17
+## 9:    9   18</code></pre>
+<p>you can also use the <code>patterns</code> function in <code>.SDcols</code>.</p>
+<pre class="r"><code>DT[, .SD, .SDcols = patterns(&quot;^val&quot;)]</code></pre>
+<pre><code>##    valA valB
+## 1:    1   10
+## 2:    2   11
+## 3:    3   12
+## 4:    4   13
+## 5:    5   14
+## 6:    6   15
+## 7:    7   16
+## 8:    8   17
+## 9:    9   18</code></pre>
+<p>How can we use this functionality to compute the sum of <code>valA</code> and <code>valB</code> grouped by <code>id</code> where <code>code != "b</code> ?
+Easy :-)</p>
+<pre class="r"><code>DT[code != &quot;b&quot;, lapply(.SD, sum), .SDcols = patterns(&quot;^val&quot;), by = &quot;id&quot;]</code></pre>
+<pre><code>##    id valA valB
+## 1:  1   17   53
+## 2:  2   19   46</code></pre>
+<p>The <code>patterns</code> function only returns columns starting with <em>val</em>.
+<code>.SD</code> stands for <em>Subset of Data</em> and contains all the columns, except for the grouping columns supplied in <code>by</code>, for each group.</p>
+<pre class="r"><code>DT[code != &quot;b&quot;, print(.SD), .SDcols = c(&quot;code&quot;,&quot;valA&quot;, &quot;valB&quot;), by = id]</code></pre>
+<pre><code>##    code valA valB
+## 1:    c    1   10
+## 2:    c    3   12
+## 3:    c    4   13
+## 4:    c    9   18
+##    code valA valB
+## 1:    a    5   14
+## 2:    a    6   15
+## 3:    a    8   17</code></pre>
+<pre><code>## Empty data.table (0 rows and 1 cols): id</code></pre>
+<p>Once you grouped by <code>id</code> only the columns <code>valA</code> and <code>valB</code> are being considered due to <code>.SDcols</code>. We therefore compute the sums on on these columns and not on <code>code</code>.</p>
+<pre class="r"><code>DT[code != &quot;b&quot;, print(.SD), .SDcols = c(&quot;valA&quot;, &quot;valB&quot;), by = id]</code></pre>
+<pre><code>##    valA valB
+## 1:    1   10
+## 2:    3   12
+## 3:    4   13
+## 4:    9   18
+##    valA valB
+## 1:    5   14
+## 2:    6   15
+## 3:    8   17</code></pre>
+<pre><code>## Empty data.table (0 rows and 1 cols): id</code></pre>
+<p>So how does this <code>lapply(.SD, sum)</code> work? <code>lapply</code> is the infamous base function which returns a list. We operate on <code>.SD</code> and compute the sum of every column in <code>.SD</code>. We take a step back and look at the <code>class</code> and <code>typeof</code>of <code>DT</code></p>
+<pre class="r"><code>class(DT)</code></pre>
+<pre><code>## [1] &quot;data.table&quot; &quot;data.frame&quot;</code></pre>
+<pre class="r"><code>typeof(DT)</code></pre>
+<pre><code>## [1] &quot;list&quot;</code></pre>
+<pre class="r"><code>typeof(DT[,.SD])</code></pre>
+<pre><code>## [1] &quot;list&quot;</code></pre>
+<p>You find more information about <code>.SD</code> in this <em>stackoverflow</em> post:</p>
+<p><a href="https://stackoverflow.com/questions/8508482/what-does-sd-stand-for-in-data-table-in-r" class="uri">https://stackoverflow.com/questions/8508482/what-does-sd-stand-for-in-data-table-in-r</a></p>
+<p>You can also check <code>vignette("datatable-sd-usage")</code> in the development version.</p>
+</div>
+<div id="optimisation" class="section level2">
+<h2>Optimisation</h2>
+<p>Arun presents optimisation principles for operations in <code>i</code>, <code>j</code> &amp; <code>by</code>.</p>
+<div id="optimisation-in-i" class="section level3">
+<h3>Optimisation in “i”</h3>
+<p>We create a <code>data.table</code> which has 200 million rows and two columns <code>x</code> and <code>y</code>.</p>
+<pre class="r"><code>dt &lt;- data.table(x = sample(1e5, 2e8, TRUE), y = runif(2e8)) </code></pre>
+<p>Now we only return rows where the value of <code>x</code> is in <code>1000:2000</code>, we operate in <code>i</code>.</p>
+<pre class="r"><code>system.time(dt[x %in% 1000:2000])
+system.time(dt[x %in% 1000:2000])</code></pre>
+<p>This takes a while (~17s on my laptop), but running the expression a second time results in a substantial speed up (~4s total). Please note that this not a proper benchmark. The second time we call this the expression, it reuses the index created in the first run. This currently works for <code>==</code> and <code>%in%</code> and is called <em>Auto indexing</em>. The index is stored within the <code>data.table</code> as an attribute.</p>
+<p>Now we create a <code>data.table</code> with 20 columns and 50 million rows to demonstrate that expression in <code>i</code>can run in parallel.</p>
+<pre class="r"><code>dt &lt;- setDT(lapply(1:20, function(x) sample(100, 5e7, TRUE))) </code></pre>
+<p>We operate in <code>i</code> to return the rows, where <code>V1 &gt; 50L</code>. The column is processed in parallel.</p>
+<pre class="r"><code>system.time(dt[V1 &gt; 50L])</code></pre>
+<p>You can set the threads <code>data.table</code> uses with and check the differences.</p>
+<pre class="r"><code>setDTthreads(threads = 1L)
+system.time(dt[V1 &gt; 50L])
+setDTTthreads(threads = 2L)</code></pre>
+</div>
+<div id="optimisation-in-by" class="section level3">
+<h3>Optimisation in “by”</h3>
+<p>Recently the radix order has been parallelised. We define a new data set.</p>
+<pre class="r"><code>dt &lt;- data.table(x=sample(1e5, 2e8, TRUE), y=runif(2e8))
+#200 million rows, 2 cols, ~3GB</code></pre>
+<p>Now we run this expression, which returns the occurences grouped by <code>x</code>.</p>
+<pre class="r"><code>dt[, .N, by = x]</code></pre>
+</div>
+<div id="optimisation-in-j" class="section level3">
+<h3>Optimisation in “j”</h3>
+<p>In <code>j</code> certain functions are optimized. Arun mentions <code>mean</code>, <code>median</code>, <code>sum</code>, <code>min</code>, <code>max</code>, <code>head</code>, <code>tail</code>.
+We can see a difference, when comparing <code>base::mean</code> with just calling <code>mean</code>in <code>j</code>.</p>
+<pre class="r"><code>dt[, lapply(.SD, base::mean), by=V1]</code></pre>
+<pre class="r"><code>dt[, lapply(.SD, mean), by=V1]</code></pre>
+<p>Internally this expression uses the function <code>mean</code> implemented by <code>data.table</code> in <em>C</em>.</p>
+</div>
+</div>
+<div id="new-functionalities" class="section level2">
+<h2>New functionalities</h2>
+<p>The first function we are going to look at is <code>nafill</code>. This function allows us to fill <code>NA</code> values in a <code>data.table</code> by a specific method, like <em>last observation carried forward (locf)</em>. See <code>?data.table::nafill</code> for more information.</p>
+<div id="nafill" class="section level3">
+<h3>nafill</h3>
+<p><code>nafill</code> is a function that fills missing values in a <code>data.table</code>. We define <code>DT</code> as follows.</p>
+<pre class="r"><code>(DT &lt;- fread(&quot;V1 V2 V3 V4
+1 c NA 10
+2 b 2 NA
+NA c 3 NA
+1 NA 4 NA
+2 NA 5 14&quot;))</code></pre>
+<pre><code>##    V1   V2 V3 V4
+## 1:  1    c NA 10
+## 2:  2    b  2 NA
+## 3: NA    c  3 NA
+## 4:  1 &lt;NA&gt;  4 NA
+## 5:  2 &lt;NA&gt;  5 14</code></pre>
+<p>Now let us try to apply <code>nafill</code>to this object. The function takes in three important arguments:</p>
+<pre class="r"><code>nafill(x, type=c(&quot;const&quot;,&quot;locf&quot;,&quot;nocb&quot;), fill=NA,
+       verbose=getOption(&quot;datatable.verbose&quot;))</code></pre>
+<p><code>x</code> can be a vector, list, data.frame or data.table. The <code>type</code> defines how the missing values should be filled.</p>
+<ul>
+<li><code>locf</code> -&gt; last observation carried forward</li>
+<li><code>nocb</code> -&gt; next observation carried backwards</li>
+<li><code>const</code> -&gt; a constant</li>
+</ul>
+<pre class="r"><code>#(DT &lt;- nafill(DT, &quot;locf&quot;))</code></pre>
+<p>Above code will throw an error indicating that we can only fill columns with type <code>numeric</code>(double &amp; integer). Here the <code>setnafill</code>functions comes in handy:</p>
+<pre class="r"><code>#getting numeric cols
+
+numeric_cols &lt;- names(DT)[DT[, sapply(.SD, is.numeric)]]
+
+setnafill(DT, &quot;locf&quot;, cols = numeric_cols)
+DT[]</code></pre>
+<pre><code>##    V1   V2 V3 V4
+## 1:  1    c NA 10
+## 2:  2    b  2 10
+## 3:  2    c  3 10
+## 4:  1 &lt;NA&gt;  4 10
+## 5:  2 &lt;NA&gt;  5 14</code></pre>
+<p>This updates <code>DT</code> by reference.</p>
+</div>
+<div id="frollmean-frollsum" class="section level3">
+<h3>frollmean &amp; frollsum</h3>
+<p>Now we are going to explore the <code>frollmean</code>and <code>frollsum</code> functions. These functions allow us to compute rolling means and rolling sums</p>
+<pre class="r"><code>DT[, lapply(.SD, frollmean, 3), .SDcols = numeric_cols]</code></pre>
+<pre><code>##          V1 V3       V4
+## 1:       NA NA       NA
+## 2:       NA NA       NA
+## 3: 1.666667 NA 10.00000
+## 4: 1.666667  3 10.00000
+## 5: 1.666667  4 11.33333</code></pre>
+<pre class="r"><code>#see also ?frollsum</code></pre>
+<pre class="r"><code>DT[, lapply(.SD, frollsum, 3), .SDcols = numeric_cols]</code></pre>
+<pre><code>##    V1 V3 V4
+## 1: NA NA NA
+## 2: NA NA NA
+## 3:  5 NA 30
+## 4:  5  9 30
+## 5:  5 12 34</code></pre>
+</div>
+<div id="coalesce" class="section level3">
+<h3>coalesce</h3>
+<p>The <code>coalesce</code> function fills missing values in a vector by trying to pull values from one or more candidate vectors</p>
+<pre class="r"><code>x &lt;- c(11L, NA, 13L, NA, 15L, NA)
+y &lt;- c(NA, 12L, 5L, NA, NA, NA)
+z &lt;- c(11L, NA, 1L, 14L, NA, NA)
+
+coalesce(x, y, z)</code></pre>
+<pre><code>## [1] 11 12 13 14 15 NA</code></pre>
+<p>Given above syntax <code>coalesce</code> tries to fill missing values in <code>x</code> by looking at the corresponding elements of <code>y</code> &amp; <code>z</code>. At the second index we find a missing value in <code>x</code>, whereas <code>y = 12L ; z = NA</code>. At the fourth index we find <code>y = NA ; z = 14L</code>. So the new vector becomes <code>11 12 13 14 15 NA</code>.</p>
+</div>
+</div>
+<div id="helpful-links" class="section level2">
+<h2>Helpful links</h2>
+<p>The talk: - <a href="https://www.youtube.com/watch?v=tWx1ooBSxFc" class="uri">https://www.youtube.com/watch?v=tWx1ooBSxFc</a>
+Slides: - <a href="http://www.user2019.fr/static/pres/t258038.pdf" class="uri">http://www.user2019.fr/static/pres/t258038.pdf</a>
+github: - <a href="https://github.com/Rdatatable" class="uri">https://github.com/Rdatatable</a>
+- <a href="https://github.com/Rdatatable/data.table/wiki" class="uri">https://github.com/Rdatatable/data.table/wiki</a></p>
+<p>See you soon!</p>
+</div>

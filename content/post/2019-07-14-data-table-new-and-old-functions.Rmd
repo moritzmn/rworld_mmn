@@ -1,0 +1,315 @@
+---
+title: data.table - useR!2019 I
+author: admin
+date: '2019-07-14'
+slug: data-table-new-and-old-functions
+categories: []
+tags:
+  - data.table
+  - useR!2019
+subtitle: ''
+summary: ''
+authors: [admin]
+lastmod: '2019-08-27T13:40:04+02:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+This is the first post looking at the **data.table** presentations from **UseR!2019** which was held in Toulouse from 2019-07-07-2019-10-10. For starters we are going to take a look at the presentations from *Arun Srinivasan*, one of the main developers of **data.table**. His talk is called **THE #RDATATABLEPACKAGE
+for fast, flexible and memory efficient data wrangling**. 
+
+Talk Agenda:
+
+- General data.table syntax
+- Explaining .SD & .SDcols
+- optimisation & new functionalities
+
+## General data.table syntax
+
+Following code chunk installs the development version of the package, which is needed for some functions explained below.
+
+```{r eval=FALSE, include=TRUE}
+install.packages("data.table", repos="https://Rdatatable.gitlab.io/data.table")
+```
+
+
+We start of with a simple expample.
+
+```{r}
+library(data.table)
+```
+
+We define a data.table DT using the `fread` function.
+
+```{r}
+(DT <- fread("id code valA valB
+1 c 1 10
+1 b 2 11
+1 c 3 12
+1 c 4 13
+2 a 5 14
+2 a 6 15
+1 b 7 16
+2 a 8 17
+1 c 9 18"))
+```
+
+The general data.table syntax is `DT[i, j, by]`, which you can translate into: *i = on which rows, j = what to do (columns), grouped by what*. So when we want to get the sum of *valA*, we can simply do.
+
+```{r}
+DT[, sum(valA)]
+```
+We have not defined a *i* nor *by* argument here. This simply means we want to compute for all rows and grouping is not relevant. Now we group by id.
+
+```{r}
+DT[, sum(valA), by = id]
+```
+We can also name the outcome of the column directly. The `.()` is an alias for `list`.
+
+```{r}
+DT[, .(sumA = sum(valA)), by = id]
+```
+When you pass a column to the `by` argument, internally the number of the unique values for that column gets evaluated. Afterwards the rows gets associated to the respective group. Then the expression provided in `j`, `sum(valA)` gets evaluated for the groups. 
+
+This is a very simple example, but illustrates the general form quite nicely. *Arun* introduces another simple example by passing an expression to the *i* argument. 
+
+```{r}
+DT[code != "b", .(sumA = sum(valA)), by = id]
+```
+
+Here we simply state that code should be not equal to "b". Very easy and logical syntax.
+
+
+## Explaining .SD & .SDcols
+
+We are still operating on DT.
+
+```{r}
+DT
+```
+
+`.SD` stands for *Subset of Data*. Together with `.SDcols` we can use it to simply subset `DT` by column names and then compute on this subset.
+
+
+You could do this:
+
+
+```{r}
+DT[, .SD, .SDcols = "valA"]
+```
+
+Which returns a `data.table` object with one column `valA`. You can of course pass more columns.
+
+```{r}
+DT[, .SD, .SDcols = c("valA", "valB")]
+```
+
+you can also use the `patterns` function in `.SDcols`.
+
+```{r}
+DT[, .SD, .SDcols = patterns("^val")]
+```
+
+How can we use this functionality to compute the sum of `valA` and `valB` grouped by `id` where `code != "b` ?
+Easy :-)
+
+```{r}
+DT[code != "b", lapply(.SD, sum), .SDcols = patterns("^val"), by = "id"]
+```
+The `patterns` function only returns columns starting with *val*. 
+`.SD` stands for *Subset of Data* and contains all the columns, except for the grouping columns supplied in `by`, for each group.
+
+```{r}
+DT[code != "b", print(.SD), .SDcols = c("code","valA", "valB"), by = id]
+```
+Once you grouped by `id` only the columns `valA` and `valB` are being considered due to `.SDcols`. We therefore compute the sums on on these columns and not on `code`.
+
+```{r}
+DT[code != "b", print(.SD), .SDcols = c("valA", "valB"), by = id]
+```
+
+So how does this `lapply(.SD, sum)` work? `lapply` is the infamous base function which returns a list. We operate on `.SD` and compute the sum of every column in `.SD`. We take a step back and look at the `class` and `typeof`of `DT`
+
+```{r}
+class(DT)
+```
+
+
+```{r}
+typeof(DT)
+```
+
+
+```{r}
+typeof(DT[,.SD])
+```
+You find more information about `.SD` in this *stackoverflow* post:
+
+<https://stackoverflow.com/questions/8508482/what-does-sd-stand-for-in-data-table-in-r>
+
+You can also check `vignette("datatable-sd-usage")` in the development version.
+
+## Optimisation
+
+Arun presents optimisation principles for operations in `i`, `j` & `by`. 
+
+### Optimisation in "i" 
+
+We create a `data.table` which has 200 million rows and two columns `x` and `y`.
+
+```{r eval=FALSE, include=TRUE}
+dt <- data.table(x = sample(1e5, 2e8, TRUE), y = runif(2e8)) 
+```
+
+Now we only return rows where the value of `x` is in `1000:2000`, we operate in `i`. 
+
+```{r eval=FALSE, include=TRUE}
+system.time(dt[x %in% 1000:2000])
+system.time(dt[x %in% 1000:2000])
+```
+
+This takes a while (~17s on my laptop), but running the expression a second time results in a substantial speed up (~4s total). Please note that this not a proper benchmark. The second time we call this the expression, it reuses the index created in the first run. This currently works for `==` and `%in%` and is called *Auto indexing*. The index is stored within the `data.table` as an attribute.
+
+
+Now we create a `data.table` with 20 columns and 50 million rows to demonstrate that expression in `i`can run in parallel.
+
+```{r eval=FALSE, include=TRUE}
+dt <- setDT(lapply(1:20, function(x) sample(100, 5e7, TRUE))) 
+```
+
+We operate in `i` to return the rows, where `V1 > 50L`. The column is processed in parallel.
+
+```{r eval=FALSE, include=TRUE}
+system.time(dt[V1 > 50L])
+```
+
+You can set the threads `data.table` uses with and check the differences.
+
+```{r eval=FALSE, include=TRUE}
+setDTthreads(threads = 1L)
+system.time(dt[V1 > 50L])
+setDTTthreads(threads = 2L)
+```
+
+
+### Optimisation in "by"
+
+Recently the radix order has been parallelised. We define a new data set.
+
+```{r eval=FALSE, include=TRUE}
+dt <- data.table(x=sample(1e5, 2e8, TRUE), y=runif(2e8))
+#200 million rows, 2 cols, ~3GB
+```
+
+Now we run this expression, which returns the occurences grouped by `x`.
+
+```{r eval=FALSE, include=TRUE}
+dt[, .N, by = x]
+```
+
+
+### Optimisation in "j"
+
+In `j` certain functions are optimized. Arun mentions `mean`, `median`, `sum`, `min`, `max`, `head`, `tail`. 
+We can see a difference, when comparing `base::mean` with just calling `mean`in `j`.
+
+```{r eval=FALSE, include=TRUE}
+dt[, lapply(.SD, base::mean), by=V1]
+```
+
+
+```{r eval=FALSE, include=TRUE}
+dt[, lapply(.SD, mean), by=V1]
+```
+
+Internally this expression uses the function `mean` implemented by `data.table` in *C*. 
+
+## New functionalities
+
+The first function we are going to look at is `nafill`. This function allows us to fill `NA` values in a `data.table` by a specific method, like *last observation carried forward (locf)*. See `?data.table::nafill` for more information.
+
+### nafill
+
+`nafill` is a function that fills missing values in a `data.table`. We define `DT` as follows. 
+
+```{r}
+(DT <- fread("V1 V2 V3 V4
+1 c NA 10
+2 b 2 NA
+NA c 3 NA
+1 NA 4 NA
+2 NA 5 14"))
+```
+
+Now let us try to apply `nafill`to this object. The function takes in three important arguments:
+
+```{r eval=FALSE, include=TRUE}
+nafill(x, type=c("const","locf","nocb"), fill=NA,
+       verbose=getOption("datatable.verbose"))
+```
+
+`x` can be a vector, list, data.frame or data.table. The `type` defines how the missing values should be filled.
+
+- `locf` -> last observation carried forward
+- `nocb` -> next observation carried backwards
+- `const` -> a constant
+
+```{r}
+#(DT <- nafill(DT, "locf"))
+```
+
+Above code will throw an error indicating that we can only fill columns with type `numeric`(double & integer). Here the `setnafill`functions comes in handy:
+
+```{r}
+#getting numeric cols
+
+numeric_cols <- names(DT)[DT[, sapply(.SD, is.numeric)]]
+
+setnafill(DT, "locf", cols = numeric_cols)
+DT[]
+```
+
+This updates `DT` by reference.  
+
+
+### frollmean & frollsum
+
+Now we are going to explore the `frollmean`and `frollsum` functions. These functions allow us to compute rolling means and rolling sums 
+
+```{r}
+DT[, lapply(.SD, frollmean, 3), .SDcols = numeric_cols]
+#see also ?frollsum
+```
+
+```{r}
+DT[, lapply(.SD, frollsum, 3), .SDcols = numeric_cols]
+```
+
+
+### coalesce
+
+The `coalesce` function fills missing values in a vector by trying to pull values from one or more candidate vectors 
+
+```{r}
+x <- c(11L, NA, 13L, NA, 15L, NA)
+y <- c(NA, 12L, 5L, NA, NA, NA)
+z <- c(11L, NA, 1L, 14L, NA, NA)
+
+coalesce(x, y, z)
+```
+
+Given above syntax `coalesce` tries to fill missing values in `x` by looking at the corresponding elements of `y` & `z`. At the second index we find a missing value in `x`, whereas `y = 12L ; z = NA`. At the fourth index we find `y = NA ; z = 14L`. So the new vector becomes `11 12 13 14 15 NA`.
+
+## Helpful links
+
+The talk: - <https://www.youtube.com/watch?v=tWx1ooBSxFc>
+Slides: - <http://www.user2019.fr/static/pres/t258038.pdf>
+github: - <https://github.com/Rdatatable>
+        -  <https://github.com/Rdatatable/data.table/wiki>
+
+
+See you soon!
