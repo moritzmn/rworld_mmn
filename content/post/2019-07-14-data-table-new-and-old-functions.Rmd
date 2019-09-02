@@ -26,7 +26,7 @@ Talk Agenda:
 
 - General data.table syntax
 - Explaining .SD & .SDcols
-- optimisation & new functionalities
+- Optimisation & new functionalities
 
 ## General data.table syntax
 
@@ -40,7 +40,7 @@ install.packages("data.table", repos="https://Rdatatable.gitlab.io/data.table")
 We start of with a simple expample.
 
 ```{r}
-library(data.table)
+library("data.table")
 ```
 
 We define a data.table DT using the `fread` function.
@@ -58,12 +58,12 @@ We define a data.table DT using the `fread` function.
 1 c 9 18"))
 ```
 
-The general data.table syntax is `DT[i, j, by]`, which you can translate into: *i = on which rows, j = what to do (columns), grouped by what*. So when we want to get the sum of *valA*, we can simply do.
+The general data.table syntax is `DT[i, j, by]`, which you can translate into: *i = on which rows, j = what to do (columns), grouped by what*. So when we want to get the sum of `valA`, we can simply do.
 
 ```{r}
 DT[, sum(valA)]
 ```
-We have not defined a *i* nor *by* argument here. This simply means we want to compute for all rows and grouping is not relevant. Now we group by id.
+We have not defined a `i` nor `by` argument here. This simply means we want to compute for all rows and grouping is not relevant. Now we group by `id`.
 
 ```{r}
 DT[, sum(valA), by = id]
@@ -75,7 +75,7 @@ DT[, .(sumA = sum(valA)), by = id]
 ```
 When you pass a column to the `by` argument, internally the number of the unique values for that column gets evaluated. Afterwards the rows are associated to the respective group. Then the expression provided in `j`, `sum(valA)` gets evaluated for the groups. 
 
-This is a very simple example, but illustrates the general form quite nicely. *Arun* introduces another simple example by passing an expression to the *i* argument. 
+This is a very simple example, but illustrates the general form quite nicely. *Arun* introduces another simple example by passing an expression to the `i` argument. 
 
 ```{r}
 DT[code != "b", .(sumA = sum(valA)), by = id]
@@ -102,13 +102,13 @@ You could do this:
 DT[, .SD, .SDcols = "valA"]
 ```
 
-Which returns a `data.table` object with one column `valA`. You can of course pass more columns.
+This returns a `data.table` object with one column `valA`. You can of course pass more columns.
 
 ```{r}
 DT[, .SD, .SDcols = c("valA", "valB")]
 ```
 
-you can also use the `patterns` function in `.SDcols`.
+You can also use the `patterns` function in `.SDcols`.
 
 ```{r}
 DT[, .SD, .SDcols = patterns("^val")]
@@ -126,7 +126,7 @@ The `patterns` function only returns columns starting with *val*.
 ```{r}
 DT[code != "b", print(.SD), .SDcols = c("code","valA", "valB"), by = id]
 ```
-Once you grouped by `id` only the columns `valA` and `valB` are being considered due to `.SDcols`. We therefore compute the sums on on these columns and not on `code`.
+Once you grouped by `id` only the columns `valA` and `valB` are being considered due to `.SDcols`. We therefore compute the sums on these columns and not on `code`.
 
 ```{r}
 DT[code != "b", print(.SD), .SDcols = c("valA", "valB"), by = id]
@@ -153,7 +153,7 @@ You find more information about `.SD` in this *stackoverflow* post:
 
 You can also check `vignette("datatable-sd-usage")` in the development version.
 
-## Optimisation
+## Optimisation & new functionalities
 
 Arun presents optimisation principles for operations in `i`, `j` & `by`. 
 
@@ -214,7 +214,7 @@ dt[, .N, by = x]
 ### Optimisation in "j"
 
 In `j` certain functions are optimized. Arun mentions `mean`, `median`, `sum`, `min`, `max`, `head`, `tail`. 
-We can see a difference, when comparing `base::mean` with just calling `mean`in `j`.
+We can see a difference, when comparing `base::mean` with just calling `mean` in `j`.
 
 ```{r eval=FALSE, include=TRUE}
 dt[, lapply(.SD, base::mean), by=V1]
@@ -244,7 +244,7 @@ NA c 3 NA
 2 NA 5 14"))
 ```
 
-Now let us try to apply `nafill`to this object. The function takes in three important arguments:
+Now let us try to apply `nafill` to this object. The function takes in three important arguments:
 
 ```{r eval=FALSE, include=TRUE}
 nafill(x, type=c("const","locf","nocb"), fill=NA,

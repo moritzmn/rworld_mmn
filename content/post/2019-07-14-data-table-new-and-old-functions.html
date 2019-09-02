@@ -27,14 +27,14 @@ for fast, flexible and memory efficient data wrangling</strong>.</p>
 <ul>
 <li>General data.table syntax</li>
 <li>Explaining .SD &amp; .SDcols</li>
-<li>optimisation &amp; new functionalities</li>
+<li>Optimisation &amp; new functionalities</li>
 </ul>
 <div id="general-data.table-syntax" class="section level2">
 <h2>General data.table syntax</h2>
 <p>Following code chunk installs the development version of the package, which is needed for some functions explained below.</p>
 <pre class="r"><code>install.packages(&quot;data.table&quot;, repos=&quot;https://Rdatatable.gitlab.io/data.table&quot;)</code></pre>
 <p>We start of with a simple expample.</p>
-<pre class="r"><code>library(data.table)</code></pre>
+<pre class="r"><code>library(&quot;data.table&quot;)</code></pre>
 <p>We define a data.table DT using the <code>fread</code> function.</p>
 <pre class="r"><code>(DT &lt;- fread(&quot;id code valA valB
 1 c 1 10
@@ -56,10 +56,10 @@ for fast, flexible and memory efficient data wrangling</strong>.</p>
 ## 7:  1    b    7   16
 ## 8:  2    a    8   17
 ## 9:  1    c    9   18</code></pre>
-<p>The general data.table syntax is <code>DT[i, j, by]</code>, which you can translate into: <em>i = on which rows, j = what to do (columns), grouped by what</em>. So when we want to get the sum of <em>valA</em>, we can simply do.</p>
+<p>The general data.table syntax is <code>DT[i, j, by]</code>, which you can translate into: <em>i = on which rows, j = what to do (columns), grouped by what</em>. So when we want to get the sum of <code>valA</code>, we can simply do.</p>
 <pre class="r"><code>DT[, sum(valA)]</code></pre>
 <pre><code>## [1] 45</code></pre>
-<p>We have not defined a <em>i</em> nor <em>by</em> argument here. This simply means we want to compute for all rows and grouping is not relevant. Now we group by id.</p>
+<p>We have not defined a <code>i</code> nor <code>by</code> argument here. This simply means we want to compute for all rows and grouping is not relevant. Now we group by <code>id</code>.</p>
 <pre class="r"><code>DT[, sum(valA), by = id]</code></pre>
 <pre><code>##    id V1
 ## 1:  1 26
@@ -70,7 +70,7 @@ for fast, flexible and memory efficient data wrangling</strong>.</p>
 ## 1:  1   26
 ## 2:  2   19</code></pre>
 <p>When you pass a column to the <code>by</code> argument, internally the number of the unique values for that column gets evaluated. Afterwards the rows are associated to the respective group. Then the expression provided in <code>j</code>, <code>sum(valA)</code> gets evaluated for the groups.</p>
-<p>This is a very simple example, but illustrates the general form quite nicely. <em>Arun</em> introduces another simple example by passing an expression to the <em>i</em> argument.</p>
+<p>This is a very simple example, but illustrates the general form quite nicely. <em>Arun</em> introduces another simple example by passing an expression to the <code>i</code> argument.</p>
 <pre class="r"><code>DT[code != &quot;b&quot;, .(sumA = sum(valA)), by = id]</code></pre>
 <pre><code>##    id sumA
 ## 1:  1   17
@@ -104,7 +104,7 @@ for fast, flexible and memory efficient data wrangling</strong>.</p>
 ## 7:    7
 ## 8:    8
 ## 9:    9</code></pre>
-<p>Which returns a <code>data.table</code> object with one column <code>valA</code>. You can of course pass more columns.</p>
+<p>This returns a <code>data.table</code> object with one column <code>valA</code>. You can of course pass more columns.</p>
 <pre class="r"><code>DT[, .SD, .SDcols = c(&quot;valA&quot;, &quot;valB&quot;)]</code></pre>
 <pre><code>##    valA valB
 ## 1:    1   10
@@ -116,7 +116,7 @@ for fast, flexible and memory efficient data wrangling</strong>.</p>
 ## 7:    7   16
 ## 8:    8   17
 ## 9:    9   18</code></pre>
-<p>you can also use the <code>patterns</code> function in <code>.SDcols</code>.</p>
+<p>You can also use the <code>patterns</code> function in <code>.SDcols</code>.</p>
 <pre class="r"><code>DT[, .SD, .SDcols = patterns(&quot;^val&quot;)]</code></pre>
 <pre><code>##    valA valB
 ## 1:    1   10
@@ -147,7 +147,7 @@ Easy :-)</p>
 ## 2:    a    6   15
 ## 3:    a    8   17</code></pre>
 <pre><code>## Empty data.table (0 rows and 1 cols): id</code></pre>
-<p>Once you grouped by <code>id</code> only the columns <code>valA</code> and <code>valB</code> are being considered due to <code>.SDcols</code>. We therefore compute the sums on on these columns and not on <code>code</code>.</p>
+<p>Once you grouped by <code>id</code> only the columns <code>valA</code> and <code>valB</code> are being considered due to <code>.SDcols</code>. We therefore compute the sums on these columns and not on <code>code</code>.</p>
 <pre class="r"><code>DT[code != &quot;b&quot;, print(.SD), .SDcols = c(&quot;valA&quot;, &quot;valB&quot;), by = id]</code></pre>
 <pre><code>##    valA valB
 ## 1:    1   10
@@ -170,8 +170,8 @@ Easy :-)</p>
 <p><a href="https://stackoverflow.com/questions/8508482/what-does-sd-stand-for-in-data-table-in-r" class="uri">https://stackoverflow.com/questions/8508482/what-does-sd-stand-for-in-data-table-in-r</a></p>
 <p>You can also check <code>vignette("datatable-sd-usage")</code> in the development version.</p>
 </div>
-<div id="optimisation" class="section level2">
-<h2>Optimisation</h2>
+<div id="optimisation-new-functionalities" class="section level2">
+<h2>Optimisation &amp; new functionalities</h2>
 <p>Arun presents optimisation principles for operations in <code>i</code>, <code>j</code> &amp; <code>by</code>.</p>
 <div id="optimisation-in-i" class="section level3">
 <h3>Optimisation in “i”</h3>
@@ -200,7 +200,7 @@ setDTTthreads(threads = 2L)</code></pre>
 <div id="optimisation-in-j" class="section level3">
 <h3>Optimisation in “j”</h3>
 <p>In <code>j</code> certain functions are optimized. Arun mentions <code>mean</code>, <code>median</code>, <code>sum</code>, <code>min</code>, <code>max</code>, <code>head</code>, <code>tail</code>.
-We can see a difference, when comparing <code>base::mean</code> with just calling <code>mean</code>in <code>j</code>.</p>
+We can see a difference, when comparing <code>base::mean</code> with just calling <code>mean</code> in <code>j</code>.</p>
 <pre class="r"><code>dt[, lapply(.SD, base::mean), by=V1]</code></pre>
 <pre class="r"><code>dt[, lapply(.SD, mean), by=V1]</code></pre>
 <p>Internally this expression uses the function <code>mean</code> implemented by <code>data.table</code> in <em>C</em>.</p>
@@ -224,7 +224,7 @@ NA c 3 NA
 ## 3: NA    c  3 NA
 ## 4:  1 &lt;NA&gt;  4 NA
 ## 5:  2 &lt;NA&gt;  5 14</code></pre>
-<p>Now let us try to apply <code>nafill</code>to this object. The function takes in three important arguments:</p>
+<p>Now let us try to apply <code>nafill</code> to this object. The function takes in three important arguments:</p>
 <pre class="r"><code>nafill(x, type=c(&quot;const&quot;,&quot;locf&quot;,&quot;nocb&quot;), fill=NA,
        verbose=getOption(&quot;datatable.verbose&quot;))</code></pre>
 <p><code>x</code> can be a vector, list, data.frame or data.table. The <code>type</code> defines how the missing values should be filled.</p>
