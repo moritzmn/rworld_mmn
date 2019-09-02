@@ -19,7 +19,7 @@ image:
 projects: []
 ---
 
-This is the first post looking at the **data.table** presentations from **UseR!2019** which was held in Toulouse from 2019-07-07-2019-10-10. For starters we are going to take a look at the presentations from *Arun Srinivasan*, one of the main developers of **data.table**. His talk is called **THE #RDATATABLEPACKAGE
+This is the first post looking at the **data.table** presentations from **useR!2019** which was held in Toulouse from 2019-07-07 to 2019-10-10. For starters we are going to take a look at the presentations from *Arun Srinivasan*, one of the main developers of **data.table**. His talk is called **THE #RDATATABLEPACKAGE
 for fast, flexible and memory efficient data wrangling**. 
 
 Talk Agenda:
