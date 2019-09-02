@@ -23,9 +23,9 @@ projects: []
 
 # Amazon Transcribe & R
 
-Hi, in this post, I will show you some ideas on how to generate subtitles with a time stamp using **R** and **Amazon Transcribe**. At first you need at least *mp3* file, or like in my case, 139 files. If you want to use this code, you need to set up an **aws** (Amazon Web Services) account, which might cost you money, depending on how much you use the services. There is a free tier available on aws, but be careful when using this code! You need and *iam role* that has access to an **s3** folder and is allowed to use **Amazon Transcribe**.
+Hi, in this post, I will show you some ideas on how to generate subtitles with a time stamp using **R** and **Amazon Transcribe**. At first you need at least one *mp3* file, or like in my case, 139 files. If you want to use this code, you need to set up an **aws** (Amazon Web Services) account, which might cost you money, depending on how much you use the services. There is a free tier available on aws, but be careful when using this code! You need and *iam role* that has access to an **s3** folder and is allowed to use **Amazon Transcribe**.
 
-In my case I actually have *mp4* video files. I generated the *mp3* files with the beautiful **ffmpeg**. We are not going to cover that in this post, rather showing you the **R** code for communicating with **Amazon S3** and **Amazon Transcribe**. Your end goal is to create a *VTT* file, which looks like this:
+In my case I actually have *mp4* video files. I generated the *mp3* files with the beautiful **ffmpeg**. We are not going to cover that in this post, rather showing you the `R` code for communicating with **Amazon S3** and **Amazon Transcribe**. Your end goal is to create a *VTT* file, which looks like this:
 
 
 ```{r eval=FALSE, include=TRUE}
@@ -46,8 +46,7 @@ kleines Skript vorbereitet, indem wir der variable A den Wert
 eins zuordnen im zweiten Schritt die variable A um den
 ```
 
-If you understand german, you will notice that there are a few errors. It is not too bad though.  
-Now let us jump into the code!
+If you understand german, you will notice that there are a few errors. It is not too bad though. Now let us jump into the code!
 
 
 ## Load packages
@@ -143,9 +142,9 @@ aws.transcribe::transcribeHTTP
 
 ```
 
-We call this function inside `StartTranscription` with `action = "StartTransciptionJob` and `body = bod`. We use the `...` argument to pass our secret and key, which are then passed to the `POST` function from the `httr`package. If you want more information on how to send requests to **aws**, please read up on <https://docs.aws.amazon.com/de_de/transcribe/latest/dg/CommonParameters.html> and <https://docs.aws.amazon.com/de_de/general/latest/gr/signature-version-4.html>. Thanks to *Thomas J. Leeper* (aws.s3 & aws.transcribe) that we do not have to fiddle with that for now!
+We call this function inside `StartTranscription` with `action = "StartTransciptionJob` and `body = bod`. We use the `...` argument to pass our secret and key, which are then passed to the `POST` function from the `httr` package. If you want more information on how to send requests to **aws**, please read up on <https://docs.aws.amazon.com/de_de/transcribe/latest/dg/CommonParameters.html> and <https://docs.aws.amazon.com/de_de/general/latest/gr/signature-version-4.html>. Thanks to *Thomas J. Leeper* (aws.s3 & aws.transcribe) that we do not have to fiddle with that for now!
 
-Now i am defining a url, which points to the **s3 bucket** where I want to save the transcribes as *json*.
+Now I am defining a url, which points to the **s3 bucket** where I want to save the transcribes as *json*.
 
 ```{r eval=FALSE, include=TRUE}
 full_url <- paste0("https://s3.eu-central-1.amazonaws.com/yourbucket/", files_mp3)
@@ -176,11 +175,11 @@ You can check the progress in your **Amazon Transcribe** console.
 
 ## Download the json files
 
-I actually need *vtt* files, because most video editing software are using this file type to include transcriptions. I wrote three helper functions to deal with downloading, formatting the *json* files and generate *vtt* files.
+I actually need *VTT* files, because most video editing software are using this file type to include transcriptions. I wrote three helper functions to deal with downloading, formatting the *json* files and generating *VTT* files.
 
 ### Functions
 
-The first function `DownloadTransJson` calls `FormatJsonObject` and `WriteVtt` after listing and downloading the files from the bucket where we wrote the *json* files to. 
+The first function `DownloadTransJson` calls `FormatJsonObject` and `WriteVTT` after listing and downloading the files from the bucket where we wrote the *json* files to. 
 
 ```{r eval=FALSE, include=TRUE}
 DownloadTransJson <- function(){
@@ -199,7 +198,7 @@ DownloadTransJson <- function(){
                                        key = "yourkey", 
                                        secret = "yoursecret")
   formatted_json <- FormatJsonObject(jsonobject = json_object)
-  WriteVtt(i, formatted_json)
+  WriteVTT(i, formatted_json)
   }
 }
 ```
@@ -255,11 +254,11 @@ FormatJsonObject <- function(jsonobject){
 And now simply write a file per transcription as *VTT*.
 
 ```{r eval=FALSE, include=TRUE}
-WriteVtt <- function(name, jsondt) {
+WriteVTT <- function(name, jsondt) {
   
   file.create(paste0(name,".VTT"))
   con_file <- file(paste0(name,".VTT"))
-  ##writing to vtt
+  ##writing to VTT
   #might be os specific
   writeLines(paste0(1 : nrow(jsondt),"\n",
                     jsondt$time_stamp,"\n",
@@ -277,6 +276,5 @@ DownloadTransJson()
 Done? Not quite. You now need to check your transciptions. Did **Amazon Transcribe** understand what your were saying? Unfortunately not in every case. It seems like mixing german with english, as I did not "translate" english R expressions into german, is problematic. I am sure it works way better, when you are trying to transcribe english. What are your experiences with **Amazon Transcribe** ?  
 I know one can define a vocabulary to improve the job, which I am going to try for sure! 
 
-Anyways, i hope you can take something away from this post.  
 Have a great day!
 Moritz

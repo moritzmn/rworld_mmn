@@ -25,8 +25,8 @@ projects: []
 
 <div id="amazon-transcribe-r" class="section level1">
 <h1>Amazon Transcribe &amp; R</h1>
-<p>Hi, in this post, I will show you some ideas on how to generate subtitles with a time stamp using <strong>R</strong> and <strong>Amazon Transcribe</strong>. At first you need at least <em>mp3</em> file, or like in my case, 139 files. If you want to use this code, you need to set up an <strong>aws</strong> (Amazon Web Services) account, which might cost you money, depending on how much you use the services. There is a free tier available on aws, but be careful when using this code! You need and <em>iam role</em> that has access to an <strong>s3</strong> folder and is allowed to use <strong>Amazon Transcribe</strong>.</p>
-<p>In my case I actually have <em>mp4</em> video files. I generated the <em>mp3</em> files with the beautiful <strong>ffmpeg</strong>. We are not going to cover that in this post, rather showing you the <strong>R</strong> code for communicating with <strong>Amazon S3</strong> and <strong>Amazon Transcribe</strong>. Your end goal is to create a <em>VTT</em> file, which looks like this:</p>
+<p>Hi, in this post, I will show you some ideas on how to generate subtitles with a time stamp using <strong>R</strong> and <strong>Amazon Transcribe</strong>. At first you need at least one <em>mp3</em> file, or like in my case, 139 files. If you want to use this code, you need to set up an <strong>aws</strong> (Amazon Web Services) account, which might cost you money, depending on how much you use the services. There is a free tier available on aws, but be careful when using this code! You need and <em>iam role</em> that has access to an <strong>s3</strong> folder and is allowed to use <strong>Amazon Transcribe</strong>.</p>
+<p>In my case I actually have <em>mp4</em> video files. I generated the <em>mp3</em> files with the beautiful <strong>ffmpeg</strong>. We are not going to cover that in this post, rather showing you the <code>R</code> code for communicating with <strong>Amazon S3</strong> and <strong>Amazon Transcribe</strong>. Your end goal is to create a <em>VTT</em> file, which looks like this:</p>
 <pre class="r"><code>1
 00:00:01,000 --&gt; 00:00:06,000
 Willkommen zur ersten Lektion Einf?hrungen er Vektoren und Tim Wir
@@ -42,8 +42,7 @@ kleines Skript vorbereitet, indem wir der variable A den Wert
 4
 00:00:17,000 --&gt; 00:00:22,000
 eins zuordnen im zweiten Schritt die variable A um den</code></pre>
-<p>If you understand german, you will notice that there are a few errors. It is not too bad though.<br />
-Now let us jump into the code!</p>
+<p>If you understand german, you will notice that there are a few errors. It is not too bad though. Now let us jump into the code!</p>
 <div id="load-packages" class="section level2">
 <h2>Load packages</h2>
 <pre class="r"><code>library(data.table)
@@ -101,7 +100,7 @@ We need the <code>start_transcription</code> function</p>
 ##     transcribeHTTP(action = &quot;StartTranscriptionJob&quot;, body = bod, 
 ##         ...)
 ## }
-## &lt;bytecode: 0x0000000015c0f760&gt;
+## &lt;bytecode: 0x0000000015bffb60&gt;
 ## &lt;environment: namespace:aws.transcribe&gt;</code></pre>
 <p>The main takeaway here is that we define a list <code>bod</code> and then call the <code>transcribeHTTP</code> function. We can check the <strong>Amazon Transcribe</strong> documentation to understand, how we should define a request body which is called <code>bod</code> in this function.</p>
 <p><a href="https://docs.aws.amazon.com/de_de/transcribe/latest/dg/API_StartTranscriptionJob.html" class="uri">https://docs.aws.amazon.com/de_de/transcribe/latest/dg/API_StartTranscriptionJob.html</a></p>
@@ -176,10 +175,10 @@ We need the <code>start_transcription</code> function</p>
 ##     }
 ##     return(out)
 ## }
-## &lt;bytecode: 0x00000000164de798&gt;
+## &lt;bytecode: 0x00000000164ce588&gt;
 ## &lt;environment: namespace:aws.transcribe&gt;</code></pre>
-<p>We call this function inside <code>StartTranscription</code> with <code>action = "StartTransciptionJob</code> and <code>body = bod</code>. We use the <code>...</code> argument to pass our secret and key, which are then passed to the <code>POST</code> function from the <code>httr</code>package. If you want more information on how to send requests to <strong>aws</strong>, please read up on <a href="https://docs.aws.amazon.com/de_de/transcribe/latest/dg/CommonParameters.html" class="uri">https://docs.aws.amazon.com/de_de/transcribe/latest/dg/CommonParameters.html</a> and <a href="https://docs.aws.amazon.com/de_de/general/latest/gr/signature-version-4.html" class="uri">https://docs.aws.amazon.com/de_de/general/latest/gr/signature-version-4.html</a>. Thanks to <em>Thomas J. Leeper</em> (aws.s3 &amp; aws.transcribe) that we do not have to fiddle with that for now!</p>
-<p>Now i am defining a url, which points to the <strong>s3 bucket</strong> where I want to save the transcribes as <em>json</em>.</p>
+<p>We call this function inside <code>StartTranscription</code> with <code>action = "StartTransciptionJob</code> and <code>body = bod</code>. We use the <code>...</code> argument to pass our secret and key, which are then passed to the <code>POST</code> function from the <code>httr</code> package. If you want more information on how to send requests to <strong>aws</strong>, please read up on <a href="https://docs.aws.amazon.com/de_de/transcribe/latest/dg/CommonParameters.html" class="uri">https://docs.aws.amazon.com/de_de/transcribe/latest/dg/CommonParameters.html</a> and <a href="https://docs.aws.amazon.com/de_de/general/latest/gr/signature-version-4.html" class="uri">https://docs.aws.amazon.com/de_de/general/latest/gr/signature-version-4.html</a>. Thanks to <em>Thomas J. Leeper</em> (aws.s3 &amp; aws.transcribe) that we do not have to fiddle with that for now!</p>
+<p>Now I am defining a url, which points to the <strong>s3 bucket</strong> where I want to save the transcribes as <em>json</em>.</p>
 <pre class="r"><code>full_url &lt;- paste0(&quot;https://s3.eu-central-1.amazonaws.com/yourbucket/&quot;, files_mp3)</code></pre>
 <div id="start-transcription" class="section level3">
 <h3>Start transcription</h3>
@@ -203,10 +202,10 @@ paste(i)
 </div>
 <div id="download-the-json-files" class="section level2">
 <h2>Download the json files</h2>
-<p>I actually need <em>vtt</em> files, because most video editing software are using this file type to include transcriptions. I wrote three helper functions to deal with downloading, formatting the <em>json</em> files and generate <em>vtt</em> files.</p>
+<p>I actually need <em>VTT</em> files, because most video editing software are using this file type to include transcriptions. I wrote three helper functions to deal with downloading, formatting the <em>json</em> files and generating <em>VTT</em> files.</p>
 <div id="functions" class="section level3">
 <h3>Functions</h3>
-<p>The first function <code>DownloadTransJson</code> calls <code>FormatJsonObject</code> and <code>WriteVtt</code> after listing and downloading the files from the bucket where we wrote the <em>json</em> files to.</p>
+<p>The first function <code>DownloadTransJson</code> calls <code>FormatJsonObject</code> and <code>WriteVTT</code> after listing and downloading the files from the bucket where we wrote the <em>json</em> files to.</p>
 <pre class="r"><code>DownloadTransJson &lt;- function(){
   list_bucket &lt;- data.table::rbindlist(aws.s3::get_bucket(
     bucket = &quot;yourbucket&quot;, 
@@ -223,7 +222,7 @@ paste(i)
                                        key = &quot;yourkey&quot;, 
                                        secret = &quot;yoursecret&quot;)
   formatted_json &lt;- FormatJsonObject(jsonobject = json_object)
-  WriteVtt(i, formatted_json)
+  WriteVTT(i, formatted_json)
   }
 }</code></pre>
 <p>The <code>FormatJsonObject</code> function formats the response we get from <code>aws.s3::getobject</code>.</p>
@@ -271,11 +270,11 @@ paste(i)
   return(unique_dt)
 }</code></pre>
 <p>And now simply write a file per transcription as <em>VTT</em>.</p>
-<pre class="r"><code>WriteVtt &lt;- function(name, jsondt) {
+<pre class="r"><code>WriteVTT &lt;- function(name, jsondt) {
   
   file.create(paste0(name,&quot;.VTT&quot;))
   con_file &lt;- file(paste0(name,&quot;.VTT&quot;))
-  ##writing to vtt
+  ##writing to VTT
   #might be os specific
   writeLines(paste0(1 : nrow(jsondt),&quot;\n&quot;,
                     jsondt$time_stamp,&quot;\n&quot;,
@@ -286,8 +285,7 @@ paste(i)
 <pre class="r"><code>DownloadTransJson()</code></pre>
 <p>Done? Not quite. You now need to check your transciptions. Did <strong>Amazon Transcribe</strong> understand what your were saying? Unfortunately not in every case. It seems like mixing german with english, as I did not “translate” english R expressions into german, is problematic. I am sure it works way better, when you are trying to transcribe english. What are your experiences with <strong>Amazon Transcribe</strong> ?<br />
 I know one can define a vocabulary to improve the job, which I am going to try for sure!</p>
-<p>Anyways, i hope you can take something away from this post.<br />
-Have a great day!
+<p>Have a great day!
 Moritz</p>
 </div>
 </div>
