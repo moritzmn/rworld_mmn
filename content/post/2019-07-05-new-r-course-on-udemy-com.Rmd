@@ -10,7 +10,7 @@ tags:
 subtitle: ''
 summary: ''
 authors: [admin]
-lastmod: '2019-08-28T17:04:13+02:00'
+lastmod: '2019-10-29T13:24:13+02:00'
 featured: no
 image:
   caption: ''
@@ -40,9 +40,8 @@ Most of the code you will encounter on this blog will start with
 library(data.table)
 ```
 
-Anyway, you finde my course under this link: <https://www.udemy.com/r-basics-u/>, it is called  
-**R Basics - Programmierung und Datenanalyse**. Using this link you get the course for 9.99$ 
-<https://www.udemy.com/r-basics-u/?couponCode=WELCOME_R_KURS_1>, limited to the first 200 subscribers!
+Anyway, you finde my course under this link: <https://www.udemy.com/course/r-basics-u/?referralCode=294114E77907E6E07B63>, it is called  
+**R Basics - Programmierung und Datenanalyse**.
 
 See you soon!  
 Moritz
