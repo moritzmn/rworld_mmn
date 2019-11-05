@@ -1,0 +1,131 @@
+---
+title: data.table - Generate and Fill missing values.
+author: ''
+date: '2019-11-04'
+slug: data-table-cross-joining-i
+categories: []
+tags:
+  - data.table
+  - cross join
+  - time series
+  - missing values
+subtitle: ''
+summary: ''
+authors: [admin]
+lastmod: '2019-11-04T15:55:01+01:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+Hi,
+
+in this post I illustrate how we can generate `NA` rows using only `data.table` function, where you have a *date* column (or equivalent).  
+We begin by loading the package.
+
+```{r}
+library(data.table)
+```
+
+# Problem 
+
+Let us assume you have a `data.table` with three columns `date`, `value` and `product`. Here `date` is of type *IDate*, `value` & `product` is *integer*. You can think of it as sales data, where you observe daily sales for a certain product. Thus giving you a time series for every product. We assume that we only get a new entry, when we actually observe a sale. Let us look at a minimal example.
+
+```{r}
+(dt <- data.table(date = as.IDate(c("2019-11-01","2019-11-02", "2019-11-04", "2019-11-07")), value = c(3L,4L,1L,8L), product = c(1L,2L,1L,1L)))
+```
+
+```{r}
+sapply(dt, typeof)
+```
+
+For the `date` column you get `integer`, because the `IDate` class is a integer based date class. Please check `?IDate` for more information.
+
+Since we want a row for every possible date within a certain range, we need to insert rows, where we did not observe anything.
+
+# Solution
+
+It is obvious that we have not sold anything on certain days. Now, our job is to insert rows where we write `NA` for `value` by `date` and `product`. There are different approaches for this task, we focus on joining. Since we know the start and the end of the time series, we can generate a sequence.
+
+```{r}
+(seq_dates <- seq(as.IDate("2019-11-01"), as.IDate("2019-11-07"), by = "days"))
+```
+
+Now we can use the `CJ` function from `data.table` to generate a table. We join `dt` to the return value of `CJ` based on the columns `date` and `product`
+
+```{r}
+dt[CJ(product = unique(product), date = seq_dates), on = c("date", "product")]
+```
+
+The `CJ` function simply generates a table with all possible combinations of `date` and `product`.
+
+```{r}
+CJ(date = seq_dates,  product = unique(dt$product))
+```
+
+
+# Scalibilty
+
+We check the perfomance of the proposed workflow by generating a `data.table` with two parameters: `n_days` & `n_products`. The code below generates random `n_days` within the year 2019 by `product`. The `value` is simply a random integer. This results in an object with 2.5 million rows and three columns.
+
+
+```{r}
+seq_dates  <- seq(as.IDate("2019-01-01"), as.IDate("2019-12-31"), by = "days")
+n_days     <- 250L
+n_products <- 10000L
+
+dt_large <-data.table(rbindlist(lapply(1:n_products, function(x) {
+  date    <- sample(seq_dates, n_days)
+  product <- rep.int(x, n_days)
+  return(list(date = date, product = product))
+})), value = sample.int(10, n_products*n_days, replace = TRUE))
+```
+
+```{r}
+sapply(dt_large, typeof)
+```
+
+
+After generating `dt_large` using `CJ` we get `dt_large_na` with 3.65 million rows (`365 days * n_products`).
+
+```{r}
+system.time(dt_large_na <- dt_large[CJ(product = unique(product), date = seq_dates), on = c("date","product")])
+```
+
+```{r}
+dt_large_na
+```
+
+Thus we get `NA` when we did not observe a value for a certain product and date.
+
+```{r}
+dt_large_na[product == 1]
+```
+
+
+```{r}
+dt_large_na[product == 5]
+```
+
+# Filling missing values
+
+We generated a `data.table` with missing values by joining. There are a lot of techniques to fill `NA`. I want to quickly demonstrate how you can use the `nafill` function included in `data.table`. I introduce a new column in `dt_large_na` to demonstrate the functionality.
+
+```{r}
+dt_large_na[, filled_value := nafill(value, "locf"), by = "product"]
+```
+
+This simply fills the `NA` values on a product level by *last observation carried forward (locf)*. You might want to use a more sophisticated approach for real data.
+
+```{r}
+dt_large_na
+```
+
+Imputing missing values requires a lot more thought for real applications. A good ressource is <https://rmisstastic.netlify.com/how-to/impute/missimp>. 
+
+See you soon,
+
+Moritz
