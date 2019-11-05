@@ -100,7 +100,7 @@ We need the <code>start_transcription</code> function</p>
 ##     transcribeHTTP(action = &quot;StartTranscriptionJob&quot;, body = bod, 
 ##         ...)
 ## }
-## &lt;bytecode: 0x0000000015bffb60&gt;
+## &lt;bytecode: 0x00000000154107d8&gt;
 ## &lt;environment: namespace:aws.transcribe&gt;</code></pre>
 <p>The main takeaway here is that we define a list <code>bod</code> and then call the <code>transcribeHTTP</code> function. We can check the <strong>Amazon Transcribe</strong> documentation to understand, how we should define a request body which is called <code>bod</code> in this function.</p>
 <p><a href="https://docs.aws.amazon.com/de_de/transcribe/latest/dg/API_StartTranscriptionJob.html" class="uri">https://docs.aws.amazon.com/de_de/transcribe/latest/dg/API_StartTranscriptionJob.html</a></p>
@@ -175,7 +175,7 @@ We need the <code>start_transcription</code> function</p>
 ##     }
 ##     return(out)
 ## }
-## &lt;bytecode: 0x00000000164ce588&gt;
+## &lt;bytecode: 0x0000000015cdebc8&gt;
 ## &lt;environment: namespace:aws.transcribe&gt;</code></pre>
 <p>We call this function inside <code>StartTranscription</code> with <code>action = "StartTransciptionJob</code> and <code>body = bod</code>. We use the <code>...</code> argument to pass our secret and key, which are then passed to the <code>POST</code> function from the <code>httr</code> package. If you want more information on how to send requests to <strong>aws</strong>, please read up on <a href="https://docs.aws.amazon.com/de_de/transcribe/latest/dg/CommonParameters.html" class="uri">https://docs.aws.amazon.com/de_de/transcribe/latest/dg/CommonParameters.html</a> and <a href="https://docs.aws.amazon.com/de_de/general/latest/gr/signature-version-4.html" class="uri">https://docs.aws.amazon.com/de_de/general/latest/gr/signature-version-4.html</a>. Thanks to <em>Thomas J. Leeper</em> (aws.s3 &amp; aws.transcribe) that we do not have to fiddle with that for now!</p>
 <p>Now I am defining a url, which points to the <strong>s3 bucket</strong> where I want to save the transcribes as <em>json</em>.</p>

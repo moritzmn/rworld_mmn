@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.3.1">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Moritz Mueller-Navarra">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="Hi,
+in this post I illustrate how we can generate NA rows using only data.table function, where you have a date column (or equivalent).
+We begin by loading the package.
+library(data.table)## Warning: Paket &#39;data.table&#39; wurde unter R Version 3.6.1 erstelltProblemLet us assume you have a data.table with three columns date, value and product. Here date is of type IDate, value &amp; product is integer. You can think of it as sales data, where you observe daily sales for a certain product.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="/post/data-table-cross-joining-i/">
+
+  
+
+
+  
+
+  
+  
+  
+  <meta name="theme-color" content="#2962ff">
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.0/css/all.css" integrity="sha384-aOkxzJ5uQz7WBObEZcHvV5JvRW3TUc2rNPA7pe3AwnsUohiw1Vj2Rgx2KSOkF5+h" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" integrity="sha256-ygkqlh3CYSUri3LhQxzdcm0n1EQvH2Y+U5S2idbLtxs=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css" crossorigin="anonymous" title="hl-light">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark" disabled>
+        
+      
+    
+
+    
+
+    
+
+  
+
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700|Roboto:400,400italic,700|Roboto+Mono&display=swap">
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.min.3834c081887e44130d565828d71a7178.css">
+
+  
+
+  
+  
+  
+
+  
+
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="icon" type="image/png" href="/img/icon.png">
+  <link rel="apple-touch-icon" type="image/png" href="/img/icon-192.png">
+
+  <link rel="canonical" href="/post/data-table-cross-joining-i/">
+
+  
+  
+  
+  
+    
+    
+  
+  <meta property="twitter:card" content="summary">
+  
+  <meta property="twitter:site" content="@NavarraMoritz">
+  <meta property="twitter:creator" content="@NavarraMoritz">
+  
+  <meta property="og:site_name" content="Moritz Mueller-Navarra">
+  <meta property="og:url" content="/post/data-table-cross-joining-i/">
+  <meta property="og:title" content="data.table - Generate and Fill missing values. | Moritz Mueller-Navarra">
+  <meta property="og:description" content="Hi,
+in this post I illustrate how we can generate NA rows using only data.table function, where you have a date column (or equivalent).
+We begin by loading the package.
+library(data.table)## Warning: Paket &#39;data.table&#39; wurde unter R Version 3.6.1 erstelltProblemLet us assume you have a data.table with three columns date, value and product. Here date is of type IDate, value &amp; product is integer. You can think of it as sales data, where you observe daily sales for a certain product."><meta property="og:image" content="/img/icon-192.png">
+  <meta property="twitter:image" content="/img/icon-192.png"><meta property="og:locale" content="en-us">
+  
+  <meta property="article:published_time" content="2019-11-04T00:00:00&#43;00:00">
+  
+  <meta property="article:modified_time" content="2019-11-04T15:55:01&#43;01:00">
+  
+
+  
+
+
+  
+
+
+
+
+
+  <title>data.table - Generate and Fill missing values. | Moritz Mueller-Navarra</title>
+
+</head>
+
+
+<body id="top" data-spy="scroll" data-target="#TableOfContents" data-offset="71" >
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" role="textbox" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+<nav class="navbar navbar-light fixed-top navbar-expand-lg py-0 compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+      <a class="navbar-brand" href="/">Moritz Mueller-Navarra</a>
+      
+      <button type="button" class="navbar-toggler" data-toggle="collapse"
+              data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+        <span><i class="fas fa-bars"></i></span>
+      </button>
+      
+
+    
+    <div class="collapse navbar-collapse" id="navbar">
+
+      
+      
+      <ul class="navbar-nav mr-auto">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#about"><span>Home</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts"><span>Posts</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#projects"><span>Projects</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#contact"><span>Contact</span></a>
+        </li>
+
+        
+        
+
+      
+      </ul>
+      <ul class="navbar-nav ml-auto">
+      
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-search" href="#"><i class="fas fa-search" aria-hidden="true"></i></a>
+        </li>
+        
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-dark-toggle" href="#"><i class="fas fa-moon" aria-hidden="true"></i></a>
+        </li>
+        
+
+      </ul>
+
+    </div>
+  </div>
+</nav>
+
+
+  <article class="article" itemscope itemtype="http://schema.org/Article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1 itemprop="name">data.table - Generate and Fill missing values.</h1>
+
+  
+
+  
+    
+
+
+
+<meta content="2019-11-04 00:00:00 &#43;0000 UTC" itemprop="datePublished">
+<meta content="2019-11-04 15:55:01 &#43;0100 CET" itemprop="dateModified">
+
+<div class="article-metadata">
+
+  
+  
+  
+  
+  <div>
+    
+
+
+
+  <span itemprop="author name" itemtype="http://schema.org/Person"><a href="/authors/admin/">Moritz Mueller-Navarra</a></span>
+
+  </div>
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+          Last updated on
+      
+    
+    <time>Nov 4, 2019</time>
+  </span>
+  
+
+  
+
+  
+  <span class="middot-divider"></span>
+  <span class="article-reading-time">
+    5 min read
+  </span>
+  
+
+  
+  
+
+  
+  
+
+  
+    
+<div class="share-box" aria-hidden="true">
+  <ul class="share">
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://twitter.com/intent/tweet?url=/post/data-table-cross-joining-i/&amp;text=data.table%20-%20Generate%20and%20Fill%20missing%20values." target="_blank" rel="noopener" class="share-btn-twitter">
+          <i class="fab fa-twitter"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.facebook.com/sharer.php?u=/post/data-table-cross-joining-i/&amp;t=data.table%20-%20Generate%20and%20Fill%20missing%20values." target="_blank" rel="noopener" class="share-btn-facebook">
+          <i class="fab fa-facebook-f"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="mailto:?subject=data.table%20-%20Generate%20and%20Fill%20missing%20values.&amp;body=/post/data-table-cross-joining-i/" target="_blank" rel="noopener" class="share-btn-email">
+          <i class="fas fa-envelope"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.linkedin.com/shareArticle?url=/post/data-table-cross-joining-i/&amp;title=data.table%20-%20Generate%20and%20Fill%20missing%20values." target="_blank" rel="noopener" class="share-btn-linkedin">
+          <i class="fab fa-linkedin-in"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://web.whatsapp.com/send?text=data.table%20-%20Generate%20and%20Fill%20missing%20values.%20/post/data-table-cross-joining-i/" target="_blank" rel="noopener" class="share-btn-whatsapp">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://service.weibo.com/share/share.php?url=/post/data-table-cross-joining-i/&amp;title=data.table%20-%20Generate%20and%20Fill%20missing%20values." target="_blank" rel="noopener" class="share-btn-weibo">
+          <i class="fab fa-weibo"></i>
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+
+  
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style" itemprop="articleBody">
+      
+
+
+<p>Hi,</p>
+<p>in this post I illustrate how we can generate <code>NA</code> rows using only <code>data.table</code> function, where you have a <em>date</em> column (or equivalent).<br />
+We begin by loading the package.</p>
+<pre class="r"><code>library(data.table)</code></pre>
+<pre><code>## Warning: Paket &#39;data.table&#39; wurde unter R Version 3.6.1 erstellt</code></pre>
+<div id="problem" class="section level1">
+<h1>Problem</h1>
+<p>Let us assume you have a <code>data.table</code> with three columns <code>date</code>, <code>value</code> and <code>product</code>. Here <code>date</code> is of type <em>IDate</em>, <code>value</code> &amp; <code>product</code> is <em>integer</em>. You can think of it as sales data, where you observe daily sales for a certain product. Thus giving you a time series for every product. We assume that we only get a new entry, when we actually observe a sale. Let us look at a minimal example.</p>
+<pre class="r"><code>(dt &lt;- data.table(date = as.IDate(c(&quot;2019-11-01&quot;,&quot;2019-11-02&quot;, &quot;2019-11-04&quot;, &quot;2019-11-07&quot;)), value = c(3L,4L,1L,8L), product = c(1L,2L,1L,1L)))</code></pre>
+<pre><code>##          date value product
+## 1: 2019-11-01     3       1
+## 2: 2019-11-02     4       2
+## 3: 2019-11-04     1       1
+## 4: 2019-11-07     8       1</code></pre>
+<pre class="r"><code>sapply(dt, typeof)</code></pre>
+<pre><code>##      date     value   product 
+## &quot;integer&quot; &quot;integer&quot; &quot;integer&quot;</code></pre>
+<p>For the <code>date</code> column you get <code>integer</code>, because the <code>IDate</code> class is a integer based date class. Please check <code>?IDate</code> for more information.</p>
+<p>Since we want a row for every possible date within a certain range, we need to insert rows, where we did not observe anything.</p>
+</div>
+<div id="solution" class="section level1">
+<h1>Solution</h1>
+<p>It is obvious that we have not sold anything on certain days. Now, our job is to insert rows where we write <code>NA</code> for <code>value</code> by <code>date</code> and <code>product</code>. There are different approaches for this task, we focus on joining. Since we know the start and the end of the time series, we can generate a sequence.</p>
+<pre class="r"><code>(seq_dates &lt;- seq(as.IDate(&quot;2019-11-01&quot;), as.IDate(&quot;2019-11-07&quot;), by = &quot;days&quot;))</code></pre>
+<pre><code>## [1] &quot;2019-11-01&quot; &quot;2019-11-02&quot; &quot;2019-11-03&quot; &quot;2019-11-04&quot; &quot;2019-11-05&quot;
+## [6] &quot;2019-11-06&quot; &quot;2019-11-07&quot;</code></pre>
+<p>Now we can use the <code>CJ</code> function from <code>data.table</code> to generate a table. We join <code>dt</code> to the return value of <code>CJ</code> based on the columns <code>date</code> and <code>product</code></p>
+<pre class="r"><code>dt[CJ(product = unique(product), date = seq_dates), on = c(&quot;date&quot;, &quot;product&quot;)]</code></pre>
+<pre><code>##           date value product
+##  1: 2019-11-01     3       1
+##  2: 2019-11-02    NA       1
+##  3: 2019-11-03    NA       1
+##  4: 2019-11-04     1       1
+##  5: 2019-11-05    NA       1
+##  6: 2019-11-06    NA       1
+##  7: 2019-11-07     8       1
+##  8: 2019-11-01    NA       2
+##  9: 2019-11-02     4       2
+## 10: 2019-11-03    NA       2
+## 11: 2019-11-04    NA       2
+## 12: 2019-11-05    NA       2
+## 13: 2019-11-06    NA       2
+## 14: 2019-11-07    NA       2</code></pre>
+<p>The <code>CJ</code> function simply generates a table with all possible combinations of <code>date</code> and <code>product</code>.</p>
+<pre class="r"><code>CJ(date = seq_dates,  product = unique(dt$product))</code></pre>
+<pre><code>##           date product
+##  1: 2019-11-01       1
+##  2: 2019-11-01       2
+##  3: 2019-11-02       1
+##  4: 2019-11-02       2
+##  5: 2019-11-03       1
+##  6: 2019-11-03       2
+##  7: 2019-11-04       1
+##  8: 2019-11-04       2
+##  9: 2019-11-05       1
+## 10: 2019-11-05       2
+## 11: 2019-11-06       1
+## 12: 2019-11-06       2
+## 13: 2019-11-07       1
+## 14: 2019-11-07       2</code></pre>
+</div>
+<div id="scalibilty" class="section level1">
+<h1>Scalibilty</h1>
+<p>We check the perfomance of the proposed workflow by generating a <code>data.table</code> with two parameters: <code>n_days</code> &amp; <code>n_products</code>. The code below generates random <code>n_days</code> within the year 2019 by <code>product</code>. The <code>value</code> is simply a random integer. This results in an object with 2.5 million rows and three columns.</p>
+<pre class="r"><code>seq_dates  &lt;- seq(as.IDate(&quot;2019-01-01&quot;), as.IDate(&quot;2019-12-31&quot;), by = &quot;days&quot;)
+n_days     &lt;- 250L
+n_products &lt;- 10000L
+
+dt_large &lt;-data.table(rbindlist(lapply(1:n_products, function(x) {
+  date    &lt;- sample(seq_dates, n_days)
+  product &lt;- rep.int(x, n_days)
+  return(list(date = date, product = product))
+})), value = sample.int(10, n_products*n_days, replace = TRUE))</code></pre>
+<pre class="r"><code>sapply(dt_large, typeof)</code></pre>
+<pre><code>##      date   product     value 
+## &quot;integer&quot; &quot;integer&quot; &quot;integer&quot;</code></pre>
+<p>After generating <code>dt_large</code> using <code>CJ</code> we get <code>dt_large_na</code> with 3.65 million rows (<code>365 days * n_products</code>).</p>
+<pre class="r"><code>system.time(dt_large_na &lt;- dt_large[CJ(product = unique(product), date = seq_dates), on = c(&quot;date&quot;,&quot;product&quot;)])</code></pre>
+<pre><code>##        User      System verstrichen 
+##        1.34        0.04        1.19</code></pre>
+<pre class="r"><code>dt_large_na</code></pre>
+<pre><code>##                date product value
+##       1: 2019-01-01       1    NA
+##       2: 2019-01-02       1    NA
+##       3: 2019-01-03       1    NA
+##       4: 2019-01-04       1    NA
+##       5: 2019-01-05       1    NA
+##      ---                         
+## 3649996: 2019-12-27   10000     2
+## 3649997: 2019-12-28   10000     5
+## 3649998: 2019-12-29   10000     8
+## 3649999: 2019-12-30   10000     7
+## 3650000: 2019-12-31   10000    NA</code></pre>
+<p>Thus we get <code>NA</code> when we did not observe a value for a certain product and date.</p>
+<pre class="r"><code>dt_large_na[product == 1]</code></pre>
+<pre><code>##            date product value
+##   1: 2019-01-01       1    NA
+##   2: 2019-01-02       1    NA
+##   3: 2019-01-03       1    NA
+##   4: 2019-01-04       1    NA
+##   5: 2019-01-05       1    NA
+##  ---                         
+## 361: 2019-12-27       1     1
+## 362: 2019-12-28       1    NA
+## 363: 2019-12-29       1     8
+## 364: 2019-12-30       1     3
+## 365: 2019-12-31       1     1</code></pre>
+<pre class="r"><code>dt_large_na[product == 5]</code></pre>
+<pre><code>##            date product value
+##   1: 2019-01-01       5     9
+##   2: 2019-01-02       5     5
+##   3: 2019-01-03       5    NA
+##   4: 2019-01-04       5     4
+##   5: 2019-01-05       5    NA
+##  ---                         
+## 361: 2019-12-27       5     5
+## 362: 2019-12-28       5     6
+## 363: 2019-12-29       5    10
+## 364: 2019-12-30       5    NA
+## 365: 2019-12-31       5     8</code></pre>
+</div>
+<div id="filling-missing-values" class="section level1">
+<h1>Filling missing values</h1>
+<p>We generated a <code>data.table</code> with missing values by joining. There are a lot of techniques to fill <code>NA</code>. I want to quickly demonstrate how you can use the <code>nafill</code> function included in <code>data.table</code>. I introduce a new column in <code>dt_large_na</code> to demonstrate the functionality.</p>
+<pre class="r"><code>dt_large_na[, filled_value := nafill(value, &quot;locf&quot;), by = &quot;product&quot;]</code></pre>
+<p>This simply fills the <code>NA</code> values on a product level by <em>last observation carried forward (locf)</em>. You might want to use a more sophisticated approach for real data.</p>
+<pre class="r"><code>dt_large_na</code></pre>
+<pre><code>##                date product value filled_value
+##       1: 2019-01-01       1    NA           NA
+##       2: 2019-01-02       1    NA           NA
+##       3: 2019-01-03       1    NA           NA
+##       4: 2019-01-04       1    NA           NA
+##       5: 2019-01-05       1    NA           NA
+##      ---                                      
+## 3649996: 2019-12-27   10000     2            2
+## 3649997: 2019-12-28   10000     5            5
+## 3649998: 2019-12-29   10000     8            8
+## 3649999: 2019-12-30   10000     7            7
+## 3650000: 2019-12-31   10000    NA            7</code></pre>
+<p>Imputing missing values requires a lot more thought for real applications. A good ressource is <a href="https://rmisstastic.netlify.com/how-to/impute/missimp" class="uri">https://rmisstastic.netlify.com/how-to/impute/missimp</a>.</p>
+<p>See you soon,</p>
+<p>Moritz</p>
+</div>
+
+    </div>
+
+    
+
+<div class="article-tags">
+  
+  <a class="badge badge-light" href="/tags/data.table/">data.table</a>
+  
+  <a class="badge badge-light" href="/tags/cross-join/">cross join</a>
+  
+  <a class="badge badge-light" href="/tags/time-series/">time series</a>
+  
+  <a class="badge badge-light" href="/tags/missing-values/">missing values</a>
+  
+</div>
+
+
+
+    
+      
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+  
+
+
+
+
+
+  
+  
+  
+    
+  
+  
+  <div class="media author-card" itemscope itemtype="http://schema.org/Person">
+    
+      
+      <img class="portrait mr-3" src="/authors/admin/avatar_hucacfa7e6a5d02d8a2e7c8f6bdeba0e03_169166_250x250_fill_lanczos_center_2.png" itemprop="image" alt="Avatar">
+    
+
+    <div class="media-body">
+      <h5 class="card-title" itemprop="name"><a href="/">Moritz Mueller-Navarra</a></h5>
+      
+      <p class="card-text" itemprop="description">A Data Scientist using R</p>
+      <ul class="network-icon" aria-hidden="true">
+        
+          
+          
+          
+            
+          
+          
+          
+          
+          
+            
+          
+          <li>
+            <a itemprop="sameAs" href="/#contact" >
+              <i class="fas fa-envelope"></i>
+            </a>
+          </li>
+        
+          
+          
+          
+            
+          
+          
+          
+          
+          
+            
+          
+          <li>
+            <a itemprop="sameAs" href="https://twitter.com/NavarraMoritz" target="_blank" rel="noopener">
+              <i class="fab fa-twitter"></i>
+            </a>
+          </li>
+        
+          
+          
+          
+            
+          
+          
+          
+          
+          
+            
+          
+          <li>
+            <a itemprop="sameAs" href="https://github.com/moritzmn" target="_blank" rel="noopener">
+              <i class="fab fa-github"></i>
+            </a>
+          </li>
+        
+          
+          
+          
+            
+          
+          
+          
+          
+          
+            
+          
+          <li>
+            <a itemprop="sameAs" href="https://stackoverflow.com/users/6244387/mmn" target="_blank" rel="noopener">
+              <i class="fab fa-stack-overflow"></i>
+            </a>
+          </li>
+        
+          
+          
+          
+            
+          
+          
+          
+          
+          
+            
+          
+          <li>
+            <a itemprop="sameAs" href="https://www.linkedin.com/in/moritz-m%C3%BCller-navarra-917285110/" target="_blank" rel="noopener">
+              <i class="fab fa-linkedin-in"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+
+      
+      
+      <div class="article-widget">
+        <div class="hr-light"></div>
+        <h3>Related</h3>
+        <ul>
+          
+          <li><a href="/post/data-table-new-and-old-functions/">data.table - useR!2019 I</a></li>
+          
+        </ul>
+      </div>
+      
+    
+
+    
+
+    
+
+
+  </div>
+</article>
+
+      
+
+    
+    
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" integrity="sha256-X5PoE3KU5l+JcX+w09p/wHl9AzK333C4hJ2I9S5mD4M=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js" integrity="sha256-aYTdUrn6Ow1DDgh5JTc3aDGnnju48y/1c8s1dgkYPQ8=" crossorigin="anonymous"></script>
+        
+      
+
+      
+      
+    
+
+    
+    
+
+    
+    
+    
+
+    
+    
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    
+    
+    <script>
+      const search_index_filename = "/index.json";
+      const i18n = {
+        'placeholder': "Search...",
+        'results': "results found",
+        'no_results': "No results found"
+      };
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks"
+        };
+    </script>
+    
+
+    
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.2e38db8060788d4ad8568291459b9649.js"></script>
+
+    
+
+
+
+
+
+
+  
+  <div class="container">
+    <footer class="site-footer">
+  
+
+  <p class="powered-by">
+    &copy; Moritz Mueller-Navarra &middot; 
+
+    Powered by the
+    <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
+    <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>.
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" id="back_to_top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
+
+  </div>
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

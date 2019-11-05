@@ -109,6 +109,459 @@
     </item>
     
     <item>
+      <title>data.table - Generate and Fill missing values.</title>
+      <link>/post/data-table-cross-joining-i/</link>
+      <pubDate>Mon, 04 Nov 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/post/data-table-cross-joining-i/</guid>
+      <description>
+
+
+&lt;p&gt;Hi,&lt;/p&gt;
+&lt;p&gt;in this post I illustrate how we can generate &lt;code&gt;NA&lt;/code&gt; rows using only &lt;code&gt;data.table&lt;/code&gt; function, where you have a &lt;em&gt;date&lt;/em&gt; column (or equivalent).&lt;br /&gt;
+We begin by loading the package.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(data.table)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Warning: Paket &amp;#39;data.table&amp;#39; wurde unter R Version 3.6.1 erstellt&lt;/code&gt;&lt;/pre&gt;
+&lt;div id=&#34;problem&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Problem&lt;/h1&gt;
+&lt;p&gt;Let us assume you have a &lt;code&gt;data.table&lt;/code&gt; with three columns &lt;code&gt;date&lt;/code&gt;, &lt;code&gt;value&lt;/code&gt; and &lt;code&gt;product&lt;/code&gt;. Here &lt;code&gt;date&lt;/code&gt; is of type &lt;em&gt;IDate&lt;/em&gt;, &lt;code&gt;value&lt;/code&gt; &amp;amp; &lt;code&gt;product&lt;/code&gt; is &lt;em&gt;integer&lt;/em&gt;. You can think of it as sales data, where you observe daily sales for a certain product. Thus giving you a time series for every product. We assume that we only get a new entry, when we actually observe a sale. Let us look at a minimal example.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;(dt &amp;lt;- data.table(date = as.IDate(c(&amp;quot;2019-11-01&amp;quot;,&amp;quot;2019-11-02&amp;quot;, &amp;quot;2019-11-04&amp;quot;, &amp;quot;2019-11-07&amp;quot;)), value = c(3L,4L,1L,8L), product = c(1L,2L,1L,1L)))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##          date value product
+## 1: 2019-11-01     3       1
+## 2: 2019-11-02     4       2
+## 3: 2019-11-04     1       1
+## 4: 2019-11-07     8       1&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;sapply(dt, typeof)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##      date     value   product 
+## &amp;quot;integer&amp;quot; &amp;quot;integer&amp;quot; &amp;quot;integer&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;For the &lt;code&gt;date&lt;/code&gt; column you get &lt;code&gt;integer&lt;/code&gt;, because the &lt;code&gt;IDate&lt;/code&gt; class is a integer based date class. Please check &lt;code&gt;?IDate&lt;/code&gt; for more information.&lt;/p&gt;
+&lt;p&gt;Since we want a row for every possible date within a certain range, we need to insert rows, where we did not observe anything.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;solution&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Solution&lt;/h1&gt;
+&lt;p&gt;It is obvious that we have not sold anything on certain days. Now, our job is to insert rows where we write &lt;code&gt;NA&lt;/code&gt; for &lt;code&gt;value&lt;/code&gt; by &lt;code&gt;date&lt;/code&gt; and &lt;code&gt;product&lt;/code&gt;. There are different approaches for this task, we focus on joining. Since we know the start and the end of the time series, we can generate a sequence.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;(seq_dates &amp;lt;- seq(as.IDate(&amp;quot;2019-11-01&amp;quot;), as.IDate(&amp;quot;2019-11-07&amp;quot;), by = &amp;quot;days&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;quot;2019-11-01&amp;quot; &amp;quot;2019-11-02&amp;quot; &amp;quot;2019-11-03&amp;quot; &amp;quot;2019-11-04&amp;quot; &amp;quot;2019-11-05&amp;quot;
+## [6] &amp;quot;2019-11-06&amp;quot; &amp;quot;2019-11-07&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now we can use the &lt;code&gt;CJ&lt;/code&gt; function from &lt;code&gt;data.table&lt;/code&gt; to generate a table. We join &lt;code&gt;dt&lt;/code&gt; to the return value of &lt;code&gt;CJ&lt;/code&gt; based on the columns &lt;code&gt;date&lt;/code&gt; and &lt;code&gt;product&lt;/code&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dt[CJ(product = unique(product), date = seq_dates), on = c(&amp;quot;date&amp;quot;, &amp;quot;product&amp;quot;)]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##           date value product
+##  1: 2019-11-01     3       1
+##  2: 2019-11-02    NA       1
+##  3: 2019-11-03    NA       1
+##  4: 2019-11-04     1       1
+##  5: 2019-11-05    NA       1
+##  6: 2019-11-06    NA       1
+##  7: 2019-11-07     8       1
+##  8: 2019-11-01    NA       2
+##  9: 2019-11-02     4       2
+## 10: 2019-11-03    NA       2
+## 11: 2019-11-04    NA       2
+## 12: 2019-11-05    NA       2
+## 13: 2019-11-06    NA       2
+## 14: 2019-11-07    NA       2&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The &lt;code&gt;CJ&lt;/code&gt; function simply generates a table with all possible combinations of &lt;code&gt;date&lt;/code&gt; and &lt;code&gt;product&lt;/code&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;CJ(date = seq_dates,  product = unique(dt$product))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##           date product
+##  1: 2019-11-01       1
+##  2: 2019-11-01       2
+##  3: 2019-11-02       1
+##  4: 2019-11-02       2
+##  5: 2019-11-03       1
+##  6: 2019-11-03       2
+##  7: 2019-11-04       1
+##  8: 2019-11-04       2
+##  9: 2019-11-05       1
+## 10: 2019-11-05       2
+## 11: 2019-11-06       1
+## 12: 2019-11-06       2
+## 13: 2019-11-07       1
+## 14: 2019-11-07       2&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;scalibilty&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Scalibilty&lt;/h1&gt;
+&lt;p&gt;We check the perfomance of the proposed workflow by generating a &lt;code&gt;data.table&lt;/code&gt; with two parameters: &lt;code&gt;n_days&lt;/code&gt; &amp;amp; &lt;code&gt;n_products&lt;/code&gt;. The code below generates random &lt;code&gt;n_days&lt;/code&gt; within the year 2019 by &lt;code&gt;product&lt;/code&gt;. The &lt;code&gt;value&lt;/code&gt; is simply a random integer. This results in an object with 2.5 million rows and three columns.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;seq_dates  &amp;lt;- seq(as.IDate(&amp;quot;2019-01-01&amp;quot;), as.IDate(&amp;quot;2019-12-31&amp;quot;), by = &amp;quot;days&amp;quot;)
+n_days     &amp;lt;- 250L
+n_products &amp;lt;- 10000L
+
+dt_large &amp;lt;-data.table(rbindlist(lapply(1:n_products, function(x) {
+  date    &amp;lt;- sample(seq_dates, n_days)
+  product &amp;lt;- rep.int(x, n_days)
+  return(list(date = date, product = product))
+})), value = sample.int(10, n_products*n_days, replace = TRUE))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;sapply(dt_large, typeof)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##      date   product     value 
+## &amp;quot;integer&amp;quot; &amp;quot;integer&amp;quot; &amp;quot;integer&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;After generating &lt;code&gt;dt_large&lt;/code&gt; using &lt;code&gt;CJ&lt;/code&gt; we get &lt;code&gt;dt_large_na&lt;/code&gt; with 3.65 million rows (&lt;code&gt;365 days * n_products&lt;/code&gt;).&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;system.time(dt_large_na &amp;lt;- dt_large[CJ(product = unique(product), date = seq_dates), on = c(&amp;quot;date&amp;quot;,&amp;quot;product&amp;quot;)])&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##        User      System verstrichen 
+##        1.34        0.04        1.19&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dt_large_na&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##                date product value
+##       1: 2019-01-01       1    NA
+##       2: 2019-01-02       1    NA
+##       3: 2019-01-03       1    NA
+##       4: 2019-01-04       1    NA
+##       5: 2019-01-05       1    NA
+##      ---                         
+## 3649996: 2019-12-27   10000     2
+## 3649997: 2019-12-28   10000     5
+## 3649998: 2019-12-29   10000     8
+## 3649999: 2019-12-30   10000     7
+## 3650000: 2019-12-31   10000    NA&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Thus we get &lt;code&gt;NA&lt;/code&gt; when we did not observe a value for a certain product and date.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dt_large_na[product == 1]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##            date product value
+##   1: 2019-01-01       1    NA
+##   2: 2019-01-02       1    NA
+##   3: 2019-01-03       1    NA
+##   4: 2019-01-04       1    NA
+##   5: 2019-01-05       1    NA
+##  ---                         
+## 361: 2019-12-27       1     1
+## 362: 2019-12-28       1    NA
+## 363: 2019-12-29       1     8
+## 364: 2019-12-30       1     3
+## 365: 2019-12-31       1     1&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dt_large_na[product == 5]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##            date product value
+##   1: 2019-01-01       5     9
+##   2: 2019-01-02       5     5
+##   3: 2019-01-03       5    NA
+##   4: 2019-01-04       5     4
+##   5: 2019-01-05       5    NA
+##  ---                         
+## 361: 2019-12-27       5     5
+## 362: 2019-12-28       5     6
+## 363: 2019-12-29       5    10
+## 364: 2019-12-30       5    NA
+## 365: 2019-12-31       5     8&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;filling-missing-values&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Filling missing values&lt;/h1&gt;
+&lt;p&gt;We generated a &lt;code&gt;data.table&lt;/code&gt; with missing values by joining. There are a lot of techniques to fill &lt;code&gt;NA&lt;/code&gt;. I want to quickly demonstrate how you can use the &lt;code&gt;nafill&lt;/code&gt; function included in &lt;code&gt;data.table&lt;/code&gt;. I introduce a new column in &lt;code&gt;dt_large_na&lt;/code&gt; to demonstrate the functionality.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dt_large_na[, filled_value := nafill(value, &amp;quot;locf&amp;quot;), by = &amp;quot;product&amp;quot;]&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This simply fills the &lt;code&gt;NA&lt;/code&gt; values on a product level by &lt;em&gt;last observation carried forward (locf)&lt;/em&gt;. You might want to use a more sophisticated approach for real data.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dt_large_na&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##                date product value filled_value
+##       1: 2019-01-01       1    NA           NA
+##       2: 2019-01-02       1    NA           NA
+##       3: 2019-01-03       1    NA           NA
+##       4: 2019-01-04       1    NA           NA
+##       5: 2019-01-05       1    NA           NA
+##      ---                                      
+## 3649996: 2019-12-27   10000     2            2
+## 3649997: 2019-12-28   10000     5            5
+## 3649998: 2019-12-29   10000     8            8
+## 3649999: 2019-12-30   10000     7            7
+## 3650000: 2019-12-31   10000    NA            7&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Imputing missing values requires a lot more thought for real applications. A good ressource is &lt;a href=&#34;https://rmisstastic.netlify.com/how-to/impute/missimp&#34; class=&#34;uri&#34;&gt;https://rmisstastic.netlify.com/how-to/impute/missimp&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;See you soon,&lt;/p&gt;
+&lt;p&gt;Moritz&lt;/p&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>TideCurves - new version on CRAN</title>
+      <link>/post/tidecurves-new-version-on-cran/</link>
+      <pubDate>Tue, 29 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/post/tidecurves-new-version-on-cran/</guid>
+      <description>
+
+
+&lt;p&gt;Hi,&lt;/p&gt;
+&lt;p&gt;I just submitted the new version of &lt;em&gt;TideCurves&lt;/em&gt; to &lt;em&gt;CRAN&lt;/em&gt;. You should be able to download version 0.0.4 in the following days.
+In the previous version 0.0.3 we used a set of 43 partial tides. This set has now been updated by Andreas Boesch and Sylvin Mueller-Navarra. In version 0.0.4 we use a new set of 39 partial tides. Please look out for the new version on &lt;em&gt;CRAN&lt;/em&gt;. &lt;a href=&#34;https://cran.r-project.org/web/packages/TideCurves/index.html&#34; class=&#34;uri&#34;&gt;https://cran.r-project.org/web/packages/TideCurves/index.html&lt;/a&gt; and a new post explaining the usage of this package. The &lt;em&gt;TideTables&lt;/em&gt; package, currently in version 0.0.2, will also be updatet in the next week(s).&lt;/p&gt;
+&lt;p&gt;See you soon!
+Moritz&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>data.table - useR!2019 I</title>
+      <link>/post/data-table-new-and-old-functions/</link>
+      <pubDate>Sun, 14 Jul 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/post/data-table-new-and-old-functions/</guid>
+      <description>
+
+
+&lt;p&gt;This is the first post looking at the &lt;strong&gt;data.table&lt;/strong&gt; presentations from &lt;strong&gt;useR!2019&lt;/strong&gt; which was held in Toulouse from 2019-07-07 to 2019-10-10. For starters we are going to take a look at the presentations from &lt;em&gt;Arun Srinivasan&lt;/em&gt;, one of the main developers of &lt;strong&gt;data.table&lt;/strong&gt;. His talk is called &lt;strong&gt;THE #RDATATABLEPACKAGE
+for fast, flexible and memory efficient data wrangling&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;Talk Agenda:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;General data.table syntax&lt;/li&gt;
+&lt;li&gt;Explaining .SD &amp;amp; .SDcols&lt;/li&gt;
+&lt;li&gt;Optimisation &amp;amp; new functionalities&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div id=&#34;general-data.table-syntax&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;General data.table syntax&lt;/h2&gt;
+&lt;p&gt;Following code chunk installs the development version of the package, which is needed for some functions explained below.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;install.packages(&amp;quot;data.table&amp;quot;, repos=&amp;quot;https://Rdatatable.gitlab.io/data.table&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We start of with a simple expample.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(&amp;quot;data.table&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Warning: Paket &amp;#39;data.table&amp;#39; wurde unter R Version 3.6.1 erstellt&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We define a data.table DT using the &lt;code&gt;fread&lt;/code&gt; function.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;(DT &amp;lt;- fread(&amp;quot;id code valA valB
+1 c 1 10
+1 b 2 11
+1 c 3 12
+1 c 4 13
+2 a 5 14
+2 a 6 15
+1 b 7 16
+2 a 8 17
+1 c 9 18&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##    id code valA valB
+## 1:  1    c    1   10
+## 2:  1    b    2   11
+## 3:  1    c    3   12
+## 4:  1    c    4   13
+## 5:  2    a    5   14
+## 6:  2    a    6   15
+## 7:  1    b    7   16
+## 8:  2    a    8   17
+## 9:  1    c    9   18&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The general data.table syntax is &lt;code&gt;DT[i, j, by]&lt;/code&gt;, which you can translate into: &lt;em&gt;i = on which rows, j = what to do (columns), grouped by what&lt;/em&gt;. So when we want to get the sum of &lt;code&gt;valA&lt;/code&gt;, we can simply do.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;DT[, sum(valA)]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] 45&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We have not defined a &lt;code&gt;i&lt;/code&gt; nor &lt;code&gt;by&lt;/code&gt; argument here. This simply means we want to compute for all rows and grouping is not relevant. Now we group by &lt;code&gt;id&lt;/code&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;DT[, sum(valA), by = id]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##    id V1
+## 1:  1 26
+## 2:  2 19&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We can also name the outcome of the column directly. The &lt;code&gt;.()&lt;/code&gt; is an alias for &lt;code&gt;list&lt;/code&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;DT[, .(sumA = sum(valA)), by = id]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##    id sumA
+## 1:  1   26
+## 2:  2   19&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;When you pass a column to the &lt;code&gt;by&lt;/code&gt; argument, internally the number of the unique values for that column gets evaluated. Afterwards the rows are associated to the respective group. Then the expression provided in &lt;code&gt;j&lt;/code&gt;, &lt;code&gt;sum(valA)&lt;/code&gt; gets evaluated for the groups.&lt;/p&gt;
+&lt;p&gt;This is a very simple example, but illustrates the general form quite nicely. &lt;em&gt;Arun&lt;/em&gt; introduces another simple example by passing an expression to the &lt;code&gt;i&lt;/code&gt; argument.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;DT[code != &amp;quot;b&amp;quot;, .(sumA = sum(valA)), by = id]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##    id sumA
+## 1:  1   17
+## 2:  2   19&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here we simply state that &lt;code&gt;code&lt;/code&gt; should be not equal to “b”. Very easy and logical syntax.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;explaining-.sd-.sdcols&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Explaining .SD &amp;amp; .SDcols&lt;/h2&gt;
+&lt;p&gt;We are still operating on DT.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;DT&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##    id code valA valB
+## 1:  1    c    1   10
+## 2:  1    b    2   11
+## 3:  1    c    3   12
+## 4:  1    c    4   13
+## 5:  2    a    5   14
+## 6:  2    a    6   15
+## 7:  1    b    7   16
+## 8:  2    a    8   17
+## 9:  1    c    9   18&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;code&gt;.SD&lt;/code&gt; stands for &lt;em&gt;Subset of Data&lt;/em&gt;. Together with &lt;code&gt;.SDcols&lt;/code&gt; we can use it to simply subset &lt;code&gt;DT&lt;/code&gt; by column names and then compute on this subset.&lt;/p&gt;
+&lt;p&gt;You could do this:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;DT[, .SD, .SDcols = &amp;quot;valA&amp;quot;]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##    valA
+## 1:    1
+## 2:    2
+## 3:    3
+## 4:    4
+## 5:    5
+## 6:    6
+## 7:    7
+## 8:    8
+## 9:    9&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This returns a &lt;code&gt;data.table&lt;/code&gt; object with one column &lt;code&gt;valA&lt;/code&gt;. You can of course pass more columns.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;DT[, .SD, .SDcols = c(&amp;quot;valA&amp;quot;, &amp;quot;valB&amp;quot;)]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##    valA valB
+## 1:    1   10
+## 2:    2   11
+## 3:    3   12
+## 4:    4   13
+## 5:    5   14
+## 6:    6   15
+## 7:    7   16
+## 8:    8   17
+## 9:    9   18&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;You can also use the &lt;code&gt;patterns&lt;/code&gt; function in &lt;code&gt;.SDcols&lt;/code&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;DT[, .SD, .SDcols = patterns(&amp;quot;^val&amp;quot;)]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##    valA valB
+## 1:    1   10
+## 2:    2   11
+## 3:    3   12
+## 4:    4   13
+## 5:    5   14
+## 6:    6   15
+## 7:    7   16
+## 8:    8   17
+## 9:    9   18&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;How can we use this functionality to compute the sum of &lt;code&gt;valA&lt;/code&gt; and &lt;code&gt;valB&lt;/code&gt; grouped by &lt;code&gt;id&lt;/code&gt; where &lt;code&gt;code != &#34;b&lt;/code&gt; ?
+Easy :-)&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;DT[code != &amp;quot;b&amp;quot;, lapply(.SD, sum), .SDcols = patterns(&amp;quot;^val&amp;quot;), by = &amp;quot;id&amp;quot;]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##    id valA valB
+## 1:  1   17   53
+## 2:  2   19   46&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The &lt;code&gt;patterns&lt;/code&gt; function only returns columns starting with &lt;em&gt;val&lt;/em&gt;.
+&lt;code&gt;.SD&lt;/code&gt; contains all the columns, except for the grouping columns supplied in &lt;code&gt;by&lt;/code&gt;, for each group.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;DT[code != &amp;quot;b&amp;quot;, print(.SD), .SDcols = c(&amp;quot;code&amp;quot;,&amp;quot;valA&amp;quot;, &amp;quot;valB&amp;quot;), by = id]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##    code valA valB
+## 1:    c    1   10
+## 2:    c    3   12
+## 3:    c    4   13
+## 4:    c    9   18
+##    code valA valB
+## 1:    a    5   14
+## 2:    a    6   15
+## 3:    a    8   17&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Empty data.table (0 rows and 1 cols): id&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Once you grouped by &lt;code&gt;id&lt;/code&gt; only the columns &lt;code&gt;valA&lt;/code&gt; and &lt;code&gt;valB&lt;/code&gt; are being considered due to &lt;code&gt;.SDcols&lt;/code&gt;. We therefore compute the sums on these columns and not on &lt;code&gt;code&lt;/code&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;DT[code != &amp;quot;b&amp;quot;, print(.SD), .SDcols = c(&amp;quot;valA&amp;quot;, &amp;quot;valB&amp;quot;), by = id]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##    valA valB
+## 1:    1   10
+## 2:    3   12
+## 3:    4   13
+## 4:    9   18
+##    valA valB
+## 1:    5   14
+## 2:    6   15
+## 3:    8   17&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Empty data.table (0 rows and 1 cols): id&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;So how does this &lt;code&gt;lapply(.SD, sum)&lt;/code&gt; work? &lt;code&gt;lapply&lt;/code&gt; is the infamous base function which returns a list. We operate on &lt;code&gt;.SD&lt;/code&gt; and compute the sum of every column in &lt;code&gt;.SD&lt;/code&gt;. We take a step back and look at the &lt;code&gt;class&lt;/code&gt; and &lt;code&gt;typeof&lt;/code&gt; of &lt;code&gt;DT&lt;/code&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;class(DT)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;quot;data.table&amp;quot; &amp;quot;data.frame&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;typeof(DT)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;quot;list&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;typeof(DT[,.SD])&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;quot;list&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;You find more information about &lt;code&gt;.SD&lt;/code&gt; in this &lt;em&gt;stackoverflow&lt;/em&gt; post:&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://stackoverflow.com/questions/8508482/what-does-sd-stand-for-in-data-table-in-r&#34; class=&#34;uri&#34;&gt;https://stackoverflow.com/questions/8508482/what-does-sd-stand-for-in-data-table-in-r&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;You can also check &lt;code&gt;vignette(&#34;datatable-sd-usage&#34;)&lt;/code&gt; in the development version.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;optimisation-new-functionalities&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Optimisation &amp;amp; new functionalities&lt;/h2&gt;
+&lt;p&gt;Arun presents optimisation principles for operations in &lt;code&gt;i&lt;/code&gt;, &lt;code&gt;j&lt;/code&gt; &amp;amp; &lt;code&gt;by&lt;/code&gt;.&lt;/p&gt;
+&lt;div id=&#34;optimisation-in-i&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Optimisation in “i”&lt;/h3&gt;
+&lt;p&gt;We create a &lt;code&gt;data.table&lt;/code&gt; which has 200 million rows and two columns &lt;code&gt;x&lt;/code&gt; and &lt;code&gt;y&lt;/code&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dt &amp;lt;- data.table(x = sample(1e5, 2e8, TRUE), y = runif(2e8)) &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now we only return rows where the value of &lt;code&gt;x&lt;/code&gt; is in &lt;code&gt;1000:2000&lt;/code&gt;, we operate in &lt;code&gt;i&lt;/code&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;system.time(dt[x %in% 1000:2000])
+system.time(dt[x %in% 1000:2000])&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This takes a while (~17s on my laptop), but running the expression a second time results in a substantial speed up (~4s total). Please note that this not a proper benchmark. The second time we call this the expression, it reuses the index created in the first run. This currently works for &lt;code&gt;==&lt;/code&gt; and &lt;code&gt;%in%&lt;/code&gt; and is called &lt;em&gt;Auto indexing&lt;/em&gt;. The index is stored within the &lt;code&gt;data.table&lt;/code&gt; as an attribute.&lt;/p&gt;
+&lt;p&gt;Now we create a &lt;code&gt;data.table&lt;/code&gt; with 20 columns and 50 million rows to demonstrate that expressions in &lt;code&gt;i&lt;/code&gt; can run in parallel.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dt &amp;lt;- setDT(lapply(1:20, function(x) sample(100, 5e7, TRUE))) &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We operate in &lt;code&gt;i&lt;/code&gt; to return the rows, where &lt;code&gt;V1 &amp;gt; 50L&lt;/code&gt;. The column is processed in parallel.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;system.time(dt[V1 &amp;gt; 50L])&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;You can set the threads &lt;code&gt;data.table&lt;/code&gt; uses with and check the differences.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;setDTthreads(threads = 1L)
+system.time(dt[V1 &amp;gt; 50L])
+setDTTthreads(threads = 2L)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;optimisation-in-by&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Optimisation in “by”&lt;/h3&gt;
+&lt;p&gt;Recently the radix order has been parallelised. We define a new data set (200 million rows, 2 cols, ~3GB).&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dt &amp;lt;- data.table(x=sample(1e5, 2e8, TRUE), y=runif(2e8))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now we run this expression, which returns the occurences grouped by &lt;code&gt;x&lt;/code&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dt[, .N, by = x]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;optimisation-in-j&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Optimisation in “j”&lt;/h3&gt;
+&lt;p&gt;In &lt;code&gt;j&lt;/code&gt; certain functions are optimized. Arun mentions &lt;code&gt;mean&lt;/code&gt;, &lt;code&gt;median&lt;/code&gt;, &lt;code&gt;sum&lt;/code&gt;, &lt;code&gt;min&lt;/code&gt;, &lt;code&gt;max&lt;/code&gt;, &lt;code&gt;head&lt;/code&gt;, &lt;code&gt;tail&lt;/code&gt;.
+We can see a difference, when comparing &lt;code&gt;base::mean&lt;/code&gt; with just calling &lt;code&gt;mean&lt;/code&gt; in &lt;code&gt;j&lt;/code&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dt[, lapply(.SD, base::mean), by=V1]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dt[, lapply(.SD, mean), by=V1]&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Internally this expression uses the function &lt;code&gt;mean&lt;/code&gt; implemented by &lt;code&gt;data.table&lt;/code&gt; in &lt;em&gt;C&lt;/em&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;new-functionalities&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;New functionalities&lt;/h2&gt;
+&lt;p&gt;The first function we are going to look at is &lt;code&gt;nafill&lt;/code&gt;. This function allows us to fill &lt;code&gt;NA&lt;/code&gt; values in a &lt;code&gt;data.table&lt;/code&gt; by a specific method, like &lt;em&gt;last observation carried forward (locf)&lt;/em&gt;. See &lt;code&gt;?data.table::nafill&lt;/code&gt; for more information.&lt;/p&gt;
+&lt;div id=&#34;nafill&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;nafill&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;nafill&lt;/code&gt; is a function that fills missing values in a &lt;code&gt;data.table&lt;/code&gt;. We define &lt;code&gt;DT&lt;/code&gt; as follows.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;(DT &amp;lt;- fread(&amp;quot;V1 V2 V3 V4
+1 c NA 10
+2 b 2 NA
+NA c 3 NA
+1 NA 4 NA
+2 NA 5 14&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##    V1   V2 V3 V4
+## 1:  1    c NA 10
+## 2:  2    b  2 NA
+## 3: NA    c  3 NA
+## 4:  1 &amp;lt;NA&amp;gt;  4 NA
+## 5:  2 &amp;lt;NA&amp;gt;  5 14&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now let us try to apply &lt;code&gt;nafill&lt;/code&gt; to this object. The function takes in three important arguments:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;nafill(x, type=c(&amp;quot;const&amp;quot;,&amp;quot;locf&amp;quot;,&amp;quot;nocb&amp;quot;), fill=NA,
+       verbose=getOption(&amp;quot;datatable.verbose&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;code&gt;x&lt;/code&gt; can be a vector, list, data.frame or data.table. The &lt;code&gt;type&lt;/code&gt; defines how the missing values should be filled.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;locf&lt;/code&gt; -&amp;gt; last observation carried forward&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;nocb&lt;/code&gt; -&amp;gt; next observation carried backwards&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;const&lt;/code&gt; -&amp;gt; a constant&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#(DT &amp;lt;- nafill(DT, &amp;quot;locf&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Above code will throw an error indicating that we can only fill columns with type &lt;code&gt;numeric&lt;/code&gt; (double &amp;amp; integer). Here the &lt;code&gt;setnafill&lt;/code&gt; functions comes in handy:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#getting numeric cols
+
+numeric_cols &amp;lt;- names(DT)[DT[, sapply(.SD, is.numeric)]]
+
+setnafill(DT, &amp;quot;locf&amp;quot;, cols = numeric_cols)
+DT[]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##    V1   V2 V3 V4
+## 1:  1    c NA 10
+## 2:  2    b  2 10
+## 3:  2    c  3 10
+## 4:  1 &amp;lt;NA&amp;gt;  4 10
+## 5:  2 &amp;lt;NA&amp;gt;  5 14&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This updates &lt;code&gt;DT&lt;/code&gt; by reference.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;frollmean-frollsum&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;frollmean &amp;amp; frollsum&lt;/h3&gt;
+&lt;p&gt;Now we are going to explore the &lt;code&gt;frollmean&lt;/code&gt; and &lt;code&gt;frollsum&lt;/code&gt; functions. These functions allow us to compute rolling means and rolling sums.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;DT[, lapply(.SD, frollmean, 3), .SDcols = numeric_cols]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##          V1 V3       V4
+## 1:       NA NA       NA
+## 2:       NA NA       NA
+## 3: 1.666667 NA 10.00000
+## 4: 1.666667  3 10.00000
+## 5: 1.666667  4 11.33333&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#see also ?frollsum&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;DT[, lapply(.SD, frollsum, 3), .SDcols = numeric_cols]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##    V1 V3 V4
+## 1: NA NA NA
+## 2: NA NA NA
+## 3:  5 NA 30
+## 4:  5  9 30
+## 5:  5 12 34&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;coalesce&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;coalesce&lt;/h3&gt;
+&lt;p&gt;The &lt;code&gt;fcoalesce&lt;/code&gt; function fills missing values in a vector by trying to pull values from one or more candidate vectors.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;x &amp;lt;- c(11L, NA, 13L, NA, 15L, NA)
+y &amp;lt;- c(NA, 12L, 5L, NA, NA, NA)
+z &amp;lt;- c(11L, NA, 1L, 14L, NA, NA)
+
+fcoalesce(x, y, z)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] 11 12 13 14 15 NA&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Given above syntax &lt;code&gt;fcoalesce&lt;/code&gt; tries to fill missing values in &lt;code&gt;x&lt;/code&gt; by looking at the corresponding elements of &lt;code&gt;y&lt;/code&gt; &amp;amp; &lt;code&gt;z&lt;/code&gt;. At the second index we find a missing value in &lt;code&gt;x&lt;/code&gt;, whereas &lt;code&gt;y = 12L ; z = NA&lt;/code&gt;. At the fourth index we find &lt;code&gt;y = NA ; z = 14L&lt;/code&gt;. So the new vector becomes &lt;code&gt;11 12 13 14 15 NA&lt;/code&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;helpful-links&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Helpful links&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;The talk: &lt;a href=&#34;https://www.youtube.com/watch?v=tWx1ooBSxFc&#34; class=&#34;uri&#34;&gt;https://www.youtube.com/watch?v=tWx1ooBSxFc&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Slides: &lt;a href=&#34;http://www.user2019.fr/static/pres/t258038.pdf&#34; class=&#34;uri&#34;&gt;http://www.user2019.fr/static/pres/t258038.pdf&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;github: &lt;a href=&#34;https://github.com/Rdatatable&#34; class=&#34;uri&#34;&gt;https://github.com/Rdatatable&lt;/a&gt;, &lt;a href=&#34;https://github.com/Rdatatable/data.table/wiki&#34; class=&#34;uri&#34;&gt;https://github.com/Rdatatable/data.table/wiki&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;See you soon!&lt;/p&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
       <title>Offcast</title>
       <link>/project/offcast-project/</link>
       <pubDate>Sun, 07 Jul 2019 00:00:00 +0000</pubDate>
@@ -168,9 +621,9 @@ but I am going to add english subtitles as soon as I figured out how to correctl
 &lt;p&gt;As for as I know &lt;strong&gt;data.table&lt;/strong&gt; has been unrecognized (correct me if I am wrong) by most of the instructors of &lt;strong&gt;udemy&lt;/strong&gt; who are teaching &lt;strong&gt;R&lt;/strong&gt;, despite being one of the best package for R! I cover the basics of the package. If you need an intro to &lt;strong&gt;data.table&lt;/strong&gt;, consider taking my course :-).&lt;/p&gt;
 &lt;p&gt;Most of the code you will encounter on this blog will start with&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(data.table)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Anyway, you finde my course under this link: &lt;a href=&#34;https://www.udemy.com/r-basics-u/&#34; class=&#34;uri&#34;&gt;https://www.udemy.com/r-basics-u/&lt;/a&gt;, it is called&lt;br /&gt;
-&lt;strong&gt;R Basics - Programmierung und Datenanalyse&lt;/strong&gt;. Using this link you get the course for 9.99$
-&lt;a href=&#34;https://www.udemy.com/r-basics-u/?couponCode=WELCOME_R_KURS&#34; class=&#34;uri&#34;&gt;https://www.udemy.com/r-basics-u/?couponCode=WELCOME_R_KURS&lt;/a&gt;, limited to the first 50 subscribers!&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;## Warning: Paket &amp;#39;data.table&amp;#39; wurde unter R Version 3.6.1 erstellt&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Anyway, you finde my course under this link: &lt;a href=&#34;https://www.udemy.com/course/r-basics-u/?referralCode=294114E77907E6E07B63&#34; class=&#34;uri&#34;&gt;https://www.udemy.com/course/r-basics-u/?referralCode=294114E77907E6E07B63&lt;/a&gt;, it is called&lt;br /&gt;
+&lt;strong&gt;R Basics - Programmierung und Datenanalyse&lt;/strong&gt;.&lt;/p&gt;
 &lt;p&gt;See you soon!&lt;br /&gt;
 Moritz&lt;/p&gt;
 </description>
@@ -187,8 +640,8 @@ Moritz&lt;/p&gt;
 
 &lt;div id=&#34;amazon-transcribe-r&#34; class=&#34;section level1&#34;&gt;
 &lt;h1&gt;Amazon Transcribe &amp;amp; R&lt;/h1&gt;
-&lt;p&gt;Hi, in this post, I will show you some ideas on how to generate subtitles with a time stamp using &lt;strong&gt;R&lt;/strong&gt; and &lt;strong&gt;Amazon Transcribe&lt;/strong&gt;. At first you need a &lt;em&gt;mp3&lt;/em&gt; file, or like in my case, 139. If you want to use this code, you need to set up an &lt;strong&gt;aws&lt;/strong&gt; (Amazon Web Services) account, which might cost you money, depending on how much you use the services. There is a free tier available on aws, but be careful when using this code! You need and &lt;em&gt;iam role&lt;/em&gt; that has access to an &lt;strong&gt;s3&lt;/strong&gt; folder and is allowed to use &lt;strong&gt;Amazon Transcribe&lt;/strong&gt;.&lt;/p&gt;
-&lt;p&gt;In my case I actually have &lt;em&gt;mp4&lt;/em&gt; video files. I generated the &lt;em&gt;mp3&lt;/em&gt; files with the beautiful &lt;strong&gt;ffmpeg&lt;/strong&gt;. We are not going to cover that in this post, rather showing you the &lt;strong&gt;R&lt;/strong&gt; code for communicating with &lt;strong&gt;Amazon S3&lt;/strong&gt; and &lt;strong&gt;Amazon Transcribe&lt;/strong&gt;. Your end goal is to create a &lt;em&gt;VTT&lt;/em&gt; file, which looks like this:&lt;/p&gt;
+&lt;p&gt;Hi, in this post, I will show you some ideas on how to generate subtitles with a time stamp using &lt;strong&gt;R&lt;/strong&gt; and &lt;strong&gt;Amazon Transcribe&lt;/strong&gt;. At first you need at least one &lt;em&gt;mp3&lt;/em&gt; file, or like in my case, 139 files. If you want to use this code, you need to set up an &lt;strong&gt;aws&lt;/strong&gt; (Amazon Web Services) account, which might cost you money, depending on how much you use the services. There is a free tier available on aws, but be careful when using this code! You need and &lt;em&gt;iam role&lt;/em&gt; that has access to an &lt;strong&gt;s3&lt;/strong&gt; folder and is allowed to use &lt;strong&gt;Amazon Transcribe&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;In my case I actually have &lt;em&gt;mp4&lt;/em&gt; video files. I generated the &lt;em&gt;mp3&lt;/em&gt; files with the beautiful &lt;strong&gt;ffmpeg&lt;/strong&gt;. We are not going to cover that in this post, rather showing you the &lt;code&gt;R&lt;/code&gt; code for communicating with &lt;strong&gt;Amazon S3&lt;/strong&gt; and &lt;strong&gt;Amazon Transcribe&lt;/strong&gt;. Your end goal is to create a &lt;em&gt;VTT&lt;/em&gt; file, which looks like this:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;1
 00:00:01,000 --&amp;gt; 00:00:06,000
 Willkommen zur ersten Lektion Einf?hrungen er Vektoren und Tim Wir
@@ -204,8 +657,7 @@ kleines Skript vorbereitet, indem wir der variable A den Wert
 4
 00:00:17,000 --&amp;gt; 00:00:22,000
 eins zuordnen im zweiten Schritt die variable A um den&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;If you understand german, you will notice that there are a few errors. It is not too bad though.&lt;br /&gt;
-Now let us jump into the code!&lt;/p&gt;
+&lt;p&gt;If you understand german, you will notice that there are a few errors. It is not too bad though. Now let us jump into the code!&lt;/p&gt;
 &lt;div id=&#34;load-packages&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Load packages&lt;/h2&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(data.table)
@@ -263,7 +715,7 @@ We need the &lt;code&gt;start_transcription&lt;/code&gt; function&lt;/p&gt;
 ##     transcribeHTTP(action = &amp;quot;StartTranscriptionJob&amp;quot;, body = bod, 
 ##         ...)
 ## }
-## &amp;lt;bytecode: 0x0000000015b96340&amp;gt;
+## &amp;lt;bytecode: 0x00000000154107d8&amp;gt;
 ## &amp;lt;environment: namespace:aws.transcribe&amp;gt;&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;The main takeaway here is that we define a list &lt;code&gt;bod&lt;/code&gt; and then call the &lt;code&gt;transcribeHTTP&lt;/code&gt; function. We can check the &lt;strong&gt;Amazon Transcribe&lt;/strong&gt; documentation to understand, how we should define a request body which is called &lt;code&gt;bod&lt;/code&gt; in this function.&lt;/p&gt;
 &lt;p&gt;&lt;a href=&#34;https://docs.aws.amazon.com/de_de/transcribe/latest/dg/API_StartTranscriptionJob.html&#34; class=&#34;uri&#34;&gt;https://docs.aws.amazon.com/de_de/transcribe/latest/dg/API_StartTranscriptionJob.html&lt;/a&gt;&lt;/p&gt;
@@ -338,10 +790,10 @@ We need the &lt;code&gt;start_transcription&lt;/code&gt; function&lt;/p&gt;
 ##     }
 ##     return(out)
 ## }
-## &amp;lt;bytecode: 0x000000001365dfc0&amp;gt;
+## &amp;lt;bytecode: 0x0000000015cdebc8&amp;gt;
 ## &amp;lt;environment: namespace:aws.transcribe&amp;gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;We call this function inside &lt;code&gt;StartTranscription&lt;/code&gt; with &lt;code&gt;action = &#34;StartTransciptionJob&lt;/code&gt; and &lt;code&gt;body = bod&lt;/code&gt;. We use the &lt;code&gt;...&lt;/code&gt; argument to pass our secret and key, which are then passed to the &lt;code&gt;POST&lt;/code&gt; function from the &lt;code&gt;httr&lt;/code&gt;package. If you want more information on how to send requests to &lt;strong&gt;aws&lt;/strong&gt;, please read up on &lt;a href=&#34;https://docs.aws.amazon.com/de_de/transcribe/latest/dg/CommonParameters.html&#34; class=&#34;uri&#34;&gt;https://docs.aws.amazon.com/de_de/transcribe/latest/dg/CommonParameters.html&lt;/a&gt; and &lt;a href=&#34;https://docs.aws.amazon.com/de_de/general/latest/gr/signature-version-4.html&#34; class=&#34;uri&#34;&gt;https://docs.aws.amazon.com/de_de/general/latest/gr/signature-version-4.html&lt;/a&gt;. Thanks to &lt;em&gt;Thomas J. Leeper&lt;/em&gt; (aws.s3 &amp;amp; aws.transcribe) that we do not have to fiddle with that for now!&lt;/p&gt;
-&lt;p&gt;Now i am defining a url, which points to the &lt;strong&gt;s3 bucket&lt;/strong&gt; where I want to save the transcribes as &lt;em&gt;json&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;We call this function inside &lt;code&gt;StartTranscription&lt;/code&gt; with &lt;code&gt;action = &#34;StartTransciptionJob&lt;/code&gt; and &lt;code&gt;body = bod&lt;/code&gt;. We use the &lt;code&gt;...&lt;/code&gt; argument to pass our secret and key, which are then passed to the &lt;code&gt;POST&lt;/code&gt; function from the &lt;code&gt;httr&lt;/code&gt; package. If you want more information on how to send requests to &lt;strong&gt;aws&lt;/strong&gt;, please read up on &lt;a href=&#34;https://docs.aws.amazon.com/de_de/transcribe/latest/dg/CommonParameters.html&#34; class=&#34;uri&#34;&gt;https://docs.aws.amazon.com/de_de/transcribe/latest/dg/CommonParameters.html&lt;/a&gt; and &lt;a href=&#34;https://docs.aws.amazon.com/de_de/general/latest/gr/signature-version-4.html&#34; class=&#34;uri&#34;&gt;https://docs.aws.amazon.com/de_de/general/latest/gr/signature-version-4.html&lt;/a&gt;. Thanks to &lt;em&gt;Thomas J. Leeper&lt;/em&gt; (aws.s3 &amp;amp; aws.transcribe) that we do not have to fiddle with that for now!&lt;/p&gt;
+&lt;p&gt;Now I am defining a url, which points to the &lt;strong&gt;s3 bucket&lt;/strong&gt; where I want to save the transcribes as &lt;em&gt;json&lt;/em&gt;.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;full_url &amp;lt;- paste0(&amp;quot;https://s3.eu-central-1.amazonaws.com/yourbucket/&amp;quot;, files_mp3)&lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;start-transcription&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Start transcription&lt;/h3&gt;
@@ -365,10 +817,10 @@ paste(i)
 &lt;/div&gt;
 &lt;div id=&#34;download-the-json-files&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Download the json files&lt;/h2&gt;
-&lt;p&gt;I actually need &lt;em&gt;vtt&lt;/em&gt; files, because most video editing software are using this file type to include transcriptions. I wrote three helper functions to deal with downloading, formatting the &lt;em&gt;json&lt;/em&gt; files and generate &lt;em&gt;vtt&lt;/em&gt; files.&lt;/p&gt;
+&lt;p&gt;I actually need &lt;em&gt;VTT&lt;/em&gt; files, because most video editing software are using this file type to include transcriptions. I wrote three helper functions to deal with downloading, formatting the &lt;em&gt;json&lt;/em&gt; files and generating &lt;em&gt;VTT&lt;/em&gt; files.&lt;/p&gt;
 &lt;div id=&#34;functions&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Functions&lt;/h3&gt;
-&lt;p&gt;The first function &lt;code&gt;DownloadTransJson&lt;/code&gt; calls &lt;code&gt;FormatJsonObject&lt;/code&gt; and &lt;code&gt;WriteVtt&lt;/code&gt; after listing and downloading the files from the bucket where we wrote the &lt;em&gt;json&lt;/em&gt; files to.&lt;/p&gt;
+&lt;p&gt;The first function &lt;code&gt;DownloadTransJson&lt;/code&gt; calls &lt;code&gt;FormatJsonObject&lt;/code&gt; and &lt;code&gt;WriteVTT&lt;/code&gt; after listing and downloading the files from the bucket where we wrote the &lt;em&gt;json&lt;/em&gt; files to.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;DownloadTransJson &amp;lt;- function(){
   list_bucket &amp;lt;- data.table::rbindlist(aws.s3::get_bucket(
     bucket = &amp;quot;yourbucket&amp;quot;, 
@@ -385,7 +837,7 @@ paste(i)
                                        key = &amp;quot;yourkey&amp;quot;, 
                                        secret = &amp;quot;yoursecret&amp;quot;)
   formatted_json &amp;lt;- FormatJsonObject(jsonobject = json_object)
-  WriteVtt(i, formatted_json)
+  WriteVTT(i, formatted_json)
   }
 }&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;The &lt;code&gt;FormatJsonObject&lt;/code&gt; function formats the response we get from &lt;code&gt;aws.s3::getobject&lt;/code&gt;.&lt;/p&gt;
@@ -433,11 +885,11 @@ paste(i)
   return(unique_dt)
 }&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;And now simply write a file per transcription as &lt;em&gt;VTT&lt;/em&gt;.&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;WriteVtt &amp;lt;- function(name, jsondt) {
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;WriteVTT &amp;lt;- function(name, jsondt) {
   
   file.create(paste0(name,&amp;quot;.VTT&amp;quot;))
   con_file &amp;lt;- file(paste0(name,&amp;quot;.VTT&amp;quot;))
-  ##writing to vtt
+  ##writing to VTT
   #might be os specific
   writeLines(paste0(1 : nrow(jsondt),&amp;quot;\n&amp;quot;,
                     jsondt$time_stamp,&amp;quot;\n&amp;quot;,
@@ -448,8 +900,7 @@ paste(i)
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;DownloadTransJson()&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Done? Not quite. You now need to check your transciptions. Did &lt;strong&gt;Amazon Transcribe&lt;/strong&gt; understand what your were saying? Unfortunately not in every case. It seems like mixing german with english, as I did not “translate” english R expressions into german, is problematic. I am sure it works way better, when you are trying to transcribe english. What are your experiences with &lt;strong&gt;Amazon Transcribe&lt;/strong&gt; ?&lt;br /&gt;
 I know one can define a vocabulary to improve the job, which I am going to try for sure!&lt;/p&gt;
-&lt;p&gt;Anyways, i hope you can take something away from this post.&lt;br /&gt;
-Have a great day!
+&lt;p&gt;Have a great day!
 Moritz&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -636,16 +1087,6 @@ $$&lt;/p&gt;
 &lt;p&gt;&lt;a href=&#34;https://discourse.gohugo.io&#34; target=&#34;_blank&#34;&gt;Ask&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;&lt;a href=&#34;https://sourcethemes.com/academic/docs/&#34; target=&#34;_blank&#34;&gt;Documentation&lt;/a&gt;&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Privacy Policy</title>
-      <link>/privacy/</link>
-      <pubDate>Thu, 28 Jun 2018 00:00:00 +0100</pubDate>
-      
-      <guid>/privacy/</guid>
-      <description>&lt;p&gt;&amp;hellip;&lt;/p&gt;
 </description>
     </item>
     

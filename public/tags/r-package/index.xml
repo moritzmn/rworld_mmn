@@ -7,10 +7,27 @@
     <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator>
     <language>en-us</language>
     <copyright> &amp;copy; Moritz Mueller-Navarra</copyright>
-    <lastBuildDate>Sun, 07 Jul 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 29 Oct 2019 00:00:00 +0000</lastBuildDate>
     
 	    <atom:link href="/tags/r-package/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>TideCurves - new version on CRAN</title>
+      <link>/post/tidecurves-new-version-on-cran/</link>
+      <pubDate>Tue, 29 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/post/tidecurves-new-version-on-cran/</guid>
+      <description>
+
+
+&lt;p&gt;Hi,&lt;/p&gt;
+&lt;p&gt;I just submitted the new version of &lt;em&gt;TideCurves&lt;/em&gt; to &lt;em&gt;CRAN&lt;/em&gt;. You should be able to download version 0.0.4 in the following days.
+In the previous version 0.0.3 we used a set of 43 partial tides. This set has now been updated by Andreas Boesch and Sylvin Mueller-Navarra. In version 0.0.4 we use a new set of 39 partial tides. Please look out for the new version on &lt;em&gt;CRAN&lt;/em&gt;. &lt;a href=&#34;https://cran.r-project.org/web/packages/TideCurves/index.html&#34; class=&#34;uri&#34;&gt;https://cran.r-project.org/web/packages/TideCurves/index.html&lt;/a&gt; and a new post explaining the usage of this package. The &lt;em&gt;TideTables&lt;/em&gt; package, currently in version 0.0.2, will also be updatet in the next week(s).&lt;/p&gt;
+&lt;p&gt;See you soon!
+Moritz&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>TideCurves</title>

@@ -34,6 +34,91 @@
   </url>
   
   <url>
+    <loc>/authors/admin/</loc>
+    <lastmod>2019-11-04T15:55:01+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/authors/</loc>
+    <lastmod>2019-11-04T15:55:01+01:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/post/</loc>
+    <lastmod>2019-11-04T15:55:01+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/</loc>
+    <lastmod>2019-11-04T15:55:01+01:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/cross-join/</loc>
+    <lastmod>2019-11-04T15:55:01+01:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/data.table/</loc>
+    <lastmod>2019-11-04T15:55:01+01:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/post/data-table-cross-joining-i/</loc>
+    <lastmod>2019-11-04T15:55:01+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/missing-values/</loc>
+    <lastmod>2019-11-04T15:55:01+01:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/time-series/</loc>
+    <lastmod>2019-11-04T15:55:01+01:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/r-package/</loc>
+    <lastmod>2019-10-29T13:30:19+01:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/tidecurves/</loc>
+    <lastmod>2019-10-29T13:30:19+01:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/post/tidecurves-new-version-on-cran/</loc>
+    <lastmod>2019-10-29T13:30:19+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/tides/</loc>
+    <lastmod>2019-10-29T13:30:19+01:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/post/data-table-new-and-old-functions/</loc>
+    <lastmod>2019-10-29T13:40:04+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/user2019/</loc>
+    <lastmod>2019-10-29T13:40:04+02:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>/tags/forecasting/</loc>
     <lastmod>2019-07-07T00:00:00+00:00</lastmod>
     <priority>0</priority>
@@ -56,18 +141,6 @@
   </url>
   
   <url>
-    <loc>/tags/r-package/</loc>
-    <lastmod>2019-07-07T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/tags/</loc>
-    <lastmod>2019-07-07T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
     <loc>/project/tidecurves-project/</loc>
     <lastmod>2019-07-07T00:00:00+00:00</lastmod>
   </url>
@@ -84,64 +157,42 @@
   </url>
   
   <url>
-    <loc>/tags/tides/</loc>
-    <lastmod>2019-07-07T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/authors/admin/</loc>
-    <lastmod>2019-07-05T17:07:56+02:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/authors/</loc>
-    <lastmod>2019-07-05T17:07:56+02:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
     <loc>/post/new-r-course-on-udemy-com/</loc>
-    <lastmod>2019-07-05T17:04:13+02:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/</loc>
-    <lastmod>2019-07-05T17:07:56+02:00</lastmod>
+    <lastmod>2019-10-29T13:24:13+02:00</lastmod>
   </url>
   
   <url>
     <loc>/tags/r/</loc>
-    <lastmod>2019-07-05T17:07:56+02:00</lastmod>
+    <lastmod>2019-10-29T13:24:13+02:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/r-course/</loc>
-    <lastmod>2019-07-05T17:04:13+02:00</lastmod>
+    <lastmod>2019-10-29T13:24:13+02:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/post/using-amazon-transcribe-with-r/</loc>
-    <lastmod>2019-07-05T17:07:56+02:00</lastmod>
+    <lastmod>2019-09-02T17:07:56+02:00</lastmod>
   </url>
   
   <url>
     <loc>/tags/aws/</loc>
-    <lastmod>2019-07-05T17:07:56+02:00</lastmod>
+    <lastmod>2019-09-02T17:07:56+02:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/aws-transcribe/</loc>
-    <lastmod>2019-07-05T17:07:56+02:00</lastmod>
+    <lastmod>2019-09-02T17:07:56+02:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/cloud/</loc>
-    <lastmod>2019-07-05T17:07:56+02:00</lastmod>
+    <lastmod>2019-09-02T17:07:56+02:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -154,11 +205,6 @@
   <url>
     <loc>/slides/example/</loc>
     <lastmod>2019-02-05T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/privacy/</loc>
-    <lastmod>2018-06-28T00:00:00+01:00</lastmod>
   </url>
   
   <url>

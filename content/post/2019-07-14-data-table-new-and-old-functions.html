@@ -10,7 +10,7 @@ tags:
 subtitle: ''
 summary: ''
 authors: [admin]
-lastmod: '2019-09-02T13:40:04+02:00'
+lastmod: '2019-10-29T13:40:04+02:00'
 featured: no
 image:
   caption: ''
@@ -35,6 +35,7 @@ for fast, flexible and memory efficient data wrangling</strong>.</p>
 <pre class="r"><code>install.packages(&quot;data.table&quot;, repos=&quot;https://Rdatatable.gitlab.io/data.table&quot;)</code></pre>
 <p>We start of with a simple expample.</p>
 <pre class="r"><code>library(&quot;data.table&quot;)</code></pre>
+<pre><code>## Warning: Paket &#39;data.table&#39; wurde unter R Version 3.6.1 erstellt</code></pre>
 <p>We define a data.table DT using the <code>fread</code> function.</p>
 <pre class="r"><code>(DT &lt;- fread(&quot;id code valA valB
 1 c 1 10
@@ -270,14 +271,14 @@ DT[]</code></pre>
 </div>
 <div id="coalesce" class="section level3">
 <h3>coalesce</h3>
-<p>The <code>coalesce</code> function fills missing values in a vector by trying to pull values from one or more candidate vectors.</p>
+<p>The <code>fcoalesce</code> function fills missing values in a vector by trying to pull values from one or more candidate vectors.</p>
 <pre class="r"><code>x &lt;- c(11L, NA, 13L, NA, 15L, NA)
 y &lt;- c(NA, 12L, 5L, NA, NA, NA)
 z &lt;- c(11L, NA, 1L, 14L, NA, NA)
 
-coalesce(x, y, z)</code></pre>
+fcoalesce(x, y, z)</code></pre>
 <pre><code>## [1] 11 12 13 14 15 NA</code></pre>
-<p>Given above syntax <code>coalesce</code> tries to fill missing values in <code>x</code> by looking at the corresponding elements of <code>y</code> &amp; <code>z</code>. At the second index we find a missing value in <code>x</code>, whereas <code>y = 12L ; z = NA</code>. At the fourth index we find <code>y = NA ; z = 14L</code>. So the new vector becomes <code>11 12 13 14 15 NA</code>.</p>
+<p>Given above syntax <code>fcoalesce</code> tries to fill missing values in <code>x</code> by looking at the corresponding elements of <code>y</code> &amp; <code>z</code>. At the second index we find a missing value in <code>x</code>, whereas <code>y = 12L ; z = NA</code>. At the fourth index we find <code>y = NA ; z = 14L</code>. So the new vector becomes <code>11 12 13 14 15 NA</code>.</p>
 </div>
 </div>
 <div id="helpful-links" class="section level2">

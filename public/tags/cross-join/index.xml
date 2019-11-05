@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>cross join on Moritz Mueller-Navarra</title>
+    <link>/tags/cross-join/</link>
+    <description>Recent content in cross join on Moritz Mueller-Navarra</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator>
+    <language>en-us</language>
+    <copyright> &amp;copy; Moritz Mueller-Navarra</copyright>
+    <lastBuildDate>Mon, 04 Nov 2019 00:00:00 +0000</lastBuildDate>
+    
+	    <atom:link href="/tags/cross-join/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>data.table - Generate and Fill missing values.</title>
+      <link>/post/data-table-cross-joining-i/</link>
+      <pubDate>Mon, 04 Nov 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/post/data-table-cross-joining-i/</guid>
+      <description>
+
+
+&lt;p&gt;Hi,&lt;/p&gt;
+&lt;p&gt;in this post I illustrate how we can generate &lt;code&gt;NA&lt;/code&gt; rows using only &lt;code&gt;data.table&lt;/code&gt; function, where you have a &lt;em&gt;date&lt;/em&gt; column (or equivalent).&lt;br /&gt;
+We begin by loading the package.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(data.table)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Warning: Paket &amp;#39;data.table&amp;#39; wurde unter R Version 3.6.1 erstellt&lt;/code&gt;&lt;/pre&gt;
+&lt;div id=&#34;problem&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Problem&lt;/h1&gt;
+&lt;p&gt;Let us assume you have a &lt;code&gt;data.table&lt;/code&gt; with three columns &lt;code&gt;date&lt;/code&gt;, &lt;code&gt;value&lt;/code&gt; and &lt;code&gt;product&lt;/code&gt;. Here &lt;code&gt;date&lt;/code&gt; is of type &lt;em&gt;IDate&lt;/em&gt;, &lt;code&gt;value&lt;/code&gt; &amp;amp; &lt;code&gt;product&lt;/code&gt; is &lt;em&gt;integer&lt;/em&gt;. You can think of it as sales data, where you observe daily sales for a certain product. Thus giving you a time series for every product. We assume that we only get a new entry, when we actually observe a sale. Let us look at a minimal example.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;(dt &amp;lt;- data.table(date = as.IDate(c(&amp;quot;2019-11-01&amp;quot;,&amp;quot;2019-11-02&amp;quot;, &amp;quot;2019-11-04&amp;quot;, &amp;quot;2019-11-07&amp;quot;)), value = c(3L,4L,1L,8L), product = c(1L,2L,1L,1L)))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##          date value product
+## 1: 2019-11-01     3       1
+## 2: 2019-11-02     4       2
+## 3: 2019-11-04     1       1
+## 4: 2019-11-07     8       1&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;sapply(dt, typeof)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##      date     value   product 
+## &amp;quot;integer&amp;quot; &amp;quot;integer&amp;quot; &amp;quot;integer&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;For the &lt;code&gt;date&lt;/code&gt; column you get &lt;code&gt;integer&lt;/code&gt;, because the &lt;code&gt;IDate&lt;/code&gt; class is a integer based date class. Please check &lt;code&gt;?IDate&lt;/code&gt; for more information.&lt;/p&gt;
+&lt;p&gt;Since we want a row for every possible date within a certain range, we need to insert rows, where we did not observe anything.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;solution&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Solution&lt;/h1&gt;
+&lt;p&gt;It is obvious that we have not sold anything on certain days. Now, our job is to insert rows where we write &lt;code&gt;NA&lt;/code&gt; for &lt;code&gt;value&lt;/code&gt; by &lt;code&gt;date&lt;/code&gt; and &lt;code&gt;product&lt;/code&gt;. There are different approaches for this task, we focus on joining. Since we know the start and the end of the time series, we can generate a sequence.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;(seq_dates &amp;lt;- seq(as.IDate(&amp;quot;2019-11-01&amp;quot;), as.IDate(&amp;quot;2019-11-07&amp;quot;), by = &amp;quot;days&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;quot;2019-11-01&amp;quot; &amp;quot;2019-11-02&amp;quot; &amp;quot;2019-11-03&amp;quot; &amp;quot;2019-11-04&amp;quot; &amp;quot;2019-11-05&amp;quot;
+## [6] &amp;quot;2019-11-06&amp;quot; &amp;quot;2019-11-07&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now we can use the &lt;code&gt;CJ&lt;/code&gt; function from &lt;code&gt;data.table&lt;/code&gt; to generate a table. We join &lt;code&gt;dt&lt;/code&gt; to the return value of &lt;code&gt;CJ&lt;/code&gt; based on the columns &lt;code&gt;date&lt;/code&gt; and &lt;code&gt;product&lt;/code&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dt[CJ(product = unique(product), date = seq_dates), on = c(&amp;quot;date&amp;quot;, &amp;quot;product&amp;quot;)]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##           date value product
+##  1: 2019-11-01     3       1
+##  2: 2019-11-02    NA       1
+##  3: 2019-11-03    NA       1
+##  4: 2019-11-04     1       1
+##  5: 2019-11-05    NA       1
+##  6: 2019-11-06    NA       1
+##  7: 2019-11-07     8       1
+##  8: 2019-11-01    NA       2
+##  9: 2019-11-02     4       2
+## 10: 2019-11-03    NA       2
+## 11: 2019-11-04    NA       2
+## 12: 2019-11-05    NA       2
+## 13: 2019-11-06    NA       2
+## 14: 2019-11-07    NA       2&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The &lt;code&gt;CJ&lt;/code&gt; function simply generates a table with all possible combinations of &lt;code&gt;date&lt;/code&gt; and &lt;code&gt;product&lt;/code&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;CJ(date = seq_dates,  product = unique(dt$product))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##           date product
+##  1: 2019-11-01       1
+##  2: 2019-11-01       2
+##  3: 2019-11-02       1
+##  4: 2019-11-02       2
+##  5: 2019-11-03       1
+##  6: 2019-11-03       2
+##  7: 2019-11-04       1
+##  8: 2019-11-04       2
+##  9: 2019-11-05       1
+## 10: 2019-11-05       2
+## 11: 2019-11-06       1
+## 12: 2019-11-06       2
+## 13: 2019-11-07       1
+## 14: 2019-11-07       2&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;scalibilty&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Scalibilty&lt;/h1&gt;
+&lt;p&gt;We check the perfomance of the proposed workflow by generating a &lt;code&gt;data.table&lt;/code&gt; with two parameters: &lt;code&gt;n_days&lt;/code&gt; &amp;amp; &lt;code&gt;n_products&lt;/code&gt;. The code below generates random &lt;code&gt;n_days&lt;/code&gt; within the year 2019 by &lt;code&gt;product&lt;/code&gt;. The &lt;code&gt;value&lt;/code&gt; is simply a random integer. This results in an object with 2.5 million rows and three columns.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;seq_dates  &amp;lt;- seq(as.IDate(&amp;quot;2019-01-01&amp;quot;), as.IDate(&amp;quot;2019-12-31&amp;quot;), by = &amp;quot;days&amp;quot;)
+n_days     &amp;lt;- 250L
+n_products &amp;lt;- 10000L
+
+dt_large &amp;lt;-data.table(rbindlist(lapply(1:n_products, function(x) {
+  date    &amp;lt;- sample(seq_dates, n_days)
+  product &amp;lt;- rep.int(x, n_days)
+  return(list(date = date, product = product))
+})), value = sample.int(10, n_products*n_days, replace = TRUE))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;sapply(dt_large, typeof)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##      date   product     value 
+## &amp;quot;integer&amp;quot; &amp;quot;integer&amp;quot; &amp;quot;integer&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;After generating &lt;code&gt;dt_large&lt;/code&gt; using &lt;code&gt;CJ&lt;/code&gt; we get &lt;code&gt;dt_large_na&lt;/code&gt; with 3.65 million rows (&lt;code&gt;365 days * n_products&lt;/code&gt;).&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;system.time(dt_large_na &amp;lt;- dt_large[CJ(product = unique(product), date = seq_dates), on = c(&amp;quot;date&amp;quot;,&amp;quot;product&amp;quot;)])&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##        User      System verstrichen 
+##        1.34        0.04        1.19&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dt_large_na&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##                date product value
+##       1: 2019-01-01       1    NA
+##       2: 2019-01-02       1    NA
+##       3: 2019-01-03       1    NA
+##       4: 2019-01-04       1    NA
+##       5: 2019-01-05       1    NA
+##      ---                         
+## 3649996: 2019-12-27   10000     2
+## 3649997: 2019-12-28   10000     5
+## 3649998: 2019-12-29   10000     8
+## 3649999: 2019-12-30   10000     7
+## 3650000: 2019-12-31   10000    NA&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Thus we get &lt;code&gt;NA&lt;/code&gt; when we did not observe a value for a certain product and date.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dt_large_na[product == 1]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##            date product value
+##   1: 2019-01-01       1    NA
+##   2: 2019-01-02       1    NA
+##   3: 2019-01-03       1    NA
+##   4: 2019-01-04       1    NA
+##   5: 2019-01-05       1    NA
+##  ---                         
+## 361: 2019-12-27       1     1
+## 362: 2019-12-28       1    NA
+## 363: 2019-12-29       1     8
+## 364: 2019-12-30       1     3
+## 365: 2019-12-31       1     1&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dt_large_na[product == 5]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##            date product value
+##   1: 2019-01-01       5     9
+##   2: 2019-01-02       5     5
+##   3: 2019-01-03       5    NA
+##   4: 2019-01-04       5     4
+##   5: 2019-01-05       5    NA
+##  ---                         
+## 361: 2019-12-27       5     5
+## 362: 2019-12-28       5     6
+## 363: 2019-12-29       5    10
+## 364: 2019-12-30       5    NA
+## 365: 2019-12-31       5     8&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;filling-missing-values&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Filling missing values&lt;/h1&gt;
+&lt;p&gt;We generated a &lt;code&gt;data.table&lt;/code&gt; with missing values by joining. There are a lot of techniques to fill &lt;code&gt;NA&lt;/code&gt;. I want to quickly demonstrate how you can use the &lt;code&gt;nafill&lt;/code&gt; function included in &lt;code&gt;data.table&lt;/code&gt;. I introduce a new column in &lt;code&gt;dt_large_na&lt;/code&gt; to demonstrate the functionality.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dt_large_na[, filled_value := nafill(value, &amp;quot;locf&amp;quot;), by = &amp;quot;product&amp;quot;]&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This simply fills the &lt;code&gt;NA&lt;/code&gt; values on a product level by &lt;em&gt;last observation carried forward (locf)&lt;/em&gt;. You might want to use a more sophisticated approach for real data.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dt_large_na&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##                date product value filled_value
+##       1: 2019-01-01       1    NA           NA
+##       2: 2019-01-02       1    NA           NA
+##       3: 2019-01-03       1    NA           NA
+##       4: 2019-01-04       1    NA           NA
+##       5: 2019-01-05       1    NA           NA
+##      ---                                      
+## 3649996: 2019-12-27   10000     2            2
+## 3649997: 2019-12-28   10000     5            5
+## 3649998: 2019-12-29   10000     8            8
+## 3649999: 2019-12-30   10000     7            7
+## 3650000: 2019-12-31   10000    NA            7&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Imputing missing values requires a lot more thought for real applications. A good ressource is &lt;a href=&#34;https://rmisstastic.netlify.com/how-to/impute/missimp&#34; class=&#34;uri&#34;&gt;https://rmisstastic.netlify.com/how-to/impute/missimp&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;See you soon,&lt;/p&gt;
+&lt;p&gt;Moritz&lt;/p&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -36,9 +36,9 @@ but I am going to add english subtitles as soon as I figured out how to correctl
 &lt;p&gt;As for as I know &lt;strong&gt;data.table&lt;/strong&gt; has been unrecognized (correct me if I am wrong) by most of the instructors of &lt;strong&gt;udemy&lt;/strong&gt; who are teaching &lt;strong&gt;R&lt;/strong&gt;, despite being one of the best package for R! I cover the basics of the package. If you need an intro to &lt;strong&gt;data.table&lt;/strong&gt;, consider taking my course :-).&lt;/p&gt;
 &lt;p&gt;Most of the code you will encounter on this blog will start with&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(data.table)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Anyway, you finde my course under this link: &lt;a href=&#34;https://www.udemy.com/r-basics-u/&#34; class=&#34;uri&#34;&gt;https://www.udemy.com/r-basics-u/&lt;/a&gt;, it is called&lt;br /&gt;
-&lt;strong&gt;R Basics - Programmierung und Datenanalyse&lt;/strong&gt;. Using this link you get the course for 9.99$
-&lt;a href=&#34;https://www.udemy.com/r-basics-u/?couponCode=WELCOME_R_KURS&#34; class=&#34;uri&#34;&gt;https://www.udemy.com/r-basics-u/?couponCode=WELCOME_R_KURS&lt;/a&gt;, limited to the first 50 subscribers!&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;## Warning: Paket &amp;#39;data.table&amp;#39; wurde unter R Version 3.6.1 erstellt&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Anyway, you finde my course under this link: &lt;a href=&#34;https://www.udemy.com/course/r-basics-u/?referralCode=294114E77907E6E07B63&#34; class=&#34;uri&#34;&gt;https://www.udemy.com/course/r-basics-u/?referralCode=294114E77907E6E07B63&lt;/a&gt;, it is called&lt;br /&gt;
+&lt;strong&gt;R Basics - Programmierung und Datenanalyse&lt;/strong&gt;.&lt;/p&gt;
 &lt;p&gt;See you soon!&lt;br /&gt;
 Moritz&lt;/p&gt;
 </description>

@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.3.1">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Moritz Mueller-Navarra">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="Hi, in this post I will use the imputeTS package which focuses on imputing missing values in time series.
+library(&quot;imputeTS&quot;)## Warning: Paket &#39;imputeTS&#39; wurde unter R Version 3.6.1 erstellt## Registered S3 method overwritten by &#39;xts&#39;:## method from## as.zoo.xts zoo## Registered S3 method overwritten by &#39;quantmod&#39;:## method from## as.zoo.data.frame zoo## Registered S3 methods overwritten by &#39;forecast&#39;:## method from ## fitted.fracdiff fracdiff## residuals.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="/post/handling-missing-data-in-sensor-time-series/">
+
+  
+
+
+  
+
+  
+  
+  
+  <meta name="theme-color" content="#2962ff">
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.0/css/all.css" integrity="sha384-aOkxzJ5uQz7WBObEZcHvV5JvRW3TUc2rNPA7pe3AwnsUohiw1Vj2Rgx2KSOkF5+h" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" integrity="sha256-ygkqlh3CYSUri3LhQxzdcm0n1EQvH2Y+U5S2idbLtxs=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css" crossorigin="anonymous" title="hl-light">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark" disabled>
+        
+      
+    
+
+    
+
+    
+
+  
+
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700|Roboto:400,400italic,700|Roboto+Mono&display=swap">
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.min.3834c081887e44130d565828d71a7178.css">
+
+  
+
+  
+  
+  
+
+  
+
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="icon" type="image/png" href="/img/icon.png">
+  <link rel="apple-touch-icon" type="image/png" href="/img/icon-192.png">
+
+  <link rel="canonical" href="/post/handling-missing-data-in-sensor-time-series/">
+
+  
+  
+  
+  
+    
+    
+  
+  <meta property="twitter:card" content="summary">
+  
+  <meta property="twitter:site" content="@NavarraMoritz">
+  <meta property="twitter:creator" content="@NavarraMoritz">
+  
+  <meta property="og:site_name" content="Moritz Mueller-Navarra">
+  <meta property="og:url" content="/post/handling-missing-data-in-sensor-time-series/">
+  <meta property="og:title" content="Handling missing data in sensor time series | Moritz Mueller-Navarra">
+  <meta property="og:description" content="Hi, in this post I will use the imputeTS package which focuses on imputing missing values in time series.
+library(&quot;imputeTS&quot;)## Warning: Paket &#39;imputeTS&#39; wurde unter R Version 3.6.1 erstellt## Registered S3 method overwritten by &#39;xts&#39;:## method from## as.zoo.xts zoo## Registered S3 method overwritten by &#39;quantmod&#39;:## method from## as.zoo.data.frame zoo## Registered S3 methods overwritten by &#39;forecast&#39;:## method from ## fitted.fracdiff fracdiff## residuals."><meta property="og:image" content="/img/icon-192.png">
+  <meta property="twitter:image" content="/img/icon-192.png"><meta property="og:locale" content="en-us">
+  
+  <meta property="article:published_time" content="2019-09-06T00:00:00&#43;00:00">
+  
+  <meta property="article:modified_time" content="2019-09-06T11:40:09&#43;02:00">
+  
+
+  
+
+
+  
+
+
+
+
+
+  <title>Handling missing data in sensor time series | Moritz Mueller-Navarra</title>
+
+</head>
+
+
+<body id="top" data-spy="scroll" data-target="#TableOfContents" data-offset="71" >
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" role="textbox" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+<nav class="navbar navbar-light fixed-top navbar-expand-lg py-0 compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+      <a class="navbar-brand" href="/">Moritz Mueller-Navarra</a>
+      
+      <button type="button" class="navbar-toggler" data-toggle="collapse"
+              data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+        <span><i class="fas fa-bars"></i></span>
+      </button>
+      
+
+    
+    <div class="collapse navbar-collapse" id="navbar">
+
+      
+      
+      <ul class="navbar-nav mr-auto">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#about"><span>Home</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts"><span>Posts</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#projects"><span>Projects</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#contact"><span>Contact</span></a>
+        </li>
+
+        
+        
+
+      
+      </ul>
+      <ul class="navbar-nav ml-auto">
+      
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-search" href="#"><i class="fas fa-search" aria-hidden="true"></i></a>
+        </li>
+        
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-dark-toggle" href="#"><i class="fas fa-moon" aria-hidden="true"></i></a>
+        </li>
+        
+
+      </ul>
+
+    </div>
+  </div>
+</nav>
+
+
+  <article class="article" itemscope itemtype="http://schema.org/Article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1 itemprop="name">Handling missing data in sensor time series</h1>
+
+  
+
+  
+    
+
+
+
+<meta content="2019-09-06 00:00:00 &#43;0000 UTC" itemprop="datePublished">
+<meta content="2019-09-06 11:40:09 &#43;0200 CEST" itemprop="dateModified">
+
+<div class="article-metadata">
+
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+          Last updated on
+      
+    
+    <time>Sep 6, 2019</time>
+  </span>
+  
+
+  
+
+  
+  <span class="middot-divider"></span>
+  <span class="article-reading-time">
+    8 min read
+  </span>
+  
+
+  
+  
+
+  
+  
+
+  
+    
+<div class="share-box" aria-hidden="true">
+  <ul class="share">
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://twitter.com/intent/tweet?url=/post/handling-missing-data-in-sensor-time-series/&amp;text=Handling%20missing%20data%20in%20sensor%20time%20series" target="_blank" rel="noopener" class="share-btn-twitter">
+          <i class="fab fa-twitter"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.facebook.com/sharer.php?u=/post/handling-missing-data-in-sensor-time-series/&amp;t=Handling%20missing%20data%20in%20sensor%20time%20series" target="_blank" rel="noopener" class="share-btn-facebook">
+          <i class="fab fa-facebook-f"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="mailto:?subject=Handling%20missing%20data%20in%20sensor%20time%20series&amp;body=/post/handling-missing-data-in-sensor-time-series/" target="_blank" rel="noopener" class="share-btn-email">
+          <i class="fas fa-envelope"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.linkedin.com/shareArticle?url=/post/handling-missing-data-in-sensor-time-series/&amp;title=Handling%20missing%20data%20in%20sensor%20time%20series" target="_blank" rel="noopener" class="share-btn-linkedin">
+          <i class="fab fa-linkedin-in"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://web.whatsapp.com/send?text=Handling%20missing%20data%20in%20sensor%20time%20series%20/post/handling-missing-data-in-sensor-time-series/" target="_blank" rel="noopener" class="share-btn-whatsapp">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://service.weibo.com/share/share.php?url=/post/handling-missing-data-in-sensor-time-series/&amp;title=Handling%20missing%20data%20in%20sensor%20time%20series" target="_blank" rel="noopener" class="share-btn-weibo">
+          <i class="fab fa-weibo"></i>
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+
+  
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style" itemprop="articleBody">
+      
+
+
+<p>Hi, in this post I will use the <code>imputeTS</code> package which focuses on imputing missing values in time series.</p>
+<pre class="r"><code>library(&quot;imputeTS&quot;)</code></pre>
+<pre><code>## Warning: Paket &#39;imputeTS&#39; wurde unter R Version 3.6.1 erstellt</code></pre>
+<pre><code>## Registered S3 method overwritten by &#39;xts&#39;:
+##   method     from
+##   as.zoo.xts zoo</code></pre>
+<pre><code>## Registered S3 method overwritten by &#39;quantmod&#39;:
+##   method            from
+##   as.zoo.data.frame zoo</code></pre>
+<pre><code>## Registered S3 methods overwritten by &#39;forecast&#39;:
+##   method             from    
+##   fitted.fracdiff    fracdiff
+##   residuals.fracdiff fracdiff</code></pre>
+<pre class="r"><code>library(&quot;ggplot2&quot;)</code></pre>
+<pre><code>## Warning: Paket &#39;ggplot2&#39; wurde unter R Version 3.6.1 erstellt</code></pre>
+<div id="data" class="section level1">
+<h1>Data</h1>
+<pre class="r"><code>ts_data &lt;- imputeTS::tsHeating
+str(ts_data)</code></pre>
+<pre><code>##  Time-Series [1:606837] from 1 to 422: 71.3 71.3 71.3 71.3 71.3 71.3 71.3 71.3 71.3 71.3 ...</code></pre>
+</div>
+<div id="visualization" class="section level1">
+<h1>Visualization</h1>
+<pre class="r"><code>statsNA(ts_data)</code></pre>
+<pre><code>## [1] &quot;Length of time series:&quot;
+## [1] 606837
+## [1] &quot;-------------------------&quot;
+## [1] &quot;Number of Missing Values:&quot;
+## [1] 57391
+## [1] &quot;-------------------------&quot;
+## [1] &quot;Percentage of Missing Values:&quot;
+## [1] &quot;9.46%&quot;
+## [1] &quot;-------------------------&quot;
+## [1] &quot;Stats for Bins&quot;
+## [1] &quot;  Bin 1 (151710 values from 1 to 151710) :      0 NAs (0%)&quot;
+## [1] &quot;  Bin 2 (151710 values from 151711 to 303420) :      29755 NAs (19.6%)&quot;
+## [1] &quot;  Bin 3 (151710 values from 303421 to 455130) :      6153 NAs (4.06%)&quot;
+## [1] &quot;  Bin 4 (151707 values from 455131 to 606837) :      21483 NAs (14.2%)&quot;
+## [1] &quot;-------------------------&quot;
+## [1] &quot;Longest NA gap (series of consecutive NAs)&quot;
+## [1] &quot;258 in a row&quot;
+## [1] &quot;-------------------------&quot;
+## [1] &quot;Most frequent gap size (series of consecutive NA series)&quot;
+## [1] &quot;2 NA in a row (occuring 104 times)&quot;
+## [1] &quot;-------------------------&quot;
+## [1] &quot;Gap size accounting for most NAs&quot;
+## [1] &quot;27 NA in a row (occuring 38 times, making up for overall 1026 NAs)&quot;
+## [1] &quot;-------------------------&quot;
+## [1] &quot;Overview NA series&quot;
+## [1] &quot;  1 NA in a row: 81 times&quot;
+## [1] &quot;  2 NA in a row: 104 times&quot;
+## [1] &quot;  3 NA in a row: 72 times&quot;
+## [1] &quot;  4 NA in a row: 61 times&quot;
+## [1] &quot;  5 NA in a row: 54 times&quot;
+## [1] &quot;  6 NA in a row: 74 times&quot;
+## [1] &quot;  7 NA in a row: 63 times&quot;
+## [1] &quot;  8 NA in a row: 60 times&quot;
+## [1] &quot;  9 NA in a row: 59 times&quot;
+## [1] &quot;  10 NA in a row: 47 times&quot;
+## [1] &quot;  11 NA in a row: 52 times&quot;
+## [1] &quot;  12 NA in a row: 56 times&quot;
+## [1] &quot;  13 NA in a row: 44 times&quot;
+## [1] &quot;  14 NA in a row: 35 times&quot;
+## [1] &quot;  15 NA in a row: 47 times&quot;
+## [1] &quot;  16 NA in a row: 43 times&quot;
+## [1] &quot;  17 NA in a row: 44 times&quot;
+## [1] &quot;  18 NA in a row: 42 times&quot;
+## [1] &quot;  19 NA in a row: 46 times&quot;
+## [1] &quot;  20 NA in a row: 36 times&quot;
+## [1] &quot;  21 NA in a row: 38 times&quot;
+## [1] &quot;  22 NA in a row: 36 times&quot;
+## [1] &quot;  23 NA in a row: 31 times&quot;
+## [1] &quot;  24 NA in a row: 35 times&quot;
+## [1] &quot;  25 NA in a row: 22 times&quot;
+## [1] &quot;  26 NA in a row: 30 times&quot;
+## [1] &quot;  27 NA in a row: 38 times&quot;
+## [1] &quot;  28 NA in a row: 31 times&quot;
+## [1] &quot;  29 NA in a row: 29 times&quot;
+## [1] &quot;  30 NA in a row: 16 times&quot;
+## [1] &quot;  31 NA in a row: 24 times&quot;
+## [1] &quot;  32 NA in a row: 17 times&quot;
+## [1] &quot;  33 NA in a row: 30 times&quot;
+## [1] &quot;  34 NA in a row: 14 times&quot;
+## [1] &quot;  35 NA in a row: 17 times&quot;
+## [1] &quot;  36 NA in a row: 15 times&quot;
+## [1] &quot;  37 NA in a row: 19 times&quot;
+## [1] &quot;  38 NA in a row: 25 times&quot;
+## [1] &quot;  39 NA in a row: 19 times&quot;
+## [1] &quot;  40 NA in a row: 6 times&quot;
+## [1] &quot;  41 NA in a row: 19 times&quot;
+## [1] &quot;  42 NA in a row: 13 times&quot;
+## [1] &quot;  43 NA in a row: 17 times&quot;
+## [1] &quot;  44 NA in a row: 15 times&quot;
+## [1] &quot;  45 NA in a row: 11 times&quot;
+## [1] &quot;  46 NA in a row: 16 times&quot;
+## [1] &quot;  47 NA in a row: 13 times&quot;
+## [1] &quot;  48 NA in a row: 16 times&quot;
+## [1] &quot;  49 NA in a row: 17 times&quot;
+## [1] &quot;  50 NA in a row: 10 times&quot;
+## [1] &quot;  51 NA in a row: 12 times&quot;
+## [1] &quot;  52 NA in a row: 9 times&quot;
+## [1] &quot;  53 NA in a row: 8 times&quot;
+## [1] &quot;  54 NA in a row: 5 times&quot;
+## [1] &quot;  55 NA in a row: 6 times&quot;
+## [1] &quot;  56 NA in a row: 9 times&quot;
+## [1] &quot;  57 NA in a row: 11 times&quot;
+## [1] &quot;  58 NA in a row: 8 times&quot;
+## [1] &quot;  59 NA in a row: 5 times&quot;
+## [1] &quot;  60 NA in a row: 11 times&quot;
+## [1] &quot;  61 NA in a row: 10 times&quot;
+## [1] &quot;  62 NA in a row: 13 times&quot;
+## [1] &quot;  63 NA in a row: 10 times&quot;
+## [1] &quot;  64 NA in a row: 6 times&quot;
+## [1] &quot;  65 NA in a row: 4 times&quot;
+## [1] &quot;  66 NA in a row: 4 times&quot;
+## [1] &quot;  67 NA in a row: 7 times&quot;
+## [1] &quot;  68 NA in a row: 5 times&quot;
+## [1] &quot;  69 NA in a row: 6 times&quot;
+## [1] &quot;  70 NA in a row: 5 times&quot;
+## [1] &quot;  71 NA in a row: 13 times&quot;
+## [1] &quot;  72 NA in a row: 5 times&quot;
+## [1] &quot;  73 NA in a row: 3 times&quot;
+## [1] &quot;  74 NA in a row: 6 times&quot;
+## [1] &quot;  75 NA in a row: 5 times&quot;
+## [1] &quot;  76 NA in a row: 3 times&quot;
+## [1] &quot;  77 NA in a row: 3 times&quot;
+## [1] &quot;  78 NA in a row: 4 times&quot;
+## [1] &quot;  79 NA in a row: 7 times&quot;
+## [1] &quot;  80 NA in a row: 4 times&quot;
+## [1] &quot;  81 NA in a row: 8 times&quot;
+## [1] &quot;  82 NA in a row: 6 times&quot;
+## [1] &quot;  83 NA in a row: 5 times&quot;
+## [1] &quot;  84 NA in a row: 3 times&quot;
+## [1] &quot;  85 NA in a row: 3 times&quot;
+## [1] &quot;  86 NA in a row: 6 times&quot;
+## [1] &quot;  87 NA in a row: 2 times&quot;
+## [1] &quot;  88 NA in a row: 4 times&quot;
+## [1] &quot;  89 NA in a row: 4 times&quot;
+## [1] &quot;  90 NA in a row: 2 times&quot;
+## [1] &quot;  91 NA in a row: 3 times&quot;
+## [1] &quot;  92 NA in a row: 3 times&quot;
+## [1] &quot;  93 NA in a row: 2 times&quot;
+## [1] &quot;  94 NA in a row: 4 times&quot;
+## [1] &quot;  96 NA in a row: 3 times&quot;
+## [1] &quot;  97 NA in a row: 3 times&quot;
+## [1] &quot;  98 NA in a row: 3 times&quot;
+## [1] &quot;  99 NA in a row: 1 times&quot;
+## [1] &quot;  100 NA in a row: 1 times&quot;
+## [1] &quot;  101 NA in a row: 2 times&quot;
+## [1] &quot;  103 NA in a row: 1 times&quot;
+## [1] &quot;  104 NA in a row: 5 times&quot;
+## [1] &quot;  106 NA in a row: 1 times&quot;
+## [1] &quot;  107 NA in a row: 1 times&quot;
+## [1] &quot;  108 NA in a row: 2 times&quot;
+## [1] &quot;  109 NA in a row: 3 times&quot;
+## [1] &quot;  110 NA in a row: 2 times&quot;
+## [1] &quot;  111 NA in a row: 1 times&quot;
+## [1] &quot;  113 NA in a row: 1 times&quot;
+## [1] &quot;  115 NA in a row: 3 times&quot;
+## [1] &quot;  117 NA in a row: 1 times&quot;
+## [1] &quot;  118 NA in a row: 1 times&quot;
+## [1] &quot;  120 NA in a row: 2 times&quot;
+## [1] &quot;  121 NA in a row: 2 times&quot;
+## [1] &quot;  125 NA in a row: 1 times&quot;
+## [1] &quot;  127 NA in a row: 3 times&quot;
+## [1] &quot;  137 NA in a row: 2 times&quot;
+## [1] &quot;  139 NA in a row: 1 times&quot;
+## [1] &quot;  141 NA in a row: 1 times&quot;
+## [1] &quot;  145 NA in a row: 1 times&quot;
+## [1] &quot;  147 NA in a row: 1 times&quot;
+## [1] &quot;  148 NA in a row: 1 times&quot;
+## [1] &quot;  151 NA in a row: 1 times&quot;
+## [1] &quot;  152 NA in a row: 1 times&quot;
+## [1] &quot;  154 NA in a row: 2 times&quot;
+## [1] &quot;  157 NA in a row: 1 times&quot;
+## [1] &quot;  159 NA in a row: 1 times&quot;
+## [1] &quot;  160 NA in a row: 1 times&quot;
+## [1] &quot;  162 NA in a row: 1 times&quot;
+## [1] &quot;  164 NA in a row: 3 times&quot;
+## [1] &quot;  167 NA in a row: 1 times&quot;
+## [1] &quot;  177 NA in a row: 1 times&quot;
+## [1] &quot;  205 NA in a row: 1 times&quot;
+## [1] &quot;  235 NA in a row: 1 times&quot;
+## [1] &quot;  258 NA in a row: 1 times&quot;</code></pre>
+<pre class="r"><code>imputeTS::plotNA.distribution(ts_data)</code></pre>
+<p><img src="/post/2019-09-06-handling-missing-data-in-sensor-time-series_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+</div>
+
+    </div>
+
+    
+
+<div class="article-tags">
+  
+  <a class="badge badge-light" href="/tags/time-series/">time series</a>
+  
+  <a class="badge badge-light" href="/tags/r/">R</a>
+  
+  <a class="badge badge-light" href="/tags/user2019/">useR!2019</a>
+  
+</div>
+
+
+
+    
+      
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+  
+  
+    
+  
+  
+  <div class="media author-card" itemscope itemtype="http://schema.org/Person">
+    
+      
+      <img class="portrait mr-3" src="/authors/admin/avatar_hucacfa7e6a5d02d8a2e7c8f6bdeba0e03_169166_250x250_fill_lanczos_center_2.png" itemprop="image" alt="Avatar">
+    
+
+    <div class="media-body">
+      <h5 class="card-title" itemprop="name"><a href="/">Moritz Mueller-Navarra</a></h5>
+      
+      <p class="card-text" itemprop="description">A Data Scientist using R</p>
+      <ul class="network-icon" aria-hidden="true">
+        
+          
+          
+          
+            
+          
+          
+          
+          
+          
+            
+          
+          <li>
+            <a itemprop="sameAs" href="/#contact" >
+              <i class="fas fa-envelope"></i>
+            </a>
+          </li>
+        
+          
+          
+          
+            
+          
+          
+          
+          
+          
+            
+          
+          <li>
+            <a itemprop="sameAs" href="https://twitter.com/NavarraMoritz" target="_blank" rel="noopener">
+              <i class="fab fa-twitter"></i>
+            </a>
+          </li>
+        
+          
+          
+          
+            
+          
+          
+          
+          
+          
+            
+          
+          <li>
+            <a itemprop="sameAs" href="https://github.com/moritzmn" target="_blank" rel="noopener">
+              <i class="fab fa-github"></i>
+            </a>
+          </li>
+        
+          
+          
+          
+            
+          
+          
+          
+          
+          
+            
+          
+          <li>
+            <a itemprop="sameAs" href="https://stackoverflow.com/users/6244387/mmn" target="_blank" rel="noopener">
+              <i class="fab fa-stack-overflow"></i>
+            </a>
+          </li>
+        
+          
+          
+          
+            
+          
+          
+          
+          
+          
+            
+          
+          <li>
+            <a itemprop="sameAs" href="https://www.linkedin.com/in/moritz-m%C3%BCller-navarra-917285110/" target="_blank" rel="noopener">
+              <i class="fab fa-linkedin-in"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+
+      
+      
+      <div class="article-widget">
+        <div class="hr-light"></div>
+        <h3>Related</h3>
+        <ul>
+          
+          <li><a href="/post/sales-forecasting/">Sales forecasting with fable</a></li>
+          
+          <li><a href="/post/satrdays-berlin-2019/">satRdays Berlin 2019</a></li>
+          
+          <li><a href="/post/data-table-new-and-old-functions/">data.table - useR!2019 I</a></li>
+          
+          <li><a href="/post/fable-a-tidy-forecasting-approach/">fable - A tidy forecasting approach I</a></li>
+          
+          <li><a href="/post/new-r-course-on-udemy-com/">NEW R COURSE ON UDEMY</a></li>
+          
+        </ul>
+      </div>
+      
+    
+
+    
+
+    
+
+
+  </div>
+</article>
+
+      
+
+    
+    
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" integrity="sha256-X5PoE3KU5l+JcX+w09p/wHl9AzK333C4hJ2I9S5mD4M=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js" integrity="sha256-aYTdUrn6Ow1DDgh5JTc3aDGnnju48y/1c8s1dgkYPQ8=" crossorigin="anonymous"></script>
+        
+      
+
+      
+      
+    
+
+    
+    
+
+    
+    
+    
+
+    
+    
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    
+    
+    <script>
+      const search_index_filename = "/index.json";
+      const i18n = {
+        'placeholder': "Search...",
+        'results': "results found",
+        'no_results': "No results found"
+      };
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks"
+        };
+    </script>
+    
+
+    
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.2e38db8060788d4ad8568291459b9649.js"></script>
+
+    
+
+
+
+
+
+
+  
+  <div class="container">
+    <footer class="site-footer">
+  
+  <p class="powered-by">
+    <a href="/privacy/">Privacy Policy</a>
+  </p>
+  
+
+  <p class="powered-by">
+    &copy; Moritz Mueller-Navarra &middot; 
+
+    Powered by the
+    <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
+    <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>.
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" id="back_to_top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
+
+  </div>
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

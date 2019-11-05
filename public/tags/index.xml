@@ -7,10 +7,82 @@
     <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator>
     <language>en-us</language>
     <copyright> &amp;copy; Moritz Mueller-Navarra</copyright>
-    <lastBuildDate>Sun, 07 Jul 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 04 Nov 2019 00:00:00 +0000</lastBuildDate>
     
 	    <atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>cross join</title>
+      <link>/tags/cross-join/</link>
+      <pubDate>Mon, 04 Nov 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/cross-join/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>data.table</title>
+      <link>/tags/data.table/</link>
+      <pubDate>Mon, 04 Nov 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/data.table/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>missing values</title>
+      <link>/tags/missing-values/</link>
+      <pubDate>Mon, 04 Nov 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/missing-values/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>time series</title>
+      <link>/tags/time-series/</link>
+      <pubDate>Mon, 04 Nov 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/time-series/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>R package</title>
+      <link>/tags/r-package/</link>
+      <pubDate>Tue, 29 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/r-package/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>TideCurves</title>
+      <link>/tags/tidecurves/</link>
+      <pubDate>Tue, 29 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/tidecurves/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>tides</title>
+      <link>/tags/tides/</link>
+      <pubDate>Tue, 29 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/tides/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>useR!2019</title>
+      <link>/tags/user2019/</link>
+      <pubDate>Sun, 14 Jul 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/user2019/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>Forecasting</title>
@@ -22,29 +94,11 @@
     </item>
     
     <item>
-      <title>R package</title>
-      <link>/tags/r-package/</link>
-      <pubDate>Sun, 07 Jul 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/r-package/</guid>
-      <description></description>
-    </item>
-    
-    <item>
       <title>offshore</title>
       <link>/tags/offshore/</link>
       <pubDate>Sun, 07 Jul 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/offshore/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>tides</title>
-      <link>/tags/tides/</link>
-      <pubDate>Sun, 07 Jul 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/tides/</guid>
       <description></description>
     </item>
     

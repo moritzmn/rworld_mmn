@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>R conference on Moritz Mueller-Navarra</title>
+    <link>/tags/r-conference/</link>
+    <description>Recent content in R conference on Moritz Mueller-Navarra</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator>
+    <language>en-us</language>
+    <copyright> &amp;copy; Moritz Mueller-Navarra</copyright>
+    <lastBuildDate>Mon, 22 Jul 2019 00:00:00 +0000</lastBuildDate>
+    
+	    <atom:link href="/tags/r-conference/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>satRdays Berlin 2019</title>
+      <link>/post/satrdays-berlin-2019/</link>
+      <pubDate>Mon, 22 Jul 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/post/satrdays-berlin-2019/</guid>
+      <description>
+
+
+&lt;p&gt;This is a short overview/recap from the &lt;strong&gt;satRDays&lt;/strong&gt; [asd]&lt;a href=&#34;https://berlin2019.satrdays.org&#34; class=&#34;uri&#34;&gt;https://berlin2019.satrdays.org&lt;/a&gt; in Berlin June 15th 2019, which I attended. I will shortly summarize the talks I attended and share links and further information on the topics. All code belong to the respective presenters as this only a wrap-up of the meeting. You find almost all the slides here:&lt;/p&gt;
+&lt;p&gt;slides: &lt;a href=&#34;https://github.com/satRdays/berlin2019-slides&#34; class=&#34;uri&#34;&gt;https://github.com/satRdays/berlin2019-slides&lt;/a&gt;&lt;/p&gt;
+&lt;div id=&#34;talks&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Talks&lt;/h1&gt;
+&lt;div id=&#34;some-remedies-for-severe-class-imbalance&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Some remedies for severe class imbalance&lt;/h2&gt;
+&lt;p&gt;For me the day starts of with this very interesting talk by Juan Orduz. The main objective of his presentation is to illustrate techniques for handling class-imbalanced classification problems.&lt;/p&gt;
+&lt;p&gt;You find everything, code &amp;amp; slides, here:&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://juanitorduz.github.io/class_imbalance/&#34; class=&#34;uri&#34;&gt;https://juanitorduz.github.io/class_imbalance/&lt;/a&gt;
+&lt;a href=&#34;https://github.com/satRdays/berlin2019-slides/tree/master/1_Orduz&#34; class=&#34;uri&#34;&gt;https://github.com/satRdays/berlin2019-slides/tree/master/1_Orduz&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;an-overview-on-explainable-ai-in-r&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;An overview on explainable AI in R&lt;/h2&gt;
+&lt;p&gt;Gero Szepannek discusses the tradeoff between acuraccy and interpretibility between machine learning algrotihmns. He presents packages which are trying to shed light into the black box of many complex models, such as gbm’s and neural nets. Discussed packages:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;iml&lt;/li&gt;
+&lt;li&gt;ingredients&lt;/li&gt;
+&lt;li&gt;DALEX&lt;/li&gt;
+&lt;li&gt;mlr&lt;/li&gt;
+&lt;li&gt;…&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;slides:&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/satRdays/berlin2019-slides/blob/master/2_Gero_Szepannek.pdf&#34; class=&#34;uri&#34;&gt;https://github.com/satRdays/berlin2019-slides/blob/master/2_Gero_Szepannek.pdf&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;not-all-users-are-the-same&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Not all users are the same&lt;/h2&gt;
+&lt;p&gt;Grace Meyer talks about analysing data from Android users using Hierarchical Clustering.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;estimating-berlin-house-prices&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Estimating Berlin House Prices&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/satRdays/berlin2019-slides/tree/master/6_Corrie&#34; class=&#34;uri&#34;&gt;https://github.com/satRdays/berlin2019-slides/tree/master/6_Corrie&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;enhancing-creativity-in-programming-with-r-keynote&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Enhancing creativity in programming with R (keynote)&lt;/h2&gt;
+&lt;p&gt;Isabella Gollini presents the usage of R from different perspectives&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/satRdays/berlin2019-slides/blob/master/8_Isabella_Gollini_2019.pdf&#34; class=&#34;uri&#34;&gt;https://github.com/satRdays/berlin2019-slides/blob/master/8_Isabella_Gollini_2019.pdf&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;cran-r-and-the-people-moving-it-forward-keynote&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;CRAN, R, and the people moving it forward (keynote)&lt;/h2&gt;
+&lt;p&gt;It is always a pleasure to listen to a talk by one of the R Core Team members.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/satRdays/berlin2019-slides/blob/master/9_Uwe_Ligges.pdf&#34; class=&#34;uri&#34;&gt;https://github.com/satRdays/berlin2019-slides/blob/master/9_Uwe_Ligges.pdf&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.3.1">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Moritz Mueller-Navarra">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="This is the first post looking at the data.table presentations from useR!2019 which was held in Toulouse from 2019-07-07 to 2019-10-10. For starters we are going to take a look at the presentations from Arun Srinivasan, one of the main developers of data.table. His talk is called THE #RDATATABLEPACKAGEfor fast, flexible and memory efficient data wrangling.
+Talk Agenda:
+General data.table syntaxExplaining .SD &amp; .SDcolsOptimisation &amp; new functionalitiesGeneral data.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="/post/data-table-new-and-old-functions/">
+
+  
+
+
+  
+
+  
+  
+  
+  <meta name="theme-color" content="#2962ff">
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.0/css/all.css" integrity="sha384-aOkxzJ5uQz7WBObEZcHvV5JvRW3TUc2rNPA7pe3AwnsUohiw1Vj2Rgx2KSOkF5+h" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" integrity="sha256-ygkqlh3CYSUri3LhQxzdcm0n1EQvH2Y+U5S2idbLtxs=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css" crossorigin="anonymous" title="hl-light">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark" disabled>
+        
+      
+    
+
+    
+
+    
+
+  
+
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700|Roboto:400,400italic,700|Roboto+Mono&display=swap">
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.min.3834c081887e44130d565828d71a7178.css">
+
+  
+
+  
+  
+  
+
+  
+
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="icon" type="image/png" href="/img/icon.png">
+  <link rel="apple-touch-icon" type="image/png" href="/img/icon-192.png">
+
+  <link rel="canonical" href="/post/data-table-new-and-old-functions/">
+
+  
+  
+  
+  
+    
+    
+  
+  <meta property="twitter:card" content="summary">
+  
+  <meta property="twitter:site" content="@NavarraMoritz">
+  <meta property="twitter:creator" content="@NavarraMoritz">
+  
+  <meta property="og:site_name" content="Moritz Mueller-Navarra">
+  <meta property="og:url" content="/post/data-table-new-and-old-functions/">
+  <meta property="og:title" content="data.table - useR!2019 I | Moritz Mueller-Navarra">
+  <meta property="og:description" content="This is the first post looking at the data.table presentations from useR!2019 which was held in Toulouse from 2019-07-07 to 2019-10-10. For starters we are going to take a look at the presentations from Arun Srinivasan, one of the main developers of data.table. His talk is called THE #RDATATABLEPACKAGEfor fast, flexible and memory efficient data wrangling.
+Talk Agenda:
+General data.table syntaxExplaining .SD &amp; .SDcolsOptimisation &amp; new functionalitiesGeneral data."><meta property="og:image" content="/img/icon-192.png">
+  <meta property="twitter:image" content="/img/icon-192.png"><meta property="og:locale" content="en-us">
+  
+  <meta property="article:published_time" content="2019-07-14T00:00:00&#43;00:00">
+  
+  <meta property="article:modified_time" content="2019-10-29T13:40:04&#43;02:00">
+  
+
+  
+
+
+  
+
+
+
+
+
+  <title>data.table - useR!2019 I | Moritz Mueller-Navarra</title>
+
+</head>
+
+
+<body id="top" data-spy="scroll" data-target="#TableOfContents" data-offset="71" >
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" role="textbox" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+<nav class="navbar navbar-light fixed-top navbar-expand-lg py-0 compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+      <a class="navbar-brand" href="/">Moritz Mueller-Navarra</a>
+      
+      <button type="button" class="navbar-toggler" data-toggle="collapse"
+              data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+        <span><i class="fas fa-bars"></i></span>
+      </button>
+      
+
+    
+    <div class="collapse navbar-collapse" id="navbar">
+
+      
+      
+      <ul class="navbar-nav mr-auto">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#about"><span>Home</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts"><span>Posts</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#projects"><span>Projects</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#contact"><span>Contact</span></a>
+        </li>
+
+        
+        
+
+      
+      </ul>
+      <ul class="navbar-nav ml-auto">
+      
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-search" href="#"><i class="fas fa-search" aria-hidden="true"></i></a>
+        </li>
+        
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-dark-toggle" href="#"><i class="fas fa-moon" aria-hidden="true"></i></a>
+        </li>
+        
+
+      </ul>
+
+    </div>
+  </div>
+</nav>
+
+
+  <article class="article" itemscope itemtype="http://schema.org/Article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1 itemprop="name">data.table - useR!2019 I</h1>
+
+  
+
+  
+    
+
+
+
+<meta content="2019-07-14 00:00:00 &#43;0000 UTC" itemprop="datePublished">
+<meta content="2019-10-29 13:40:04 &#43;0200 &#43;0200" itemprop="dateModified">
+
+<div class="article-metadata">
+
+  
+  
+  
+  
+  <div>
+    
+
+
+
+  <span itemprop="author name" itemtype="http://schema.org/Person"><a href="/authors/admin/">Moritz Mueller-Navarra</a></span>
+
+  </div>
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+          Last updated on
+      
+    
+    <time>Oct 29, 2019</time>
+  </span>
+  
+
+  
+
+  
+  <span class="middot-divider"></span>
+  <span class="article-reading-time">
+    9 min read
+  </span>
+  
+
+  
+  
+
+  
+  
+
+  
+    
+<div class="share-box" aria-hidden="true">
+  <ul class="share">
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://twitter.com/intent/tweet?url=/post/data-table-new-and-old-functions/&amp;text=data.table%20-%20useR!2019%20I" target="_blank" rel="noopener" class="share-btn-twitter">
+          <i class="fab fa-twitter"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.facebook.com/sharer.php?u=/post/data-table-new-and-old-functions/&amp;t=data.table%20-%20useR!2019%20I" target="_blank" rel="noopener" class="share-btn-facebook">
+          <i class="fab fa-facebook-f"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="mailto:?subject=data.table%20-%20useR!2019%20I&amp;body=/post/data-table-new-and-old-functions/" target="_blank" rel="noopener" class="share-btn-email">
+          <i class="fas fa-envelope"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.linkedin.com/shareArticle?url=/post/data-table-new-and-old-functions/&amp;title=data.table%20-%20useR!2019%20I" target="_blank" rel="noopener" class="share-btn-linkedin">
+          <i class="fab fa-linkedin-in"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://web.whatsapp.com/send?text=data.table%20-%20useR!2019%20I%20/post/data-table-new-and-old-functions/" target="_blank" rel="noopener" class="share-btn-whatsapp">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://service.weibo.com/share/share.php?url=/post/data-table-new-and-old-functions/&amp;title=data.table%20-%20useR!2019%20I" target="_blank" rel="noopener" class="share-btn-weibo">
+          <i class="fab fa-weibo"></i>
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+
+  
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style" itemprop="articleBody">
+      
+
+
+<p>This is the first post looking at the <strong>data.table</strong> presentations from <strong>useR!2019</strong> which was held in Toulouse from 2019-07-07 to 2019-10-10. For starters we are going to take a look at the presentations from <em>Arun Srinivasan</em>, one of the main developers of <strong>data.table</strong>. His talk is called <strong>THE #RDATATABLEPACKAGE
+for fast, flexible and memory efficient data wrangling</strong>.</p>
+<p>Talk Agenda:</p>
+<ul>
+<li>General data.table syntax</li>
+<li>Explaining .SD &amp; .SDcols</li>
+<li>Optimisation &amp; new functionalities</li>
+</ul>
+<div id="general-data.table-syntax" class="section level2">
+<h2>General data.table syntax</h2>
+<p>Following code chunk installs the development version of the package, which is needed for some functions explained below.</p>
+<pre class="r"><code>install.packages(&quot;data.table&quot;, repos=&quot;https://Rdatatable.gitlab.io/data.table&quot;)</code></pre>
+<p>We start of with a simple expample.</p>
+<pre class="r"><code>library(&quot;data.table&quot;)</code></pre>
+<pre><code>## Warning: Paket &#39;data.table&#39; wurde unter R Version 3.6.1 erstellt</code></pre>
+<p>We define a data.table DT using the <code>fread</code> function.</p>
+<pre class="r"><code>(DT &lt;- fread(&quot;id code valA valB
+1 c 1 10
+1 b 2 11
+1 c 3 12
+1 c 4 13
+2 a 5 14
+2 a 6 15
+1 b 7 16
+2 a 8 17
+1 c 9 18&quot;))</code></pre>
+<pre><code>##    id code valA valB
+## 1:  1    c    1   10
+## 2:  1    b    2   11
+## 3:  1    c    3   12
+## 4:  1    c    4   13
+## 5:  2    a    5   14
+## 6:  2    a    6   15
+## 7:  1    b    7   16
+## 8:  2    a    8   17
+## 9:  1    c    9   18</code></pre>
+<p>The general data.table syntax is <code>DT[i, j, by]</code>, which you can translate into: <em>i = on which rows, j = what to do (columns), grouped by what</em>. So when we want to get the sum of <code>valA</code>, we can simply do.</p>
+<pre class="r"><code>DT[, sum(valA)]</code></pre>
+<pre><code>## [1] 45</code></pre>
+<p>We have not defined a <code>i</code> nor <code>by</code> argument here. This simply means we want to compute for all rows and grouping is not relevant. Now we group by <code>id</code>.</p>
+<pre class="r"><code>DT[, sum(valA), by = id]</code></pre>
+<pre><code>##    id V1
+## 1:  1 26
+## 2:  2 19</code></pre>
+<p>We can also name the outcome of the column directly. The <code>.()</code> is an alias for <code>list</code>.</p>
+<pre class="r"><code>DT[, .(sumA = sum(valA)), by = id]</code></pre>
+<pre><code>##    id sumA
+## 1:  1   26
+## 2:  2   19</code></pre>
+<p>When you pass a column to the <code>by</code> argument, internally the number of the unique values for that column gets evaluated. Afterwards the rows are associated to the respective group. Then the expression provided in <code>j</code>, <code>sum(valA)</code> gets evaluated for the groups.</p>
+<p>This is a very simple example, but illustrates the general form quite nicely. <em>Arun</em> introduces another simple example by passing an expression to the <code>i</code> argument.</p>
+<pre class="r"><code>DT[code != &quot;b&quot;, .(sumA = sum(valA)), by = id]</code></pre>
+<pre><code>##    id sumA
+## 1:  1   17
+## 2:  2   19</code></pre>
+<p>Here we simply state that <code>code</code> should be not equal to “b”. Very easy and logical syntax.</p>
+</div>
+<div id="explaining-.sd-.sdcols" class="section level2">
+<h2>Explaining .SD &amp; .SDcols</h2>
+<p>We are still operating on DT.</p>
+<pre class="r"><code>DT</code></pre>
+<pre><code>##    id code valA valB
+## 1:  1    c    1   10
+## 2:  1    b    2   11
+## 3:  1    c    3   12
+## 4:  1    c    4   13
+## 5:  2    a    5   14
+## 6:  2    a    6   15
+## 7:  1    b    7   16
+## 8:  2    a    8   17
+## 9:  1    c    9   18</code></pre>
+<p><code>.SD</code> stands for <em>Subset of Data</em>. Together with <code>.SDcols</code> we can use it to simply subset <code>DT</code> by column names and then compute on this subset.</p>
+<p>You could do this:</p>
+<pre class="r"><code>DT[, .SD, .SDcols = &quot;valA&quot;]</code></pre>
+<pre><code>##    valA
+## 1:    1
+## 2:    2
+## 3:    3
+## 4:    4
+## 5:    5
+## 6:    6
+## 7:    7
+## 8:    8
+## 9:    9</code></pre>
+<p>This returns a <code>data.table</code> object with one column <code>valA</code>. You can of course pass more columns.</p>
+<pre class="r"><code>DT[, .SD, .SDcols = c(&quot;valA&quot;, &quot;valB&quot;)]</code></pre>
+<pre><code>##    valA valB
+## 1:    1   10
+## 2:    2   11
+## 3:    3   12
+## 4:    4   13
+## 5:    5   14
+## 6:    6   15
+## 7:    7   16
+## 8:    8   17
+## 9:    9   18</code></pre>
+<p>You can also use the <code>patterns</code> function in <code>.SDcols</code>.</p>
+<pre class="r"><code>DT[, .SD, .SDcols = patterns(&quot;^val&quot;)]</code></pre>
+<pre><code>##    valA valB
+## 1:    1   10
+## 2:    2   11
+## 3:    3   12
+## 4:    4   13
+## 5:    5   14
+## 6:    6   15
+## 7:    7   16
+## 8:    8   17
+## 9:    9   18</code></pre>
+<p>How can we use this functionality to compute the sum of <code>valA</code> and <code>valB</code> grouped by <code>id</code> where <code>code != "b</code> ?
+Easy :-)</p>
+<pre class="r"><code>DT[code != &quot;b&quot;, lapply(.SD, sum), .SDcols = patterns(&quot;^val&quot;), by = &quot;id&quot;]</code></pre>
+<pre><code>##    id valA valB
+## 1:  1   17   53
+## 2:  2   19   46</code></pre>
+<p>The <code>patterns</code> function only returns columns starting with <em>val</em>.
+<code>.SD</code> contains all the columns, except for the grouping columns supplied in <code>by</code>, for each group.</p>
+<pre class="r"><code>DT[code != &quot;b&quot;, print(.SD), .SDcols = c(&quot;code&quot;,&quot;valA&quot;, &quot;valB&quot;), by = id]</code></pre>
+<pre><code>##    code valA valB
+## 1:    c    1   10
+## 2:    c    3   12
+## 3:    c    4   13
+## 4:    c    9   18
+##    code valA valB
+## 1:    a    5   14
+## 2:    a    6   15
+## 3:    a    8   17</code></pre>
+<pre><code>## Empty data.table (0 rows and 1 cols): id</code></pre>
+<p>Once you grouped by <code>id</code> only the columns <code>valA</code> and <code>valB</code> are being considered due to <code>.SDcols</code>. We therefore compute the sums on these columns and not on <code>code</code>.</p>
+<pre class="r"><code>DT[code != &quot;b&quot;, print(.SD), .SDcols = c(&quot;valA&quot;, &quot;valB&quot;), by = id]</code></pre>
+<pre><code>##    valA valB
+## 1:    1   10
+## 2:    3   12
+## 3:    4   13
+## 4:    9   18
+##    valA valB
+## 1:    5   14
+## 2:    6   15
+## 3:    8   17</code></pre>
+<pre><code>## Empty data.table (0 rows and 1 cols): id</code></pre>
+<p>So how does this <code>lapply(.SD, sum)</code> work? <code>lapply</code> is the infamous base function which returns a list. We operate on <code>.SD</code> and compute the sum of every column in <code>.SD</code>. We take a step back and look at the <code>class</code> and <code>typeof</code> of <code>DT</code></p>
+<pre class="r"><code>class(DT)</code></pre>
+<pre><code>## [1] &quot;data.table&quot; &quot;data.frame&quot;</code></pre>
+<pre class="r"><code>typeof(DT)</code></pre>
+<pre><code>## [1] &quot;list&quot;</code></pre>
+<pre class="r"><code>typeof(DT[,.SD])</code></pre>
+<pre><code>## [1] &quot;list&quot;</code></pre>
+<p>You find more information about <code>.SD</code> in this <em>stackoverflow</em> post:</p>
+<p><a href="https://stackoverflow.com/questions/8508482/what-does-sd-stand-for-in-data-table-in-r" class="uri">https://stackoverflow.com/questions/8508482/what-does-sd-stand-for-in-data-table-in-r</a></p>
+<p>You can also check <code>vignette("datatable-sd-usage")</code> in the development version.</p>
+</div>
+<div id="optimisation-new-functionalities" class="section level2">
+<h2>Optimisation &amp; new functionalities</h2>
+<p>Arun presents optimisation principles for operations in <code>i</code>, <code>j</code> &amp; <code>by</code>.</p>
+<div id="optimisation-in-i" class="section level3">
+<h3>Optimisation in “i”</h3>
+<p>We create a <code>data.table</code> which has 200 million rows and two columns <code>x</code> and <code>y</code>.</p>
+<pre class="r"><code>dt &lt;- data.table(x = sample(1e5, 2e8, TRUE), y = runif(2e8)) </code></pre>
+<p>Now we only return rows where the value of <code>x</code> is in <code>1000:2000</code>, we operate in <code>i</code>.</p>
+<pre class="r"><code>system.time(dt[x %in% 1000:2000])
+system.time(dt[x %in% 1000:2000])</code></pre>
+<p>This takes a while (~17s on my laptop), but running the expression a second time results in a substantial speed up (~4s total). Please note that this not a proper benchmark. The second time we call this the expression, it reuses the index created in the first run. This currently works for <code>==</code> and <code>%in%</code> and is called <em>Auto indexing</em>. The index is stored within the <code>data.table</code> as an attribute.</p>
+<p>Now we create a <code>data.table</code> with 20 columns and 50 million rows to demonstrate that expressions in <code>i</code> can run in parallel.</p>
+<pre class="r"><code>dt &lt;- setDT(lapply(1:20, function(x) sample(100, 5e7, TRUE))) </code></pre>
+<p>We operate in <code>i</code> to return the rows, where <code>V1 &gt; 50L</code>. The column is processed in parallel.</p>
+<pre class="r"><code>system.time(dt[V1 &gt; 50L])</code></pre>
+<p>You can set the threads <code>data.table</code> uses with and check the differences.</p>
+<pre class="r"><code>setDTthreads(threads = 1L)
+system.time(dt[V1 &gt; 50L])
+setDTTthreads(threads = 2L)</code></pre>
+</div>
+<div id="optimisation-in-by" class="section level3">
+<h3>Optimisation in “by”</h3>
+<p>Recently the radix order has been parallelised. We define a new data set (200 million rows, 2 cols, ~3GB).</p>
+<pre class="r"><code>dt &lt;- data.table(x=sample(1e5, 2e8, TRUE), y=runif(2e8))</code></pre>
+<p>Now we run this expression, which returns the occurences grouped by <code>x</code>.</p>
+<pre class="r"><code>dt[, .N, by = x]</code></pre>
+</div>
+<div id="optimisation-in-j" class="section level3">
+<h3>Optimisation in “j”</h3>
+<p>In <code>j</code> certain functions are optimized. Arun mentions <code>mean</code>, <code>median</code>, <code>sum</code>, <code>min</code>, <code>max</code>, <code>head</code>, <code>tail</code>.
+We can see a difference, when comparing <code>base::mean</code> with just calling <code>mean</code> in <code>j</code>.</p>
+<pre class="r"><code>dt[, lapply(.SD, base::mean), by=V1]</code></pre>
+<pre class="r"><code>dt[, lapply(.SD, mean), by=V1]</code></pre>
+<p>Internally this expression uses the function <code>mean</code> implemented by <code>data.table</code> in <em>C</em>.</p>
+</div>
+</div>
+<div id="new-functionalities" class="section level2">
+<h2>New functionalities</h2>
+<p>The first function we are going to look at is <code>nafill</code>. This function allows us to fill <code>NA</code> values in a <code>data.table</code> by a specific method, like <em>last observation carried forward (locf)</em>. See <code>?data.table::nafill</code> for more information.</p>
+<div id="nafill" class="section level3">
+<h3>nafill</h3>
+<p><code>nafill</code> is a function that fills missing values in a <code>data.table</code>. We define <code>DT</code> as follows.</p>
+<pre class="r"><code>(DT &lt;- fread(&quot;V1 V2 V3 V4
+1 c NA 10
+2 b 2 NA
+NA c 3 NA
+1 NA 4 NA
+2 NA 5 14&quot;))</code></pre>
+<pre><code>##    V1   V2 V3 V4
+## 1:  1    c NA 10
+## 2:  2    b  2 NA
+## 3: NA    c  3 NA
+## 4:  1 &lt;NA&gt;  4 NA
+## 5:  2 &lt;NA&gt;  5 14</code></pre>
+<p>Now let us try to apply <code>nafill</code> to this object. The function takes in three important arguments:</p>
+<pre class="r"><code>nafill(x, type=c(&quot;const&quot;,&quot;locf&quot;,&quot;nocb&quot;), fill=NA,
+       verbose=getOption(&quot;datatable.verbose&quot;))</code></pre>
+<p><code>x</code> can be a vector, list, data.frame or data.table. The <code>type</code> defines how the missing values should be filled.</p>
+<ul>
+<li><code>locf</code> -&gt; last observation carried forward</li>
+<li><code>nocb</code> -&gt; next observation carried backwards</li>
+<li><code>const</code> -&gt; a constant</li>
+</ul>
+<pre class="r"><code>#(DT &lt;- nafill(DT, &quot;locf&quot;))</code></pre>
+<p>Above code will throw an error indicating that we can only fill columns with type <code>numeric</code> (double &amp; integer). Here the <code>setnafill</code> functions comes in handy:</p>
+<pre class="r"><code>#getting numeric cols
+
+numeric_cols &lt;- names(DT)[DT[, sapply(.SD, is.numeric)]]
+
+setnafill(DT, &quot;locf&quot;, cols = numeric_cols)
+DT[]</code></pre>
+<pre><code>##    V1   V2 V3 V4
+## 1:  1    c NA 10
+## 2:  2    b  2 10
+## 3:  2    c  3 10
+## 4:  1 &lt;NA&gt;  4 10
+## 5:  2 &lt;NA&gt;  5 14</code></pre>
+<p>This updates <code>DT</code> by reference.</p>
+</div>
+<div id="frollmean-frollsum" class="section level3">
+<h3>frollmean &amp; frollsum</h3>
+<p>Now we are going to explore the <code>frollmean</code> and <code>frollsum</code> functions. These functions allow us to compute rolling means and rolling sums.</p>
+<pre class="r"><code>DT[, lapply(.SD, frollmean, 3), .SDcols = numeric_cols]</code></pre>
+<pre><code>##          V1 V3       V4
+## 1:       NA NA       NA
+## 2:       NA NA       NA
+## 3: 1.666667 NA 10.00000
+## 4: 1.666667  3 10.00000
+## 5: 1.666667  4 11.33333</code></pre>
+<pre class="r"><code>#see also ?frollsum</code></pre>
+<pre class="r"><code>DT[, lapply(.SD, frollsum, 3), .SDcols = numeric_cols]</code></pre>
+<pre><code>##    V1 V3 V4
+## 1: NA NA NA
+## 2: NA NA NA
+## 3:  5 NA 30
+## 4:  5  9 30
+## 5:  5 12 34</code></pre>
+</div>
+<div id="coalesce" class="section level3">
+<h3>coalesce</h3>
+<p>The <code>fcoalesce</code> function fills missing values in a vector by trying to pull values from one or more candidate vectors.</p>
+<pre class="r"><code>x &lt;- c(11L, NA, 13L, NA, 15L, NA)
+y &lt;- c(NA, 12L, 5L, NA, NA, NA)
+z &lt;- c(11L, NA, 1L, 14L, NA, NA)
+
+fcoalesce(x, y, z)</code></pre>
+<pre><code>## [1] 11 12 13 14 15 NA</code></pre>
+<p>Given above syntax <code>fcoalesce</code> tries to fill missing values in <code>x</code> by looking at the corresponding elements of <code>y</code> &amp; <code>z</code>. At the second index we find a missing value in <code>x</code>, whereas <code>y = 12L ; z = NA</code>. At the fourth index we find <code>y = NA ; z = 14L</code>. So the new vector becomes <code>11 12 13 14 15 NA</code>.</p>
+</div>
+</div>
+<div id="helpful-links" class="section level2">
+<h2>Helpful links</h2>
+<ul>
+<li><p>The talk: <a href="https://www.youtube.com/watch?v=tWx1ooBSxFc" class="uri">https://www.youtube.com/watch?v=tWx1ooBSxFc</a></p></li>
+<li><p>Slides: <a href="http://www.user2019.fr/static/pres/t258038.pdf" class="uri">http://www.user2019.fr/static/pres/t258038.pdf</a></p></li>
+<li><p>github: <a href="https://github.com/Rdatatable" class="uri">https://github.com/Rdatatable</a>, <a href="https://github.com/Rdatatable/data.table/wiki" class="uri">https://github.com/Rdatatable/data.table/wiki</a></p></li>
+</ul>
+<p>See you soon!</p>
+</div>
+
+    </div>
+
+    
+
+<div class="article-tags">
+  
+  <a class="badge badge-light" href="/tags/data.table/">data.table</a>
+  
+  <a class="badge badge-light" href="/tags/user2019/">useR!2019</a>
+  
+</div>
+
+
+
+    
+      
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+  
+
+
+
+
+
+  
+  
+  
+    
+  
+  
+  <div class="media author-card" itemscope itemtype="http://schema.org/Person">
+    
+      
+      <img class="portrait mr-3" src="/authors/admin/avatar_hucacfa7e6a5d02d8a2e7c8f6bdeba0e03_169166_250x250_fill_lanczos_center_2.png" itemprop="image" alt="Avatar">
+    
+
+    <div class="media-body">
+      <h5 class="card-title" itemprop="name"><a href="/">Moritz Mueller-Navarra</a></h5>
+      
+      <p class="card-text" itemprop="description">A Data Scientist using R</p>
+      <ul class="network-icon" aria-hidden="true">
+        
+          
+          
+          
+            
+          
+          
+          
+          
+          
+            
+          
+          <li>
+            <a itemprop="sameAs" href="/#contact" >
+              <i class="fas fa-envelope"></i>
+            </a>
+          </li>
+        
+          
+          
+          
+            
+          
+          
+          
+          
+          
+            
+          
+          <li>
+            <a itemprop="sameAs" href="https://twitter.com/NavarraMoritz" target="_blank" rel="noopener">
+              <i class="fab fa-twitter"></i>
+            </a>
+          </li>
+        
+          
+          
+          
+            
+          
+          
+          
+          
+          
+            
+          
+          <li>
+            <a itemprop="sameAs" href="https://github.com/moritzmn" target="_blank" rel="noopener">
+              <i class="fab fa-github"></i>
+            </a>
+          </li>
+        
+          
+          
+          
+            
+          
+          
+          
+          
+          
+            
+          
+          <li>
+            <a itemprop="sameAs" href="https://stackoverflow.com/users/6244387/mmn" target="_blank" rel="noopener">
+              <i class="fab fa-stack-overflow"></i>
+            </a>
+          </li>
+        
+          
+          
+          
+            
+          
+          
+          
+          
+          
+            
+          
+          <li>
+            <a itemprop="sameAs" href="https://www.linkedin.com/in/moritz-m%C3%BCller-navarra-917285110/" target="_blank" rel="noopener">
+              <i class="fab fa-linkedin-in"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+
+      
+      
+    
+
+    
+
+    
+
+
+  </div>
+</article>
+
+      
+
+    
+    
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" integrity="sha256-X5PoE3KU5l+JcX+w09p/wHl9AzK333C4hJ2I9S5mD4M=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js" integrity="sha256-aYTdUrn6Ow1DDgh5JTc3aDGnnju48y/1c8s1dgkYPQ8=" crossorigin="anonymous"></script>
+        
+      
+
+      
+      
+    
+
+    
+    
+
+    
+    
+    
+
+    
+    
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    
+    
+    <script>
+      const search_index_filename = "/index.json";
+      const i18n = {
+        'placeholder': "Search...",
+        'results': "results found",
+        'no_results': "No results found"
+      };
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks"
+        };
+    </script>
+    
+
+    
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.2e38db8060788d4ad8568291459b9649.js"></script>
+
+    
+
+
+
+
+
+
+  
+  <div class="container">
+    <footer class="site-footer">
+  
+
+  <p class="powered-by">
+    &copy; Moritz Mueller-Navarra &middot; 
+
+    Powered by the
+    <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
+    <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>.
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" id="back_to_top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
+
+  </div>
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
