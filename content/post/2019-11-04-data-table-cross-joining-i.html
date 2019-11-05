@@ -102,47 +102,47 @@ dt_large &lt;-data.table(rbindlist(lapply(1:n_products, function(x) {
 <p>After generating <code>dt_large</code> using <code>CJ</code> we get <code>dt_large_na</code> with 3.65 million rows (<code>365 days * n_products</code>).</p>
 <pre class="r"><code>system.time(dt_large_na &lt;- dt_large[CJ(product = unique(product), date = seq_dates), on = c(&quot;date&quot;,&quot;product&quot;)])</code></pre>
 <pre><code>##        User      System verstrichen 
-##        1.34        0.04        1.19</code></pre>
+##        0.92        0.06        0.86</code></pre>
 <pre class="r"><code>dt_large_na</code></pre>
 <pre><code>##                date product value
-##       1: 2019-01-01       1    NA
-##       2: 2019-01-02       1    NA
-##       3: 2019-01-03       1    NA
-##       4: 2019-01-04       1    NA
-##       5: 2019-01-05       1    NA
+##       1: 2019-01-01       1     7
+##       2: 2019-01-02       1     6
+##       3: 2019-01-03       1     9
+##       4: 2019-01-04       1     8
+##       5: 2019-01-05       1     4
 ##      ---                         
-## 3649996: 2019-12-27   10000     2
-## 3649997: 2019-12-28   10000     5
-## 3649998: 2019-12-29   10000     8
-## 3649999: 2019-12-30   10000     7
+## 3649996: 2019-12-27   10000    10
+## 3649997: 2019-12-28   10000     9
+## 3649998: 2019-12-29   10000     4
+## 3649999: 2019-12-30   10000     6
 ## 3650000: 2019-12-31   10000    NA</code></pre>
 <p>Thus we get <code>NA</code> when we did not observe a value for a certain product and date.</p>
 <pre class="r"><code>dt_large_na[product == 1]</code></pre>
 <pre><code>##            date product value
-##   1: 2019-01-01       1    NA
-##   2: 2019-01-02       1    NA
-##   3: 2019-01-03       1    NA
-##   4: 2019-01-04       1    NA
-##   5: 2019-01-05       1    NA
+##   1: 2019-01-01       1     7
+##   2: 2019-01-02       1     6
+##   3: 2019-01-03       1     9
+##   4: 2019-01-04       1     8
+##   5: 2019-01-05       1     4
 ##  ---                         
-## 361: 2019-12-27       1     1
-## 362: 2019-12-28       1    NA
-## 363: 2019-12-29       1     8
-## 364: 2019-12-30       1     3
-## 365: 2019-12-31       1     1</code></pre>
+## 361: 2019-12-27       1     8
+## 362: 2019-12-28       1     5
+## 363: 2019-12-29       1     1
+## 364: 2019-12-30       1    NA
+## 365: 2019-12-31       1    NA</code></pre>
 <pre class="r"><code>dt_large_na[product == 5]</code></pre>
 <pre><code>##            date product value
-##   1: 2019-01-01       5     9
-##   2: 2019-01-02       5     5
-##   3: 2019-01-03       5    NA
-##   4: 2019-01-04       5     4
-##   5: 2019-01-05       5    NA
+##   1: 2019-01-01       5    NA
+##   2: 2019-01-02       5     7
+##   3: 2019-01-03       5    10
+##   4: 2019-01-04       5     3
+##   5: 2019-01-05       5     6
 ##  ---                         
-## 361: 2019-12-27       5     5
-## 362: 2019-12-28       5     6
-## 363: 2019-12-29       5    10
-## 364: 2019-12-30       5    NA
-## 365: 2019-12-31       5     8</code></pre>
+## 361: 2019-12-27       5     8
+## 362: 2019-12-28       5     9
+## 363: 2019-12-29       5    NA
+## 364: 2019-12-30       5     1
+## 365: 2019-12-31       5    NA</code></pre>
 </div>
 <div id="filling-missing-values" class="section level1">
 <h1>Filling missing values</h1>
@@ -151,18 +151,18 @@ dt_large &lt;-data.table(rbindlist(lapply(1:n_products, function(x) {
 <p>This simply fills the <code>NA</code> values on a product level by <em>last observation carried forward (locf)</em>. You might want to use a more sophisticated approach for real data.</p>
 <pre class="r"><code>dt_large_na</code></pre>
 <pre><code>##                date product value filled_value
-##       1: 2019-01-01       1    NA           NA
-##       2: 2019-01-02       1    NA           NA
-##       3: 2019-01-03       1    NA           NA
-##       4: 2019-01-04       1    NA           NA
-##       5: 2019-01-05       1    NA           NA
+##       1: 2019-01-01       1     7            7
+##       2: 2019-01-02       1     6            6
+##       3: 2019-01-03       1     9            9
+##       4: 2019-01-04       1     8            8
+##       5: 2019-01-05       1     4            4
 ##      ---                                      
-## 3649996: 2019-12-27   10000     2            2
-## 3649997: 2019-12-28   10000     5            5
-## 3649998: 2019-12-29   10000     8            8
-## 3649999: 2019-12-30   10000     7            7
-## 3650000: 2019-12-31   10000    NA            7</code></pre>
-<p>Imputing missing values requires a lot more thought for real applications. A good ressource is <a href="https://rmisstastic.netlify.com/how-to/impute/missimp" class="uri">https://rmisstastic.netlify.com/how-to/impute/missimp</a>.</p>
+## 3649996: 2019-12-27   10000    10           10
+## 3649997: 2019-12-28   10000     9            9
+## 3649998: 2019-12-29   10000     4            4
+## 3649999: 2019-12-30   10000     6            6
+## 3650000: 2019-12-31   10000    NA            6</code></pre>
+<p>Imputing missing values requires a lot more thought for real applications. A great resource is: <a href="https://rmisstastic.netlify.com/how-to/impute/missimp" class="uri">https://rmisstastic.netlify.com/how-to/impute/missimp</a>.</p>
 <p>See you soon,</p>
 <p>Moritz</p>
 </div>

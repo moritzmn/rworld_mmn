@@ -124,7 +124,7 @@ This simply fills the `NA` values on a product level by *last observation carrie
 dt_large_na
 ```
 
-Imputing missing values requires a lot more thought for real applications. A good ressource is <https://rmisstastic.netlify.com/how-to/impute/missimp>. 
+Imputing missing values requires a lot more thought for real applications. A great resource is: <https://rmisstastic.netlify.com/how-to/impute/missimp>. 
 
 See you soon,
 
