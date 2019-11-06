@@ -1,5 +1,5 @@
 ---
-title: data.table - Generate and Fill missing values.
+title: data.table - Generate and fill missing values.
 author: ''
 date: '2019-11-04'
 slug: data-table-cross-joining-i
@@ -23,7 +23,7 @@ projects: []
 
 Hi,
 
-in this post I illustrate how we can generate `NA` rows using only `data.table` function, where you have a *date* column (or equivalent).  
+in this post I illustrate how we can generate `NA` (missing values) rows using only `data.table` functions, where you have a *date* column (or equivalent) in your data.  
 We begin by loading the package.
 
 ```{r}
@@ -32,7 +32,7 @@ library(data.table)
 
 # Problem 
 
-Let us assume you have a `data.table` with three columns `date`, `value` and `product`. Here `date` is of type *IDate*, `value` & `product` is *integer*. You can think of it as sales data, where you observe daily sales for a certain product. Thus giving you a time series for every product. We assume that we only get a new entry, when we actually observe a sale. Let us look at a minimal example.
+Let us assume you have a `data.table` with three columns `date`, `value` and `product`. Here `date` is of type *IDate*, `value` & `product` are *integer*. You can think of it as sales data, where you observe daily sales for a certain product. Thus giving you a time series for every product. We assume that we only get a new entry, when we actually observe a sale. Let us look at a minimal example.
 
 ```{r}
 (dt <- data.table(date = as.IDate(c("2019-11-01","2019-11-02", "2019-11-04", "2019-11-07")), value = c(3L,4L,1L,8L), product = c(1L,2L,1L,1L)))
@@ -54,20 +54,20 @@ It is obvious that we have not sold anything on certain days. Now, our job is to
 (seq_dates <- seq(as.IDate("2019-11-01"), as.IDate("2019-11-07"), by = "days"))
 ```
 
-Now we can use the `CJ` function from `data.table` to generate a table. We join `dt` to the return value of `CJ` based on the columns `date` and `product`
+Now we can use the `CJ` function from `data.table` to generate a `data.table`. We join `dt` to the return value of `CJ` based on the columns `date` and `product`
 
 ```{r}
 dt[CJ(product = unique(product), date = seq_dates), on = c("date", "product")]
 ```
 
-The `CJ` function simply generates a table with all possible combinations of `date` and `product`.
+The `CJ` function simply generates a `data.table` with all possible combinations of `date` and `product`.
 
 ```{r}
 CJ(date = seq_dates,  product = unique(dt$product))
 ```
 
 
-# Scalibilty
+# Scalability
 
 We check the perfomance of the proposed workflow by generating a `data.table` with two parameters: `n_days` & `n_products`. The code below generates random `n_days` within the year 2019 by `product`. The `value` is simply a random integer. This results in an object with 2.5 million rows and three columns.
 
@@ -89,17 +89,17 @@ sapply(dt_large, typeof)
 ```
 
 
-After generating `dt_large` using `CJ` we get `dt_large_na` with 3.65 million rows (`365 days * n_products`).
+Using `CJ` we get `dt_large_na` with 3.65 million rows (`365 days * n_products`) and missing values for `value`, when did not sold a product on a certain day.
 
 ```{r}
-system.time(dt_large_na <- dt_large[CJ(product = unique(product), date = seq_dates), on = c("date","product")])
+system.time(dt_large_na <- dt_large[CJ(product = unique(product), date = seq_dates), on = c("date", "product")])
 ```
 
 ```{r}
 dt_large_na
 ```
 
-Thus we get `NA` when we did not observe a value for a certain product and date.
+For product 1 & 5 the data looks like this:
 
 ```{r}
 dt_large_na[product == 1]
@@ -112,13 +112,13 @@ dt_large_na[product == 5]
 
 # Filling missing values
 
-We generated a `data.table` with missing values by joining. There are a lot of techniques to fill `NA`. I want to quickly demonstrate how you can use the `nafill` function included in `data.table`. I introduce a new column in `dt_large_na` to demonstrate the functionality.
+We generated a `data.table` with missing values by joining. There are a lot of techniques to fill `NA` values. I want to quickly demonstrate how you can use the `nafill` function included in `data.table`. I introduce a new column in `dt_large_na` to demonstrate the functionality.
 
 ```{r}
 dt_large_na[, filled_value := nafill(value, "locf"), by = "product"]
 ```
 
-This simply fills the `NA` values on a product level by *last observation carried forward (locf)*. You might want to use a more sophisticated approach for real data.
+This simply fills the `NA` values on a product level by *last observation carried forward (locf)*. You might want to use a more sophisticated approach for real data. Please note that `nafill` only accepts numeric vectors.
 
 ```{r}
 dt_large_na
