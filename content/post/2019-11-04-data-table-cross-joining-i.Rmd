@@ -67,7 +67,7 @@ CJ(date = seq_dates,  product = unique(dt$product))
 ```
 
 
-# Scalability
+# Scalabilitie
 
 We check the perfomance of the proposed workflow by generating a `data.table` with two parameters: `n_days` & `n_products`. The code below generates random `n_days` within the year 2019 by `product`. The `value` is simply a random integer. This results in an object with 2.5 million rows and three columns.
 
