@@ -1,0 +1,42 @@
+---
+title: TideTables 0.0.3
+author: admin
+date: '2020-12-16'
+slug: tidetables-0-0-3
+categories: []
+tags:
+  - R package
+  - tides
+  - tide tables
+  - cran
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2020-12-16T12:30:24+01:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+
+
+<p>Hi,</p>
+<p>if you are interested in analyzing and synthesizing tide tables, you should check out the new version of TideTables.
+Version 0.0.3 is now on CRAN <a href="https://cran.r-project.org/web/packages/TideTables/index.html" class="uri">https://cran.r-project.org/web/packages/TideTables/index.html</a></p>
+<p>Main changes are:</p>
+<ol style="list-style-type: decimal">
+<li>Introducing two new functions: <code>BuildTT</code> and <code>SynTT</code>.</li>
+<li>TideTable is again (up to ~50 times) faster, uses less RAM and has a new parameter <code>strict_hwi</code>.</li>
+<li>Minor changes in helper functions, which do not affect the output.</li>
+<li>Using a new set of angular velocities.</li>
+<li>The output format of date/time is now the same as the expected input format.</li>
+<li>Two new internal functions <code>FindOmega</code> and <code>ComputeAfunc</code> introduced. For internal use only!</li>
+</ol>
+<p>The two new functions allow you to build a model of class <code>tidetable</code> given a certain time frame and then later use this model to synthesize a tide table by using <code>SynTT</code>. You will experience a major speed up of the <code>TideTable</code> function, if you have used the package version 0.0.2.
+We also updated the set of angular velocities due to the work of <em>Andreas Boesch</em> and <em>Sylvin Mueller-Navarra</em>, which you can find here: <a href="https://os.copernicus.org/articles/15/1363/2019/" class="uri">https://os.copernicus.org/articles/15/1363/2019/</a></p>
+<p>The package is on also available on github: <a href="https://github.com/moritzmn/TideTables" class="uri">https://github.com/moritzmn/TideTables</a></p>
+<p>Best,
+Moritz</p>
