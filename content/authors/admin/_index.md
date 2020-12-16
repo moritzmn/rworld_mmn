@@ -46,7 +46,7 @@ I am a freelancer applying Data Science using *R*. I studied engineering and eco
 I believe that interacting with other programmers is fundamental to improving your skills. I constantly visit *R* conferences to learn new skills and meet with other *R* developers. 
 
 In the past years my projects focused around tidal data and offshore windenergy.  
-In my spare time I work on Mobile Apps with *Java* and recently *Dart* using the *Flutter* framework. 
+Currently I am exploring the world of Cloud Computing using R.
 
 Furthermore I like do any kind of sports and recently started doing yoga.  
 
