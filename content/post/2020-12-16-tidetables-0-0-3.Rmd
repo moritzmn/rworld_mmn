@@ -1,0 +1,45 @@
+---
+title: TideTables 0.0.3
+author: admin
+date: '2020-12-16'
+slug: tidetables-0-0-3
+categories: []
+tags:
+  - R package
+  - tides
+  - tide tables
+  - cran
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2020-12-16T12:30:24+01:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+Hi,
+
+if you are interested in analyzing and synthesizing tide tables, you should check out the new version of TideTables.
+Version 0.0.3 is now on CRAN <https://cran.r-project.org/web/packages/TideTables/index.html> 
+
+Main changes are:
+
+1. Introducing two new functions: `BuildTT` and `SynTT`. 
+2. TideTable is again (up to ~50 times) faster, uses less RAM and has a new parameter `strict_hwi`.
+3. Minor changes in helper functions, which do not affect the output.
+4. Using a new set of angular velocities. 
+5. The output format of date/time is now the same as the expected input format.
+6. Two new internal functions `FindOmega` and `ComputeAfunc` introduced. For internal use only!
+
+The two new functions allow you to build a model of class `tidetable` given a certain time frame and then later use this model to synthesize a tide table by using `SynTT`. You will experience a major speed up of the `TideTable` function, if you have used the package version 0.0.2. 
+We also updated the set of angular velocities due to the work of *Andreas Boesch* and *Sylvin Mueller-Navarra*, which you can find here: <https://os.copernicus.org/articles/15/1363/2019/>
+
+The package is on also available on github: <https://github.com/moritzmn/TideTables>
+
+Best,
+Moritz
+
