@@ -1,7 +1,7 @@
 ---
 title: Reading Data - data.table & arrow
 author: admin
-date: '2021-02-17'
+date: '2021-02-22'
 slug: []
 categories: []
 tags:
@@ -10,7 +10,7 @@ tags:
 subtitle: ''
 summary: ''
 authors: []
-lastmod: '2021-02-19T15:12:05+01:00'
+lastmod: '2021-02-22T15:12:05+01:00'
 featured: no
 image:
   caption: ''
@@ -50,22 +50,23 @@ library(microbenchmark)</code></pre>
 <p>We define two functions, which are calling the <code>arrow</code> or <code>data.table</code> functions.</p>
 <pre class="r"><code>#Calling arrow
 arrow_read &lt;- function() {
-  read_delim_arrow(file = path_to, delim = &quot;\t&quot;,                                                                col_names = FALSE, escape_double = FALSE)
+  read_delim_arrow(file = path_to, delim = &quot;\t&quot;, 
+                   col_names = FALSE)
 }
 #Calling data.table
 dt_read    &lt;- function() {
   fread(file = path_to, sep = &quot;\t&quot;, header = FALSE)
 }</code></pre>
 <p>Using the <code>microbenchmark</code> package, we call the functions five times each and print/plot the results. Each function should be called 3 times as a block.</p>
-<pre class="r"><code>mb &lt;- microbenchmark::microbenchmark(arrow_read(), dt_read(), 
+<pre class="r"><code>mb &lt;- microbenchmark::microbenchmark(dt_read(), arrow_read(),  
                                      times = 3, control = list(order = &quot;block&quot;))</code></pre>
 <pre class="r"><code>print(mb)</code></pre>
-<pre><code>## Unit: seconds
-##          expr       min        lq      mean    median        uq       max neval
-##  arrow_read()  1.128856  1.137955  1.200293  1.147055  1.236012  1.324969     3
-##     dt_read() 10.467963 12.364040 13.964196 14.260117 15.712312 17.164507     3</code></pre>
+<pre><code>## Unit: milliseconds
+##          expr       min        lq      mean    median        uq      max neval
+##     dt_read()  888.8003  900.9147  934.8187  913.0291  957.8279 1002.627     3
+##  arrow_read() 1480.2873 1993.2762 2261.2065 2506.2651 2651.6662 2797.067     3</code></pre>
 <p><img src="{{< blogdown/postref >}}index.en_files/figure-html/default_classes_plot-1.png" width="672" /></p>
-<p>So, <code>arrow::read_delim_arrow</code> is super fast here, but maybe I am overlooking something. We take a look at the objects that are being created</p>
+<p>So, <code>arrow::read_delim_arrow</code> is super fast here, comparable do <code>data.table::fread</code>. We take a look at the objects that are being created.</p>
 <pre class="r"><code>da &lt;- arrow_read()
 str(da)</code></pre>
 <pre><code>## Classes &#39;tbl_df&#39;, &#39;tbl&#39; and &#39;data.frame&#39;:    11353967 obs. of  3 variables:
@@ -75,20 +76,20 @@ str(da)</code></pre>
 <pre class="r"><code>dt &lt;- dt_read()
 str(dt)</code></pre>
 <pre><code>## Classes &#39;data.table&#39; and &#39;data.frame&#39;:   11353967 obs. of  3 variables:
-##  $ V1: chr  &quot;1997-11-01 00:00:00&quot; &quot;1997-11-01 00:10:00&quot; &quot;1997-11-01 00:20:00&quot; &quot;1997-11-01 00:30:00&quot; ...
+##  $ V1: POSIXct, format: &quot;1997-11-01 00:00:00&quot; &quot;1997-11-01 00:10:00&quot; ...
 ##  $ V2: int  329 330 339 354 374 396 419 442 464 484 ...
 ##  $ V3: int  NA NA NA NA NA NA NA NA NA NA ...
 ##  - attr(*, &quot;.internal.selfref&quot;)=&lt;externalptr&gt;</code></pre>
-<p><code>arrow_read()</code> creates a <code>tibble</code> with three columns (f0, f1, f2). With f0 being a <code>POSIXct</code> vector, while <code>dt_read()</code> returns a <code>data.table</code>, with V1 as a character vector. If we want to compare both functions, while returning the same types in each column, we should set the column classes explicitly.</p>
+<p><code>arrow_read()</code> creates a <code>tibble</code> with three columns (f0, f1, f2). With f0 being a <code>POSIXct</code> vector, while <code>dt_read()</code> returns a <code>data.table</code>, with columns V1, V2, V3.</p>
 </div>
 <div id="setting-column-classes" class="section level2">
 <h2>Setting column classes</h2>
-<p>We overwrite the functions setting the column classes.</p>
+<p>We overwrite the functions setting the column classes explicitly.</p>
 <pre class="r"><code>#Calling arrow
 #setting the col_types parameter
 arrow_read &lt;- function(col_classes = c(&quot;tii&quot;) ) {
-  read_delim_arrow(file = path_to, delim = &quot;\t&quot;, escape_double = FALSE, 
-                          col_types = col_classes, col_names = c(&quot;V1&quot;, &quot;V2&quot;, &quot;V3&quot;))
+  read_delim_arrow(file = path_to, delim = &quot;\t&quot;, col_types = col_classes, 
+                   col_names = c(&quot;V1&quot;, &quot;V2&quot;, &quot;V3&quot;))
 }
 #Calling data.table
 #setting the colClasses parameter
@@ -96,38 +97,69 @@ dt_read    &lt;- function(col_classes = c(&quot;POSIXct&quot;, &quot;integer&quo
   fread(file = path_to, sep = &quot;\t&quot;, header = FALSE, tz = &quot;UTC&quot;,
                     colClasses = col_classes)
 }</code></pre>
-<p>We run the benchmark again.</p>
-<pre><code>## Unit: milliseconds
-##          expr      min        lq     mean   median       uq      max neval
-##  arrow_read() 678.2325 2135.4028 2531.679 2753.858 2986.360 4104.540     5
-##     dt_read() 730.0057  773.9883 1369.375 1423.809 1612.917 2306.155     5</code></pre>
-<p><img src="{{< blogdown/postref >}}index.en_files/figure-html/posixct_classes_plot-1.png" width="672" /></p>
-<pre class="r"><code>dt &lt;- dt_read()
-str(dt)</code></pre>
-<pre><code>## Classes &#39;data.table&#39; and &#39;data.frame&#39;:   11353967 obs. of  3 variables:
-##  $ V1: POSIXct, format: &quot;1997-11-01 00:00:00&quot; &quot;1997-11-01 00:10:00&quot; ...
-##  $ V2: int  329 330 339 354 374 396 419 442 464 484 ...
-##  $ V3: int  NA NA NA NA NA NA NA NA NA NA ...
-##  - attr(*, &quot;.internal.selfref&quot;)=&lt;externalptr&gt;</code></pre>
-</div>
-<div id="what-if-i-want-character" class="section level2">
-<h2>What if I want character?</h2>
-<p><code>arrow</code> automatically detects that the first column is a date/time object and reads it as <code>POSIXct</code>, whereas <code>fread</code> defaults to character. Let us assume for now that the first column should be read as a character vector. We can set the parameter of the functions as such:</p>
+<p><code>arrow</code> and <code>data.table</code> automatically detect that the first column is a date/time object and reads it as <code>POSIXct</code>, whereas Let us assume for now that the first column should be read as a character vector. We can set the parameter of the functions as such:</p>
 <pre class="r"><code>a_c &lt;- c(&quot;cii&quot;)
 d_c &lt;- c(&quot;character&quot;, &quot;integer&quot;, &quot;integer&quot;)
 
 mb &lt;- microbenchmark::microbenchmark(arrow_read(col_classes = a_c), 
                                      dt_read(col_classes = d_c), 
-                                     times = 5, control = list(order = &quot;block&quot;))</code></pre>
+                                     times = 3, control = list(order = &quot;block&quot;))</code></pre>
 <p>The results of the benchmark is shown below:</p>
 <pre><code>## Unit: seconds
-##                           expr      min       lq     mean   median       uq
-##  arrow_read(col_classes = a_c) 3.006417 3.138927 3.834311 3.271698 3.396560
-##     dt_read(col_classes = d_c) 2.568249 2.605525 3.920655 3.439121 3.726911
-##       max neval
-##  6.357953     5
-##  7.263471     5</code></pre>
+##                           expr      min       lq      mean    median       uq
+##  arrow_read(col_classes = a_c) 4.699052 8.700987 12.638073 12.702922 16.60758
+##     dt_read(col_classes = d_c) 2.545700 3.061817  3.584553  3.577935  4.10398
+##        max neval
+##  20.512243     3
+##   4.630025     3</code></pre>
 <p><img src="{{< blogdown/postref >}}index.en_files/figure-html/character_column_plot-1.png" width="672" /></p>
+</div>
+<div id="threads" class="section level2">
+<h2>Threads</h2>
+<p>Since I am new to the <code>arrow</code> library, I do not know, how many threads it uses. We can check and set the number of threads for <code>arrow</code> and <code>data.table</code> using built-in functions.</p>
+<pre class="r"><code>arrow::cpu_count()</code></pre>
+<pre><code>## [1] 4</code></pre>
+<pre class="r"><code>data.table::getDTthreads()</code></pre>
+<pre><code>## [1] 2</code></pre>
+<p>This makes we wonder what happens when we set the threads and compare the reader functions again.</p>
+<pre class="r"><code>SetThreads &lt;- function(n_threads = 2L) {
+  arrow::set_cpu_count(num_threads = n_threads)
+  data.table::setDTthreads(threads = n_threads)
+}</code></pre>
+<pre class="r"><code>mb &lt;- vector(mode = &quot;list&quot;, length = 4L)
+
+for(i in 1L:4L) {
+  SetThreads(n_threads = i)
+
+a_c &lt;- c(&quot;cii&quot;)
+d_c &lt;- c(&quot;character&quot;, &quot;integer&quot;, &quot;integer&quot;)
+
+mb[[i]] &lt;- summary(microbenchmark::microbenchmark(arrow_read(col_classes = a_c), 
+                                     dt_read(col_classes = d_c), 
+                                     times = 3, control = list(order = &quot;block&quot;)))
+
+}
+
+mb &lt;- rbindlist(mb, idcol = &quot;threads&quot;)</code></pre>
+<pre class="r"><code>print(mb)</code></pre>
+<pre><code>##    threads                          expr      min       lq     mean   median
+## 1:       1 arrow_read(col_classes = a_c) 5.428651 5.626497 6.997638 5.824344
+## 2:       1    dt_read(col_classes = d_c) 4.964640 5.072506 6.677696 5.180372
+## 3:       2 arrow_read(col_classes = a_c) 4.191114 4.856675 7.376874 5.522235
+## 4:       2    dt_read(col_classes = d_c) 3.442416 4.050537 4.406088 4.658658
+## 5:       3 arrow_read(col_classes = a_c) 3.802427 4.103590 4.213372 4.404753
+## 6:       3    dt_read(col_classes = d_c) 3.240687 3.336594 4.519840 3.432501
+## 7:       4 arrow_read(col_classes = a_c) 2.910719 2.933908 5.316196 2.957097
+## 8:       4    dt_read(col_classes = d_c) 2.460618 2.481157 2.862984 2.501697
+##          uq       max neval
+## 1: 7.782131  9.739919     3
+## 2: 7.534224  9.888076     3
+## 3: 8.969754 12.417272     3
+## 4: 4.887925  5.117191     3
+## 5: 4.418845  4.432937     3
+## 6: 5.159417  6.886333     3
+## 7: 6.518935 10.080773     3
+## 8: 3.064166  3.626636     3</code></pre>
 </div>
 <div id="wrapping-up" class="section level2">
 <h2>Wrapping up</h2>
