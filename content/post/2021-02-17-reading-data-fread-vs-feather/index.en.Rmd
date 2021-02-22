@@ -131,8 +131,8 @@ dt_read    <- function(col_classes = c("POSIXct", "integer", "integer")) {
 a_c <- c("cii")
 d_c <- c("character", "integer", "integer")
 
-mb <- microbenchmark::microbenchmark(arrow_read(col_classes = a_c), 
-                                     dt_read(col_classes = d_c), 
+mb <- microbenchmark::microbenchmark(dt_read(col_classes = d_c),
+                                     arrow_read(col_classes = a_c),
                                      times = 3, control = list(order = "block"))
 ```
 
@@ -177,8 +177,8 @@ for(i in 1L:4L) {
 a_c <- c("cii")
 d_c <- c("character", "integer", "integer")
 
-mb[[i]] <- summary(microbenchmark::microbenchmark(arrow_read(col_classes = a_c), 
-                                     dt_read(col_classes = d_c), 
+mb[[i]] <- summary(microbenchmark::microbenchmark(dt_read(col_classes = d_c),
+                                                  arrow_read(col_classes = a_c),
                                      times = 3, control = list(order = "block")))
 
 }

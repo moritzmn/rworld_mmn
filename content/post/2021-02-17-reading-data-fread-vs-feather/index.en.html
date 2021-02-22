@@ -62,9 +62,9 @@ dt_read    &lt;- function() {
                                      times = 3, control = list(order = &quot;block&quot;))</code></pre>
 <pre class="r"><code>print(mb)</code></pre>
 <pre><code>## Unit: milliseconds
-##          expr       min        lq      mean    median        uq      max neval
-##     dt_read()  888.8003  900.9147  934.8187  913.0291  957.8279 1002.627     3
-##  arrow_read() 1480.2873 1993.2762 2261.2065 2506.2651 2651.6662 2797.067     3</code></pre>
+##          expr      min       lq     mean    median        uq       max neval
+##     dt_read() 862.1386 863.7842 867.7227  865.4299  870.5147  875.5995     3
+##  arrow_read() 805.2859 922.7686 976.3603 1040.2512 1061.8974 1083.5437     3</code></pre>
 <p><img src="{{< blogdown/postref >}}index.en_files/figure-html/default_classes_plot-1.png" width="672" /></p>
 <p>So, <code>arrow::read_delim_arrow</code> is super fast here, comparable do <code>data.table::fread</code>. We take a look at the objects that are being created.</p>
 <pre class="r"><code>da &lt;- arrow_read()
@@ -101,17 +101,17 @@ dt_read    &lt;- function(col_classes = c(&quot;POSIXct&quot;, &quot;integer&quo
 <pre class="r"><code>a_c &lt;- c(&quot;cii&quot;)
 d_c &lt;- c(&quot;character&quot;, &quot;integer&quot;, &quot;integer&quot;)
 
-mb &lt;- microbenchmark::microbenchmark(arrow_read(col_classes = a_c), 
-                                     dt_read(col_classes = d_c), 
+mb &lt;- microbenchmark::microbenchmark(dt_read(col_classes = d_c),
+                                     arrow_read(col_classes = a_c),
                                      times = 3, control = list(order = &quot;block&quot;))</code></pre>
 <p>The results of the benchmark is shown below:</p>
 <pre><code>## Unit: seconds
-##                           expr      min       lq      mean    median       uq
-##  arrow_read(col_classes = a_c) 4.699052 8.700987 12.638073 12.702922 16.60758
-##     dt_read(col_classes = d_c) 2.545700 3.061817  3.584553  3.577935  4.10398
+##                           expr      min       lq     mean   median        uq
+##     dt_read(col_classes = d_c) 2.849376 6.334458 8.475382 9.819539 11.288384
+##  arrow_read(col_classes = a_c) 4.176872 4.260962 4.440585 4.345051  4.572441
 ##        max neval
-##  20.512243     3
-##   4.630025     3</code></pre>
+##  12.757229     3
+##   4.799831     3</code></pre>
 <p><img src="{{< blogdown/postref >}}index.en_files/figure-html/character_column_plot-1.png" width="672" /></p>
 </div>
 <div id="threads" class="section level2">
@@ -134,8 +134,8 @@ for(i in 1L:4L) {
 a_c &lt;- c(&quot;cii&quot;)
 d_c &lt;- c(&quot;character&quot;, &quot;integer&quot;, &quot;integer&quot;)
 
-mb[[i]] &lt;- summary(microbenchmark::microbenchmark(arrow_read(col_classes = a_c), 
-                                     dt_read(col_classes = d_c), 
+mb[[i]] &lt;- summary(microbenchmark::microbenchmark(dt_read(col_classes = d_c),
+                                                  arrow_read(col_classes = a_c),
                                      times = 3, control = list(order = &quot;block&quot;)))
 
 }
@@ -143,23 +143,23 @@ mb[[i]] &lt;- summary(microbenchmark::microbenchmark(arrow_read(col_classes = a_
 mb &lt;- rbindlist(mb, idcol = &quot;threads&quot;)</code></pre>
 <pre class="r"><code>print(mb)</code></pre>
 <pre><code>##    threads                          expr      min       lq     mean   median
-## 1:       1 arrow_read(col_classes = a_c) 5.428651 5.626497 6.997638 5.824344
-## 2:       1    dt_read(col_classes = d_c) 4.964640 5.072506 6.677696 5.180372
-## 3:       2 arrow_read(col_classes = a_c) 4.191114 4.856675 7.376874 5.522235
-## 4:       2    dt_read(col_classes = d_c) 3.442416 4.050537 4.406088 4.658658
-## 5:       3 arrow_read(col_classes = a_c) 3.802427 4.103590 4.213372 4.404753
-## 6:       3    dt_read(col_classes = d_c) 3.240687 3.336594 4.519840 3.432501
-## 7:       4 arrow_read(col_classes = a_c) 2.910719 2.933908 5.316196 2.957097
-## 8:       4    dt_read(col_classes = d_c) 2.460618 2.481157 2.862984 2.501697
-##          uq       max neval
-## 1: 7.782131  9.739919     3
-## 2: 7.534224  9.888076     3
-## 3: 8.969754 12.417272     3
-## 4: 4.887925  5.117191     3
-## 5: 4.418845  4.432937     3
-## 6: 5.159417  6.886333     3
-## 7: 6.518935 10.080773     3
-## 8: 3.064166  3.626636     3</code></pre>
+## 1:       1    dt_read(col_classes = d_c) 3.540304 3.692165 4.439417 3.844026
+## 2:       1 arrow_read(col_classes = a_c) 4.198402 4.738828 5.937146 5.279254
+## 3:       2    dt_read(col_classes = d_c) 2.824914 2.845855 4.406937 2.866795
+## 4:       2 arrow_read(col_classes = a_c) 3.464902 3.890802 4.175166 4.316702
+## 5:       3    dt_read(col_classes = d_c) 2.832681 2.854359 2.950912 2.876038
+## 6:       3 arrow_read(col_classes = a_c) 3.479970 3.493036 4.243320 3.506102
+## 7:       4    dt_read(col_classes = d_c) 2.386013 2.403941 4.573434 2.421869
+## 8:       4 arrow_read(col_classes = a_c) 2.816352 2.825118 3.145613 2.833883
+##          uq      max neval
+## 1: 4.888974 5.933922     3
+## 2: 6.806517 8.333781     3
+## 3: 5.197948 7.529101     3
+## 4: 4.530299 4.743895     3
+## 5: 3.010027 3.144016     3
+## 6: 4.624995 5.743888     3
+## 7: 5.667145 8.912422     3
+## 8: 3.310244 3.786605     3</code></pre>
 </div>
 <div id="wrapping-up" class="section level2">
 <h2>Wrapping up</h2>
