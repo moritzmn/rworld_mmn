@@ -1,0 +1,195 @@
+---
+title: Reading Data - data.table & arrow
+author: admin
+date: '2021-02-17'
+slug: []
+categories: []
+tags:
+  - data.table
+  - arrow
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2021-02-19T15:12:05+01:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+Hi,
+I recently stumbled upon the discussion on twitter, concerning the speed of reading data into R. A recent conference talk at rstudio::global, where it was claimed that `arrow` could outperform `data.table´s fread` function and the following debate on twitter got me interested in testing `arrow´s` data reading capabilities vs `data.table´s`. This is not a comprehensive benchmark, rather a test for data I used in one of my last project. 
+
+## Data
+
+We are going to download water level data from Hamburg, St.Pauli, Germany.
+You can access the data here: <https://www.kuestendaten.de/DE/dynamisch/Funktionen/Liste_der_vorhandenen_Daten/index.php.html>
+
+You need to input a few parameters here:
+
+- Portal                 = Portal Tideelbe
+- Erhebende Organisation = Hamburg Port Authority (HPA)
+- Themenbereich          = Alle
+- Einzelthema            = Wasserstand
+
+Then choose the data for St. Pauli (*Wasserstand (Ganglinie)*)
+The downloaded file is a zip file, which you can unzip using something like (using your path to the downloaded data):
+
+```{r eval=FALSE, include=TRUE}
+unzip(zipfile = file.path("path"), exdir = file.path("path"))
+```
+
+You should get a txt file named *directDownload_97.txt*, which we are going to read into R using the functions `data.table::fread` and `arrow::read_delim_arrow`. To make things a little bit easier I deleted the header and the tail of the file by hand.
+
+## A first try
+
+Now we load the packages into our R session and set the path to the file you created with `unzip` and cleaned by hand.
+
+```{r message=FALSE, warning=FALSE}
+library(data.table)
+library(arrow)
+library(microbenchmark)
+```
+
+You need set the path to the unzipped and cleaned file.
+
+```{r}
+path_to <- file.path("D:", "Projekte", "TestsPackages", "data", "directDownload_97.txt")
+```
+
+We define two functions, which are calling the `arrow` or `data.table` functions.
+
+```{r}
+#Calling arrow
+arrow_read <- function() {
+  read_delim_arrow(file = path_to, delim = "\t", 
+                   col_names = FALSE)
+}
+#Calling data.table
+dt_read    <- function() {
+  fread(file = path_to, sep = "\t", header = FALSE)
+}
+```
+
+Using the `microbenchmark` package, we call the functions five times each and print/plot the results. Each function should be called 3 times as a block. 
+
+```{r}
+mb <- microbenchmark::microbenchmark(dt_read(), arrow_read(),  
+                                     times = 3, control = list(order = "block"))
+```
+
+```{r}
+print(mb)
+```
+
+```{r default_classes_plot, echo=FALSE}
+plot(mb, main = "arrow vs. data.table - default classes")
+```
+
+So, `arrow::read_delim_arrow` is super fast here, comparable do `data.table::fread`. We take a look at the objects that are being created.
+
+```{r}
+da <- arrow_read()
+str(da)
+```
+
+
+```{r}
+dt <- dt_read()
+str(dt)
+```
+
+`arrow_read()` creates a `tibble` with three columns (f0, f1, f2). With f0 being a `POSIXct` vector, while `dt_read()` returns a `data.table`, with columns V1, V2, V3. 
+
+## Setting column classes
+
+We overwrite the functions setting the column classes explicitly.
+
+```{r}
+#Calling arrow
+#setting the col_types parameter
+arrow_read <- function(col_classes = c("tii") ) {
+  read_delim_arrow(file = path_to, delim = "\t", col_types = col_classes, 
+                   col_names = c("V1", "V2", "V3"))
+}
+#Calling data.table
+#setting the colClasses parameter
+dt_read    <- function(col_classes = c("POSIXct", "integer", "integer")) {
+  fread(file = path_to, sep = "\t", header = FALSE, tz = "UTC",
+                    colClasses = col_classes)
+}
+
+```
+
+`arrow` and `data.table` automatically detect that the first column is a date/time object and reads it as `POSIXct`, whereas Let us assume for now that the first column should be read as a character vector. We can set the parameter of the functions as such:
+
+
+```{r}
+
+a_c <- c("cii")
+d_c <- c("character", "integer", "integer")
+
+mb <- microbenchmark::microbenchmark(arrow_read(col_classes = a_c), 
+                                     dt_read(col_classes = d_c), 
+                                     times = 3, control = list(order = "block"))
+```
+
+The results of the benchmark is shown below:
+
+```{r echo=FALSE}
+print(mb)
+```
+
+```{r character_column_plot, echo=FALSE}
+plot(mb, main = "arrow vs. data.table - character column")
+```
+
+## Threads
+
+Since I am new to the `arrow` library, I do not know, how many threads it uses. We can check and set the number of threads for `arrow` and `data.table` using built-in functions.
+
+```{r}
+arrow::cpu_count()
+```
+
+```{r}
+data.table::getDTthreads()
+```
+
+This makes we wonder what happens when we set the threads and compare the reader functions again.
+
+```{r}
+SetThreads <- function(n_threads = 2L) {
+  arrow::set_cpu_count(num_threads = n_threads)
+  data.table::setDTthreads(threads = n_threads)
+}
+```
+
+
+```{r}
+mb <- vector(mode = "list", length = 4L)
+
+for(i in 1L:4L) {
+  SetThreads(n_threads = i)
+
+a_c <- c("cii")
+d_c <- c("character", "integer", "integer")
+
+mb[[i]] <- summary(microbenchmark::microbenchmark(arrow_read(col_classes = a_c), 
+                                     dt_read(col_classes = d_c), 
+                                     times = 3, control = list(order = "block")))
+
+}
+
+mb <- rbindlist(mb, idcol = "threads")
+```
+```{r}
+print(mb)
+```
+
+
+## Wrapping up
+
+I use data.table on a daily basis for my scripts and frequently call `fread` to read data into my R session. `arrow` is super impressive and performance of both functions is amazing. Thanks to all package developers for enhancing our lifes :-). See you soon!
