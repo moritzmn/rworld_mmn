@@ -1,7 +1,7 @@
 ---
 title: Reading Data - data.table & arrow
 author: admin
-date: '2021-02-17'
+date: '2021-02-22'
 slug: []
 categories: []
 tags:
@@ -10,7 +10,7 @@ tags:
 subtitle: ''
 summary: ''
 authors: []
-lastmod: '2021-02-19T15:12:05+01:00'
+lastmod: '2021-02-22T15:12:05+01:00'
 featured: no
 image:
   caption: ''
