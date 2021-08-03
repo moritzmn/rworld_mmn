@@ -1,0 +1,38 @@
+---
+title: TideCurves 0.0.5
+author: admin
+date: '2021-08-03'
+slug: []
+categories: []
+tags:
+  - TideCurves
+  - tides
+  - R package
+  - R
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2021-08-03T15:02:42+02:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+Hi,
+
+if you are interested in analyzing and synthesizing tide curves, you should check out the new version of TideCurves.
+Version 0.0.5 is now on CRAN <https://cran.r-project.org/web/packages/TideCurves/index.html> 
+
+Main changes are:
+
+* Introducing two new exported functions: BuildTC() & SynTC(). Please see examples and README.
+* Added a new internal function BuildDesign().
+
+
+The package is on also available on github: <https://github.com/moritzmn/TideCurves>
+
+Best,
+Moritz
