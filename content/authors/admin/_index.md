@@ -7,6 +7,9 @@ education:
   - course: Diplom (equiv. Master) Engineering & Economics
     institution: Technical University Hamburg
     year: 2014
+  - course: Data Scientist Professional
+    institution: DataCamp
+    year: 2021
 
 email: ""
 interests:
@@ -45,7 +48,7 @@ I am a freelancer applying Data Science using *R*. I studied engineering and eco
 
 I believe that interacting with other programmers is fundamental to improving your skills. I constantly visit *R* conferences to learn new skills and meet with other *R* developers. 
 
-In the past years my projects focused around tidal data and offshore windenergy.  
+In the past years my projects focused around tidal data and offshore wind energy.  
 Currently I am exploring the world of Cloud Computing using R.
 
 Furthermore I like do any kind of sports and recently started doing yoga.  
