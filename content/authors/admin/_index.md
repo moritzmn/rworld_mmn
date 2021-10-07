@@ -10,6 +10,7 @@ education:
   - course: Data Scientist Professional
     institution: DataCamp
     year: 2021
+    link: https://www.datacamp.com/certificate/DS0011186732540
 
 email: ""
 interests:
