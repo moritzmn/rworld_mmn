@@ -29,8 +29,16 @@ I also teach a Beginner´s course on udemy which is called *R Basics* unfortunat
 
 If you are interested in the courses, please use following links:
 
+## Regression Pipeline with R and tidymodels (english)
+
+- <https://www.udemy.com/course/pipeline-tidymodels/?referralCode=2F12E2D5273D866CC0FD>
+
+## Regression Pipeline using tidymodels (german)
+
 - <https://www.udemy.com/course/regressions-pipeline-r/?referralCode=CCF54A38E243A7CF646C>
 You can use the coupon-code *F3D83F32BD427297682F* to get a discount if you like.
+
+## R Basics (german)
 
 - <https://www.udemy.com/course/r-basics-u/?referralCode=294114E77907E6E07B63>
 
