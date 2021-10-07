@@ -11,6 +11,15 @@ education:
     institution: DataCamp
     year: 2021
     link: https://www.datacamp.com/certificate/DS0011186732540
+  - course: R Programmer Track
+    institution: DataCamp
+    year: 2021
+  - course: Machine Learning Scientist with Python
+    institution: DataCamp
+    year: 2021
+  - course: Data Analyst with SQL Server
+    institution: DataCamp
+    year 2021
 
 email: ""
 interests:

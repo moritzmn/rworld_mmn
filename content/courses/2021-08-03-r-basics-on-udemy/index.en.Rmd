@@ -19,3 +19,11 @@ image:
   preview_only: no
 projects: []
 ---
+
+Dieser Kurs dient als Einstieg in die Programmierung und Datenanalyse mit R & RStudio. In dem Kurs lernt Ihr im ersten Schritt Grundlagen der R-Programmierung. Abschluss des ersten Kapitels bildet ein kleines Projekt, in dem wir die Fläche eines Kreises approximieren. Dafür schreiben wir angepasste Funktionen. Danach erfolgt, eine Einführung in die, aus Sicht des Autors, wichtigsten Pakete für die Datenanalyse. Ihr lernt das "tidyverse" und "data.table" kennen, die in der Praxis sehr häufig für die Datenanalyse benutzt werden. "data.table" ermöglicht euch die Behandlung sehr großer Datenmengen in kurzer Zeit. Die in dem ersten Kapitel eingeführten Möglichkeiten zur grafischen Darstellung von Daten werden durch "moderne" Bibliotheken, wie "ggplot2"  und "plotly" ergänzt.  An realen Daten werden die Konzepte vertieft. Es werden Verkaufspreise von Immobilien analysiert und in einem dynamischen Report zusammengefasst. Dafür benutzen wir "Rmarkdown". In Kapitel 4 lernt ihr unter Anderem die Grundlagen von Web-Applikationen mit dem "shiny" package kennen. Außerdem werden Web-APIs behandelt. Wir programmieren eine Finance-API mit dem "plumber" Package. Dabei dient das "quantmod" Package als Grundlage für die Kursverläufe von Aktien.
+
+Im Fokus dieses Kurses steht die Vermittlung von Konzepten und Techniken, und weniger die Statistik. 
+
+Es werden keine Vorkenntnisse in der Programmierung benötigt. 
+
+Dieser Kurs eignet sich für alle, die einen Einstieg und in R benötigen und Datenanalysen durchführen möchten. Dieser Kurs eignet sich zudem als Einstieg in das Feld Data Science mit R.
