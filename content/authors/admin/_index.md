@@ -19,7 +19,7 @@ education:
     year: 2021
   - course: Data Analyst with SQL Server
     institution: DataCamp
-    year 2021
+    year: 2021
 
 email: ""
 interests:
