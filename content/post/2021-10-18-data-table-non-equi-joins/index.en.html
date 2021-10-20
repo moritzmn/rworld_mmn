@@ -1,0 +1,210 @@
+---
+title: data.table - non-equi-joins
+author: admin
+date: '2021-10-20'
+slug: []
+categories: []
+tags:
+  - data.table
+  - R
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2021-10-20T15:08:38+02:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+<script src="{{< blogdown/postref >}}index.en_files/header-attrs/header-attrs.js"></script>
+
+
+<p>Hi,</p>
+<p>in this post we are going to explore <em>non-equi-joins</em> using the <strong>data.table</strong> package in <strong>R</strong>.
+<em>non-equi-joins</em> can be utilized, when you want to join two tables based on inequalities. We will use the <strong>flights</strong> data set, which we will download from github using the <strong>fread</strong> function. From this data set I am going to generate a second table which will be used as a look up table. More on this later. After explaining the join, I will show you a quick workaround for this special case.</p>
+<div id="prerequisite" class="section level2">
+<h2>prerequisite</h2>
+<p>You need <em>data.table</em> installed.</p>
+<pre class="r"><code>library(data.table)</code></pre>
+<p>You can then download the data using the code below.</p>
+<pre class="r"><code>flights &lt;- fread(&quot;https://raw.githubusercontent.com/Rdatatable/data.table/master/vignettes/flights14.csv&quot;)</code></pre>
+<p>The data set consists of 253316 rows and 11 columns. Our main focus lies on the columns <em>dep_delay</em> and <em>origin</em>.</p>
+<pre class="r"><code>flights</code></pre>
+<pre><code>##         year month day dep_delay arr_delay carrier origin dest air_time
+##      1: 2014     1   1        14        13      AA    JFK  LAX      359
+##      2: 2014     1   1        -3        13      AA    JFK  LAX      363
+##      3: 2014     1   1         2         9      AA    JFK  LAX      351
+##      4: 2014     1   1        -8       -26      AA    LGA  PBI      157
+##      5: 2014     1   1         2         1      AA    JFK  LAX      350
+##     ---                                                                
+## 253312: 2014    10  31         1       -30      UA    LGA  IAH      201
+## 253313: 2014    10  31        -5       -14      UA    EWR  IAH      189
+## 253314: 2014    10  31        -8        16      MQ    LGA  RDU       83
+## 253315: 2014    10  31        -4        15      MQ    LGA  DTW       75
+## 253316: 2014    10  31        -5         1      MQ    LGA  SDF      110
+##         distance hour
+##      1:     2475    9
+##      2:     2475   11
+##      3:     2475   19
+##      4:     1035    7
+##      5:     2475   13
+##     ---              
+## 253312:     1416   14
+## 253313:     1400    8
+## 253314:      431   11
+## 253315:      502   11
+## 253316:      659    8</code></pre>
+</div>
+<div id="joining" class="section level2">
+<h2>Joining</h2>
+<p>We then generate a look-up table. We compute the mean and standard deviation of <em>dep_delay</em> grouped by the <em>origin</em> of the flight.</p>
+<pre class="r"><code>look_up &lt;- flights[, .(mean_dep_delay = mean(dep_delay), sd_dep_delay = sd(dep_delay)), by = &quot;origin&quot;]
+look_up</code></pre>
+<pre><code>##    origin mean_dep_delay sd_dep_delay
+## 1:    JFK       11.44617     41.40737
+## 2:    LGA       10.60500     40.11721
+## 3:    EWR       15.21248     43.15634</code></pre>
+<p>The generated table can now be used to filter the original table <em>flights</em>. We want to filter for the extremes, which are flights with a departure delay (<em>dep_delay</em>) of more than 3 standard deviations away from the mean.</p>
+<pre class="r"><code>look_up[, mean_sd_delay := mean_dep_delay + 3 * sd_dep_delay]
+look_up</code></pre>
+<pre><code>##    origin mean_dep_delay sd_dep_delay mean_sd_delay
+## 1:    JFK       11.44617     41.40737      135.6683
+## 2:    LGA       10.60500     40.11721      130.9566
+## 3:    EWR       15.21248     43.15634      144.6815</code></pre>
+<p>Using the code below, we can perform the join. The syntax is quit simple, but does not exactly returns what one might expect. The general syntax is <em>x[i, on = .(…)]</em>, where <em>x</em> is the <em>flights</em> table and <em>i</em> is the <em>look_up</em> table. The <em>on</em> statement sets the rules for joining both tables together. We already calculated a column <em>mean_sd_delay</em> per <em>origin</em>. Let us assume we are interested in analyzing flights where <em>dep_delay</em> is bigger than <em>mean_sd_delay</em>. For demonstration purposes we join <em>look_up</em> to <em>flights</em>, keeping all rows in <em>flights</em>, which is an <em>equi join</em> using origin first. Now we of course could have simply computed the values using flights only.</p>
+<pre class="r"><code>flights[look_up, on = .(origin)]</code></pre>
+<pre><code>##         year month day dep_delay arr_delay carrier origin dest air_time
+##      1: 2014     1   1        14        13      AA    JFK  LAX      359
+##      2: 2014     1   1        -3        13      AA    JFK  LAX      363
+##      3: 2014     1   1         2         9      AA    JFK  LAX      351
+##      4: 2014     1   1         2         1      AA    JFK  LAX      350
+##      5: 2014     1   1        -2       -18      AA    JFK  LAX      338
+##     ---                                                                
+## 253312: 2014    10  31        41        19      UA    EWR  SFO      344
+## 253313: 2014    10  31       427       393      UA    EWR  ORD      100
+## 253314: 2014    10  31        10       -27      UA    EWR  LAX      326
+## 253315: 2014    10  31        18       -14      UA    EWR  LAS      291
+## 253316: 2014    10  31        -5       -14      UA    EWR  IAH      189
+##         distance hour mean_dep_delay sd_dep_delay mean_sd_delay
+##      1:     2475    9       11.44617     41.40737      135.6683
+##      2:     2475   11       11.44617     41.40737      135.6683
+##      3:     2475   19       11.44617     41.40737      135.6683
+##      4:     2475   13       11.44617     41.40737      135.6683
+##      5:     2475   21       11.44617     41.40737      135.6683
+##     ---                                                        
+## 253312:     2565   12       15.21248     43.15634      144.6815
+## 253313:      719   21       15.21248     43.15634      144.6815
+## 253314:     2454   10       15.21248     43.15634      144.6815
+## 253315:     2227   16       15.21248     43.15634      144.6815
+## 253316:     1400    8       15.21248     43.15634      144.6815</code></pre>
+<p>Actually performing the <em>non-equi-join</em> we simply add to the <em>on</em> statement. Now only rows in <em>flights</em> where the logical vector <em>dep_delay &gt; mean_sd_delay</em> equates to <em>TRUE</em> will be returned. Please note that the <em>dep_delay</em> column is populated with the values of <em>mean_sd_delay</em>.</p>
+<pre class="r"><code>flights[look_up, on = .(origin, dep_delay &gt; mean_sd_delay)]</code></pre>
+<pre><code>##       year month day dep_delay arr_delay carrier origin dest air_time distance
+##    1: 2014     1   1  135.6683       133      AA    JFK  LAX      345     2475
+##    2: 2014     1   1  135.6683       197      B6    JFK  MCO      154      944
+##    3: 2014     1   1  135.6683       161      B6    JFK  PBI      152     1028
+##    4: 2014     1   1  135.6683       221      B6    JFK  BTV       48      266
+##    5: 2014     1   1  135.6683       178      B6    JFK  RDU       74      427
+##   ---                                                                         
+## 5566: 2014    10  31  144.6815       130      UA    EWR  ORD       98      719
+## 5567: 2014    10  31  144.6815       211      UA    EWR  ORD      116      719
+## 5568: 2014    10  31  144.6815       175      UA    EWR  MCO      141      937
+## 5569: 2014    10  31  144.6815       289      UA    EWR  ORD      106      719
+## 5570: 2014    10  31  144.6815       393      UA    EWR  ORD      100      719
+##       hour mean_dep_delay sd_dep_delay
+##    1:   19       11.44617     41.40737
+##    2:   15       11.44617     41.40737
+##    3:   23       11.44617     41.40737
+##    4:   16       11.44617     41.40737
+##    5:   20       11.44617     41.40737
+##   ---                                 
+## 5566:   21       15.21248     43.15634
+## 5567:   17       15.21248     43.15634
+## 5568:   16       15.21248     43.15634
+## 5569:   22       15.21248     43.15634
+## 5570:   21       15.21248     43.15634</code></pre>
+<p>You absolutely need to define the columns using <em>x</em> and <em>i</em> to get the result you want. The next code snippet uses the <em>j</em> argument of <strong>data.table</strong> to return the desired values. If you use <em>j</em> like this and want to return all columns of <em>x</em> and <em>i</em> you would need to specify every column in <em>x</em> and <em>j</em>.</p>
+<pre class="r"><code>flights[look_up, .(dep_delay = x.dep_delay, 
+                   arr_delay = x.arr_delay, 
+                   carrier = x.carrier,
+                   mean_sd_delay = i.mean_sd_delay) ,
+        on = .(origin, dep_delay &gt; mean_sd_delay)]</code></pre>
+<pre><code>##       dep_delay arr_delay carrier mean_sd_delay
+##    1:       142       133      AA      135.6683
+##    2:       162       197      B6      135.6683
+##    3:       151       161      B6      135.6683
+##    4:       231       221      B6      135.6683
+##    5:       182       178      B6      135.6683
+##   ---                                          
+## 5566:       169       130      UA      144.6815
+## 5567:       154       211      UA      144.6815
+## 5568:       176       175      UA      144.6815
+## 5569:       316       289      UA      144.6815
+## 5570:       427       393      UA      144.6815</code></pre>
+<p>We can avoid specifying the columns of <em>x</em> for example by adding and <em>index</em> column in <em>flights</em>, only return the index of <em>x</em> in the <em>non-equi-join</em> and then perform a join with the <em>flights</em> table. I added a order at the end to allow for a comparison with a different approach.</p>
+<pre class="r"><code>flights[, index := 1:.N]
+(a &lt;- flights[flights[look_up, .(index), on = .(origin, dep_delay &gt; mean_sd_delay)], on = &quot;index&quot;][order(origin)])</code></pre>
+<pre><code>##       year month day dep_delay arr_delay carrier origin dest air_time distance
+##    1: 2014     1   1       191       185      AA    EWR  DFW      214     1372
+##    2: 2014     1   1       297       290      DL    EWR  ATL      114      746
+##    3: 2014     1   1       148       146      EV    EWR  AVL      101      583
+##    4: 2014     1   1       210       218      EV    EWR  MEM      176      946
+##    5: 2014     1   1       260       244      UA    EWR  SEA      339     2402
+##   ---                                                                         
+## 5566: 2014    10  31       159       218      AA    LGA  ORD      118      733
+## 5567: 2014    10  31       244       220      UA    LGA  ORD       98      733
+## 5568: 2014    10  31       366       365      UA    LGA  ORD      123      733
+## 5569: 2014    10  31       167       138      UA    LGA  ORD      102      733
+## 5570: 2014    10  31       271       236      UA    LGA  IAH      195     1416
+##       hour  index
+##    1:   16     19
+##    2:   16    332
+##    3:   16    372
+##    4:   21    387
+##    5:   23    584
+##   ---            
+## 5566:   17 252812
+## 5567:   19 253220
+## 5568:   18 253241
+## 5569:   19 253246
+## 5570:   23 253288</code></pre>
+<p>Now this returns the result you might be looking for.</p>
+</div>
+<div id="why-the-trouble" class="section level2">
+<h2>Why the trouble?</h2>
+<p>There is, in this special case, a much simpler version, avoiding the <em>non-equi</em> join entirely.
+You simply compute a new column in <em>j</em> and chain a filter afterwards in <em>i</em> and group the table by <em>origin</em>. The order is set to origin to allow for a comparison with <em>a</em>.</p>
+<pre class="r"><code>(b &lt;- flights[, mean_sd_delay := (mean(dep_delay) + 3 * sd(dep_delay)), by = &quot;origin&quot;][
+  dep_delay &gt; mean_sd_delay][order(origin)])</code></pre>
+<pre><code>##       year month day dep_delay arr_delay carrier origin dest air_time distance
+##    1: 2014     1   1       191       185      AA    EWR  DFW      214     1372
+##    2: 2014     1   1       297       290      DL    EWR  ATL      114      746
+##    3: 2014     1   1       148       146      EV    EWR  AVL      101      583
+##    4: 2014     1   1       210       218      EV    EWR  MEM      176      946
+##    5: 2014     1   1       260       244      UA    EWR  SEA      339     2402
+##   ---                                                                         
+## 5566: 2014    10  31       159       218      AA    LGA  ORD      118      733
+## 5567: 2014    10  31       244       220      UA    LGA  ORD       98      733
+## 5568: 2014    10  31       366       365      UA    LGA  ORD      123      733
+## 5569: 2014    10  31       167       138      UA    LGA  ORD      102      733
+## 5570: 2014    10  31       271       236      UA    LGA  IAH      195     1416
+##       hour  index mean_sd_delay
+##    1:   16     19      144.6815
+##    2:   16    332      144.6815
+##    3:   16    372      144.6815
+##    4:   21    387      144.6815
+##    5:   23    584      144.6815
+##   ---                          
+## 5566:   17 252812      130.9566
+## 5567:   19 253220      130.9566
+## 5568:   18 253241      130.9566
+## 5569:   19 253246      130.9566
+## 5570:   23 253288      130.9566</code></pre>
+<pre class="r"><code>all.equal(a$dep_delay, b$dep_delay)</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+<p>Please note that the column order and the number of columns differ in <em>a</em> and <em>b</em>, because we introduced an index in <em>a</em>. This post hopefully serves the purpose of providing a quick introduction into <em>non-equi-joins</em> using <strong>data.table</strong>.</p>
+<p>Have a nice day!</p>
+</div>

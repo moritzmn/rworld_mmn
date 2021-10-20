@@ -1,0 +1,104 @@
+---
+title: data.table - non-equi-joins
+author: admin
+date: '2021-10-20'
+slug: []
+categories: []
+tags:
+  - data.table
+  - R
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2021-10-20T15:08:38+02:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+Hi,
+
+in this post we are going to explore *non-equi-joins* using the **data.table** package in **R**.
+*non-equi-joins* can be utilized, when you want to join two tables based on inequalities. We will use the **flights** data set, which we will download from github using the **fread** function. From this data set I am going to generate a second table which will be used as a look up table. More on this later. After explaining the join, I will show you a quick workaround for this special case. 
+
+## prerequisite
+
+You need *data.table* installed.
+
+```{r lib, message=FALSE, warning=TRUE}
+library(data.table)
+```
+
+You can then download the data using the code below.
+
+```{r data, message=FALSE, warning=FALSE}
+flights <- fread("https://raw.githubusercontent.com/Rdatatable/data.table/master/vignettes/flights14.csv")
+```
+
+The data set consists of `r nrow(flights)` rows and `r ncol(flights)` columns. Our main focus lies on the columns *dep_delay* and *origin*. 
+
+```{r data-set}
+flights
+```
+## Joining
+
+We then generate a look-up table. We compute the mean and standard deviation of *dep_delay* grouped by the *origin* of the flight.
+
+```{r look-up}
+look_up <- flights[, .(mean_dep_delay = mean(dep_delay), sd_dep_delay = sd(dep_delay)), by = "origin"]
+look_up
+```
+The generated table can now be used to filter the original table *flights*. We want to filter for the extremes, which are flights with a departure delay (*dep_delay*) of more than 3 standard deviations away from the mean.
+
+```{r add-mean}
+look_up[, mean_sd_delay := mean_dep_delay + 3 * sd_dep_delay]
+look_up
+```
+
+Using the code below, we can perform the join. The syntax is quit simple, but does not exactly returns what one might expect. The general syntax is *x[i, on = .(...)]*, where *x* is the *flights* table and *i* is the *look_up* table. The *on* statement sets the rules for joining both tables together. We already calculated a column *mean_sd_delay* per *origin*. Let us assume we are interested in analyzing flights where *dep_delay* is bigger than *mean_sd_delay*. For demonstration purposes we join *look_up* to *flights*, keeping all rows in *flights*, which is an *equi join* using origin first. Now we of course could have simply computed the values using flights only. 
+
+```{r equi-join}
+flights[look_up, on = .(origin)]
+```
+
+Actually performing the *non-equi-join* we simply add to the *on* statement. Now only rows in *flights* where the logical vector *dep_delay > mean_sd_delay* equates to *TRUE* will be returned. Please note that the *dep_delay* column is populated with the values of *mean_sd_delay*.
+
+```{r non-equi join}
+flights[look_up, on = .(origin, dep_delay > mean_sd_delay)]
+```
+You absolutely need to define the columns using *x* and *i* to get the result you want. The next code snippet uses the *j* argument of **data.table** to return the desired values. If you use *j* like this and want to return all columns of *x* and *i* you would need to specify every column in *x* and *j*.
+
+```{r specifiy-columns}
+flights[look_up, .(dep_delay = x.dep_delay, 
+                   arr_delay = x.arr_delay, 
+                   carrier = x.carrier,
+                   mean_sd_delay = i.mean_sd_delay) ,
+        on = .(origin, dep_delay > mean_sd_delay)]
+```
+We can avoid specifying the columns of *x* for example by adding and *index* column in *flights*, only return the index of *x* in the *non-equi-join* and then perform a join with the *flights* table. I added a order at the end to allow for a comparison with a different approach.
+
+```{r add-index}
+flights[, index := 1:.N]
+(a <- flights[flights[look_up, .(index), on = .(origin, dep_delay > mean_sd_delay)], on = "index"][order(origin)])
+```
+Now this returns the result you might be looking for.
+
+## Why the trouble?
+
+There is, in this special case, a much simpler version, avoiding the *non-equi* join entirely.
+You simply compute a new column in *j* and chain a filter afterwards in *i* and group the table by *origin*. The order is set to origin to allow for a comparison with *a*.
+
+```{r why-trouble}
+(b <- flights[, mean_sd_delay := (mean(dep_delay) + 3 * sd(dep_delay)), by = "origin"][
+  dep_delay > mean_sd_delay][order(origin)])
+```
+
+```{r}
+all.equal(a$dep_delay, b$dep_delay)
+```
+Please note that the column order and the number of columns differ in *a* and *b*, because we introduced an index in *a*. This post hopefully serves the purpose of providing a quick introduction into *non-equi-joins* using **data.table**.
+
+Have a nice day!
