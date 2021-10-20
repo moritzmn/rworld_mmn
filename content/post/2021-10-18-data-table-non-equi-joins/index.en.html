@@ -7,6 +7,8 @@ categories: []
 tags:
   - data.table
   - R
+  - non-equi-join
+  - join
 subtitle: ''
 summary: ''
 authors: []
@@ -25,8 +27,8 @@ projects: []
 <p>Hi,</p>
 <p>in this post we are going to explore <em>non-equi-joins</em> using the <strong>data.table</strong> package in <strong>R</strong>.
 <em>non-equi-joins</em> can be utilized, when you want to join two tables based on inequalities. We will use the <strong>flights</strong> data set, which we will download from github using the <strong>fread</strong> function. From this data set I am going to generate a second table which will be used as a look up table. More on this later. After explaining the join, I will show you a quick workaround for this special case.</p>
-<div id="prerequisite" class="section level2">
-<h2>prerequisite</h2>
+<div id="prerequisites" class="section level2">
+<h2>prerequisites</h2>
 <p>You need <em>data.table</em> installed.</p>
 <pre class="r"><code>library(data.table)</code></pre>
 <p>You can then download the data using the code below.</p>
@@ -74,7 +76,7 @@ look_up</code></pre>
 ## 1:    JFK       11.44617     41.40737      135.6683
 ## 2:    LGA       10.60500     40.11721      130.9566
 ## 3:    EWR       15.21248     43.15634      144.6815</code></pre>
-<p>Using the code below, we can perform the join. The syntax is quit simple, but does not exactly returns what one might expect. The general syntax is <em>x[i, on = .(…)]</em>, where <em>x</em> is the <em>flights</em> table and <em>i</em> is the <em>look_up</em> table. The <em>on</em> statement sets the rules for joining both tables together. We already calculated a column <em>mean_sd_delay</em> per <em>origin</em>. Let us assume we are interested in analyzing flights where <em>dep_delay</em> is bigger than <em>mean_sd_delay</em>. For demonstration purposes we join <em>look_up</em> to <em>flights</em>, keeping all rows in <em>flights</em>, which is an <em>equi join</em> using origin first. Now we of course could have simply computed the values using flights only.</p>
+<p>Using the code below, we can perform the join. The syntax is quite simple, but does not exactly returns what one might expect. The general syntax is <em>x[i, on = .(…)]</em>, where <em>x</em> is the <em>flights</em> table and <em>i</em> is the <em>look_up</em> table. The <em>on</em> statement sets the rules for joining both tables together. We already calculated a column <em>mean_sd_delay</em> per <em>origin</em>. Let us assume we are interested in analyzing flights where <em>dep_delay</em> is bigger than <em>mean_sd_delay</em>. For demonstration purposes we join <em>look_up</em> to <em>flights</em>, keeping all rows in <em>flights</em>, which is an <em>equi join</em> using origin first. Now we of course could have simply computed the values using flights only.</p>
 <pre class="r"><code>flights[look_up, on = .(origin)]</code></pre>
 <pre><code>##         year month day dep_delay arr_delay carrier origin dest air_time
 ##      1: 2014     1   1        14        13      AA    JFK  LAX      359
@@ -144,7 +146,7 @@ look_up</code></pre>
 ## 5568:       176       175      UA      144.6815
 ## 5569:       316       289      UA      144.6815
 ## 5570:       427       393      UA      144.6815</code></pre>
-<p>We can avoid specifying the columns of <em>x</em> for example by adding and <em>index</em> column in <em>flights</em>, only return the index of <em>x</em> in the <em>non-equi-join</em> and then perform a join with the <em>flights</em> table. I added a order at the end to allow for a comparison with a different approach.</p>
+<p>We can avoid specifying the columns of <em>x</em> for example by adding and <em>index</em> column in <em>flights</em>, only returning the index of <em>x</em> in the <em>non-equi-join</em> and then perform a join with the <em>flights</em> table. I added a order at the end to allow for a comparison with a different approach.</p>
 <pre class="r"><code>flights[, index := 1:.N]
 (a &lt;- flights[flights[look_up, .(index), on = .(origin, dep_delay &gt; mean_sd_delay)], on = &quot;index&quot;][order(origin)])</code></pre>
 <pre><code>##       year month day dep_delay arr_delay carrier origin dest air_time distance
@@ -206,5 +208,6 @@ You simply compute a new column in <em>j</em> and chain a filter afterwards in <
 <pre class="r"><code>all.equal(a$dep_delay, b$dep_delay)</code></pre>
 <pre><code>## [1] TRUE</code></pre>
 <p>Please note that the column order and the number of columns differ in <em>a</em> and <em>b</em>, because we introduced an index in <em>a</em>. This post hopefully serves the purpose of providing a quick introduction into <em>non-equi-joins</em> using <strong>data.table</strong>.</p>
-<p>Have a nice day!</p>
+<p>Have a nice day!
+Moritz</p>
 </div>

@@ -7,6 +7,8 @@ categories: []
 tags:
   - data.table
   - R
+  - non-equi-join
+  - join
 subtitle: ''
 summary: ''
 authors: []
@@ -24,7 +26,7 @@ Hi,
 in this post we are going to explore *non-equi-joins* using the **data.table** package in **R**.
 *non-equi-joins* can be utilized, when you want to join two tables based on inequalities. We will use the **flights** data set, which we will download from github using the **fread** function. From this data set I am going to generate a second table which will be used as a look up table. More on this later. After explaining the join, I will show you a quick workaround for this special case. 
 
-## prerequisite
+## prerequisites
 
 You need *data.table* installed.
 
@@ -58,7 +60,7 @@ look_up[, mean_sd_delay := mean_dep_delay + 3 * sd_dep_delay]
 look_up
 ```
 
-Using the code below, we can perform the join. The syntax is quit simple, but does not exactly returns what one might expect. The general syntax is *x[i, on = .(...)]*, where *x* is the *flights* table and *i* is the *look_up* table. The *on* statement sets the rules for joining both tables together. We already calculated a column *mean_sd_delay* per *origin*. Let us assume we are interested in analyzing flights where *dep_delay* is bigger than *mean_sd_delay*. For demonstration purposes we join *look_up* to *flights*, keeping all rows in *flights*, which is an *equi join* using origin first. Now we of course could have simply computed the values using flights only. 
+Using the code below, we can perform the join. The syntax is quite simple, but does not exactly returns what one might expect. The general syntax is *x[i, on = .(...)]*, where *x* is the *flights* table and *i* is the *look_up* table. The *on* statement sets the rules for joining both tables together. We already calculated a column *mean_sd_delay* per *origin*. Let us assume we are interested in analyzing flights where *dep_delay* is bigger than *mean_sd_delay*. For demonstration purposes we join *look_up* to *flights*, keeping all rows in *flights*, which is an *equi join* using origin first. Now we of course could have simply computed the values using flights only. 
 
 ```{r equi-join}
 flights[look_up, on = .(origin)]
@@ -78,7 +80,7 @@ flights[look_up, .(dep_delay = x.dep_delay,
                    mean_sd_delay = i.mean_sd_delay) ,
         on = .(origin, dep_delay > mean_sd_delay)]
 ```
-We can avoid specifying the columns of *x* for example by adding and *index* column in *flights*, only return the index of *x* in the *non-equi-join* and then perform a join with the *flights* table. I added a order at the end to allow for a comparison with a different approach.
+We can avoid specifying the columns of *x* for example by adding and *index* column in *flights*, only returning the index of *x* in the *non-equi-join* and then perform a join with the *flights* table. I added a order at the end to allow for a comparison with a different approach.
 
 ```{r add-index}
 flights[, index := 1:.N]
@@ -102,3 +104,4 @@ all.equal(a$dep_delay, b$dep_delay)
 Please note that the column order and the number of columns differ in *a* and *b*, because we introduced an index in *a*. This post hopefully serves the purpose of providing a quick introduction into *non-equi-joins* using **data.table**.
 
 Have a nice day!
+Moritz
