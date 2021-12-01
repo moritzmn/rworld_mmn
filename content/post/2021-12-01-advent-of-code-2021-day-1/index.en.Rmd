@@ -1,0 +1,49 @@
+---
+title: Advent of Code 2021 - Day 1
+author: admin
+date: '2021-12-01'
+slug: []
+categories:
+  - R
+tags:
+  - R
+  - Advent of Code
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2021-12-01T18:42:43+01:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+Hi,
+
+welcome to my solutions to the challenges of *Advent of Code 2021*. I present my solutions as a short post for every daily challenge. If you do not know what is going on, please go ahead and check out <https://adventofcode.com/>. I will not go into detail about the problem for day one, since you can simply visit <https://adventofcode.com/2021/day/1>.
+
+The goal for this year is to solve every puzzle. The puzzles should get harder every day until the 24th of december. I am going to use *R*, with no added packages. Please the my setup below.
+
+```{r session-info}
+sessionInfo()
+```
+
+
+
+## Soultion to day 1
+
+```{r day-one}
+# Data --------------------------------------------------------------------
+
+sonar_data <- read.csv(file = "day_one_sonar",  col.names = "depth", header = FALSE)
+
+# Soultion -----------------------------------------------------------------
+
+diff_depth <- diff(sonar_data$depth)
+sum_inc <- sum(diff_depth > 0)
+sum_inc
+```
+
+Yes, it is that easy! See you at day 2!

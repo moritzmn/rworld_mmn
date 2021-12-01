@@ -1,0 +1,62 @@
+---
+title: Advent of Code 2021 - Day 1
+author: admin
+date: '2021-12-01'
+slug: []
+categories:
+  - R
+tags:
+  - R
+  - Advent of Code
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2021-12-01T18:42:43+01:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+<script src="{{< blogdown/postref >}}index.en_files/header-attrs/header-attrs.js"></script>
+
+
+<p>Hi,</p>
+<p>welcome to my solutions to the challenges of <em>Advent of Code 2021</em>. I present my solutions as a short post for every daily challenge. If you do not know what is going on, please go ahead and check out <a href="https://adventofcode.com/" class="uri">https://adventofcode.com/</a>. I will not go into detail about the problem for day one, since you can simply visit <a href="https://adventofcode.com/2021/day/1" class="uri">https://adventofcode.com/2021/day/1</a>.</p>
+<p>The goal for this year is to solve every puzzle. The puzzles should get harder every day until the 24th of december. I am going to use <em>R</em>, with no added packages. Please the my setup below.</p>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>## R version 4.0.3 (2020-10-10)
+## Platform: x86_64-w64-mingw32/x64 (64-bit)
+## Running under: Windows 10 x64 (build 19043)
+## 
+## Matrix products: default
+## 
+## locale:
+## [1] LC_COLLATE=German_Germany.1252  LC_CTYPE=German_Germany.1252   
+## [3] LC_MONETARY=German_Germany.1252 LC_NUMERIC=C                   
+## [5] LC_TIME=German_Germany.1252    
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## loaded via a namespace (and not attached):
+##  [1] compiler_4.0.3    magrittr_2.0.1    bookdown_0.21     tools_4.0.3      
+##  [5] htmltools_0.5.1.1 yaml_2.2.1        stringi_1.5.3     rmarkdown_2.6    
+##  [9] blogdown_1.1      knitr_1.30        stringr_1.4.0     digest_0.6.27    
+## [13] xfun_0.21         rlang_0.4.10      evaluate_0.14</code></pre>
+<div id="soultion-to-day-1" class="section level2">
+<h2>Soultion to day 1</h2>
+<pre class="r"><code># Data --------------------------------------------------------------------
+
+sonar_data &lt;- read.csv(file = &quot;day_one_sonar&quot;,  col.names = &quot;depth&quot;, header = FALSE)
+
+# Soultion -----------------------------------------------------------------
+
+diff_depth &lt;- diff(sonar_data$depth)
+sum_inc &lt;- sum(diff_depth &gt; 0)
+sum_inc</code></pre>
+<pre><code>## [1] 1195</code></pre>
+<p>Yes, it is that easy! See you at day 2!</p>
+</div>
