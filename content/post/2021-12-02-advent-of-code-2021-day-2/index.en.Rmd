@@ -1,0 +1,68 @@
+---
+title: Advent of Code 2021 - Day 2
+author: admin
+date: '2021-12-02'
+slug: []
+categories: []
+tags:
+  - R
+  - Advent of Code
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2021-12-02T13:10:23+01:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+Hi, welcome to the solution to day two of *Advent of Code 2021*. Please check out the puzzle at <https://adventofcode.com/2021/day/2>
+
+```{r data}
+# Data --------------------------------------------------------------------
+dir_data <- read.csv(file = "day_two",  col.names = c("direction", "value"), 
+                     header = FALSE, sep = " ")
+head(dir_data)
+```
+
+
+```{r part-one}
+# Solution -----------------------------------------------------------------
+
+#forward position
+forward_pos <- sum(with(dir_data, value[direction == "forward"]))
+
+#depth
+depth_values <- within(with(dir_data, dir_data[direction != "forward",]), {
+  depth_dir <- ifelse(direction == "up",  -value, value)
+})
+
+depth_pos <- sum(depth_values[, "depth_dir"])
+(answer <- depth_pos * forward_pos)
+
+
+
+```
+
+Solutions to part 2:
+
+```{r part-two}
+
+# Solution -----------------------------------------------------------------
+dir_data <- within(dir_data, {
+  aim <- ifelse(direction != "forward", value, 0)
+  aim <- ifelse(aim != 0 & direction == "up", -aim, aim)
+  aim <- cumsum(aim)
+  hor_change <- ifelse(direction == "forward", value, 0)
+  depth_change <- ifelse(direction == "forward", aim * value, 0)
+})
+
+hor_pos <- sum(dir_data[["hor_change"]])
+depth_pos <- sum(dir_data[["depth_change"]])
+
+(answer <- hor_pos * depth_pos)
+```
+
