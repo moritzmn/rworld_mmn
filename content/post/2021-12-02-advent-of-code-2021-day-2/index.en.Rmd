@@ -28,29 +28,26 @@ dir_data <- read.csv(file = "day_two",  col.names = c("direction", "value"),
 head(dir_data)
 ```
 
+Solutions to part 2:
+
 
 ```{r part-one}
 # Solution -----------------------------------------------------------------
-
-#forward position
 forward_pos <- sum(with(dir_data, value[direction == "forward"]))
 
-#depth
 depth_values <- within(with(dir_data, dir_data[direction != "forward",]), {
   depth_dir <- ifelse(direction == "up",  -value, value)
 })
 
 depth_pos <- sum(depth_values[, "depth_dir"])
+
 (answer <- depth_pos * forward_pos)
-
-
 
 ```
 
-Solutions to part 2:
+Solution part 2:
 
 ```{r part-two}
-
 # Solution -----------------------------------------------------------------
 dir_data <- within(dir_data, {
   aim <- ifelse(direction != "forward", value, 0)
@@ -66,3 +63,4 @@ depth_pos <- sum(dir_data[["depth_change"]])
 (answer <- hor_pos * depth_pos)
 ```
 
+See you tomorrow :)
