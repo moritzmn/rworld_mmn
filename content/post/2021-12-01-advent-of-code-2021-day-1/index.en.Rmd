@@ -34,7 +34,7 @@ sessionInfo()
 
 ## Soultion to day 1
 
-Part one can be solved using **diff** and summing over the logical vector, where **diff_depth > 0**
+Part one can be solved using **diff** and summing over the logical vector, where **diff_depth > 0**.
 
 ```{r day-one-one}
 # Data --------------------------------------------------------------------
@@ -51,7 +51,7 @@ sum_inc
 I solved part two using a **for** loop, though there might be a simpler solution.
 
 ```{r day-one-two}
-shift_sum <- vector(mode = "numeric", length = nrow(test) - 2)
+shift_sum <- vector(mode = "numeric", length = nrow(sonar_data) - 2)
 for(i in seq_along(shift_sum)) {
   shift_sum[i] <- sum(sonar_data[i : (i + 2), "depth"])
 }
