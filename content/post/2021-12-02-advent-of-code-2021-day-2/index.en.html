@@ -34,7 +34,7 @@ head(dir_data)</code></pre>
 ## 4   forward     2
 ## 5        up     3
 ## 6   forward     5</code></pre>
-<p>Solutions to part 2:</p>
+<p>Part 1:</p>
 <pre class="r"><code># Solution -----------------------------------------------------------------
 forward_pos &lt;- sum(with(dir_data, value[direction == &quot;forward&quot;]))
 
@@ -46,7 +46,7 @@ depth_pos &lt;- sum(depth_values[, &quot;depth_dir&quot;])
 
 (answer &lt;- depth_pos * forward_pos)</code></pre>
 <pre><code>## [1] 1451208</code></pre>
-<p>Solution part 2:</p>
+<p>Part 2:</p>
 <pre class="r"><code># Solution -----------------------------------------------------------------
 dir_data &lt;- within(dir_data, {
   aim &lt;- ifelse(direction != &quot;forward&quot;, value, 0)

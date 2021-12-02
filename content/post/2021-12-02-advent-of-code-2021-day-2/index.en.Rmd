@@ -28,7 +28,7 @@ dir_data <- read.csv(file = "day_two",  col.names = c("direction", "value"),
 head(dir_data)
 ```
 
-Solutions to part 2:
+Part 1:
 
 
 ```{r part-one}
@@ -45,7 +45,7 @@ depth_pos <- sum(depth_values[, "depth_dir"])
 
 ```
 
-Solution part 2:
+Part 2:
 
 ```{r part-two}
 # Solution -----------------------------------------------------------------
