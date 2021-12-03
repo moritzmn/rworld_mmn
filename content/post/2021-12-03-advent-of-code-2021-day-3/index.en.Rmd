@@ -47,4 +47,36 @@ epsilon <- strtoi(paste(epsilon, collapse = ""), base = 2)
 (answer <- gamma * epsilon)
 ```
 
+Part 2:
+
+Solved by a while loop, indexing the columns of bin_m. Guess what, loops are still cool in R ;-)
+
+```{r oxi}
+i <- 1L
+while(i <= ncol(bin_m)) {
+  filter_m <- ifelse(sum(bin_m[, i]) >= nrow(bin_m)/2, 1, 0)
+  bin_m    <- bin_m[bin_m[, i] == filter_m,]
+  i <- i + 1L
+  if(is.null(nrow(bin_m))) break
+}
+ox <- strtoi(paste(bin_m, collapse = ""), base = 2)
+```
+
+Computing co2 is basically the same. Sorry for repitition.
+
+```{r co2}
+bin_m   <- matrix(data = as.integer(unlist(strsplit(bin_data[["bin"]], split = ""))), ncol = 12, byrow = TRUE)
+i <- 1L
+while(i <= ncol(bin_m)) {
+  filter_m <- ifelse(sum(bin_m[, i]) >= nrow(bin_m)/2, 0, 1)
+  bin_m    <- bin_m[bin_m[, i] == filter_m,]
+  i <- i + 1L
+  if(is.null(nrow(bin_m))) break
+}
+co_2 <- strtoi(paste(bin_m, collapse = ""), base = 2)
+
+(answer <- co_2 * ox)
+```
+
+
 See you!

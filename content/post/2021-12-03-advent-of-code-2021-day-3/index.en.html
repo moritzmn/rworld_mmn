@@ -50,4 +50,27 @@ gamma   &lt;- strtoi(paste(gamma, collapse = &quot;&quot;), base = 2)
 epsilon &lt;- strtoi(paste(epsilon, collapse = &quot;&quot;), base = 2)</code></pre>
 <pre class="r"><code>(answer &lt;- gamma * epsilon)</code></pre>
 <pre><code>## [1] 2967914</code></pre>
+<p>Part 2:</p>
+<p>Solved by a while loop, indexing the columns of bin_m. Guess what, loops are still cool in R ;-)</p>
+<pre class="r"><code>i &lt;- 1L
+while(i &lt;= ncol(bin_m)) {
+  filter_m &lt;- ifelse(sum(bin_m[, i]) &gt;= nrow(bin_m)/2, 1, 0)
+  bin_m    &lt;- bin_m[bin_m[, i] == filter_m,]
+  i &lt;- i + 1L
+  if(is.null(nrow(bin_m))) break
+}
+ox &lt;- strtoi(paste(bin_m, collapse = &quot;&quot;), base = 2)</code></pre>
+<p>Computing co2 is basically the same. Sorry for repitition.</p>
+<pre class="r"><code>bin_m   &lt;- matrix(data = as.integer(unlist(strsplit(bin_data[[&quot;bin&quot;]], split = &quot;&quot;))), ncol = 12, byrow = TRUE)
+i &lt;- 1L
+while(i &lt;= ncol(bin_m)) {
+  filter_m &lt;- ifelse(sum(bin_m[, i]) &gt;= nrow(bin_m)/2, 0, 1)
+  bin_m    &lt;- bin_m[bin_m[, i] == filter_m,]
+  i &lt;- i + 1L
+  if(is.null(nrow(bin_m))) break
+}
+co_2 &lt;- strtoi(paste(bin_m, collapse = &quot;&quot;), base = 2)
+
+(answer &lt;- co_2 * ox)</code></pre>
+<pre><code>## [1] 7041258</code></pre>
 <p>See you!</p>
