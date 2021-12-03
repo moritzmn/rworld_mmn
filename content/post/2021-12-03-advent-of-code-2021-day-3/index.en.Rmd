@@ -19,7 +19,7 @@ image:
 projects: []
 ---
 
-Aloha, welcome to the third day of *Advent of Code 2021*. Again, I am going to solve this puzzle using *Base R*.
+Aloha, welcome to the third day of *Advent of Code 2021*. Again, I am going to solve this puzzle using *Base R*. Please see <https://adventofcode.com/2021/day/3> for the problem description. 
 
 Part 1:
 
