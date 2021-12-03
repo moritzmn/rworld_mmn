@@ -1,0 +1,50 @@
+---
+title: Advent of Code 2021 - Day 3
+author: admin
+date: '2021-12-03'
+slug: []
+categories: []
+tags:
+  - Advent of Code
+  - R
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2021-12-03T09:19:59+01:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+Aloha, welcome to the third day of *Advent of Code 2021*. Again, I am going to solve this puzzle using *Base R*.
+
+Part 1:
+
+```{r data}
+bin_data <- read.csv(file = "day_three", col.names = "bin", header = FALSE, colClasses = "character")
+
+head(bin_data)
+```
+
+```{r bin-matrix}
+bin_m <- matrix(data = as.integer(unlist(strsplit(bin_data[["bin"]], split = ""))), ncol = 12, byrow = TRUE)
+head(bin_m)
+```
+
+```{r gamma-epsilon}
+gamma   <- as.integer(colSums(bin_m) > nrow(bin_data)/2)
+epsilon <- as.integer(colSums(bin_m) < nrow(bin_data)/2)
+
+gamma   <- strtoi(paste(gamma, collapse = ""), base = 2)
+epsilon <- strtoi(paste(epsilon, collapse = ""), base = 2)
+
+```
+
+```{r answer}
+(answer <- gamma * epsilon)
+```
+
+See you!

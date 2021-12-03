@@ -1,0 +1,53 @@
+---
+title: Advent of Code 2021 - Day 3
+author: admin
+date: '2021-12-03'
+slug: []
+categories: []
+tags:
+  - Advent of Code
+  - R
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2021-12-03T09:19:59+01:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+<script src="{{< blogdown/postref >}}index.en_files/header-attrs/header-attrs.js"></script>
+
+
+<p>Aloha, welcome to the third day of <em>Advent of Code 2021</em>. Again, I am going to solve this puzzle using <em>Base R</em>.</p>
+<p>Part 1:</p>
+<pre class="r"><code>bin_data &lt;- read.csv(file = &quot;day_three&quot;, col.names = &quot;bin&quot;, header = FALSE, colClasses = &quot;character&quot;)
+
+head(bin_data)</code></pre>
+<pre><code>##            bin
+## 1 110011110101
+## 2 110011100010
+## 3 010100011010
+## 4 011001100000
+## 5 010011011101
+## 6 011110111000</code></pre>
+<pre class="r"><code>bin_m &lt;- matrix(data = as.integer(unlist(strsplit(bin_data[[&quot;bin&quot;]], split = &quot;&quot;))), ncol = 12, byrow = TRUE)
+head(bin_m)</code></pre>
+<pre><code>##      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
+## [1,]    1    1    0    0    1    1    1    1    0     1     0     1
+## [2,]    1    1    0    0    1    1    1    0    0     0     1     0
+## [3,]    0    1    0    1    0    0    0    1    1     0     1     0
+## [4,]    0    1    1    0    0    1    1    0    0     0     0     0
+## [5,]    0    1    0    0    1    1    0    1    1     1     0     1
+## [6,]    0    1    1    1    1    0    1    1    1     0     0     0</code></pre>
+<pre class="r"><code>gamma   &lt;- as.integer(colSums(bin_m) &gt; nrow(bin_data)/2)
+epsilon &lt;- as.integer(colSums(bin_m) &lt; nrow(bin_data)/2)
+
+gamma   &lt;- strtoi(paste(gamma, collapse = &quot;&quot;), base = 2)
+epsilon &lt;- strtoi(paste(epsilon, collapse = &quot;&quot;), base = 2)</code></pre>
+<pre class="r"><code>(answer &lt;- gamma * epsilon)</code></pre>
+<pre><code>## [1] 2967914</code></pre>
+<p>See you!</p>
