@@ -1,0 +1,96 @@
+---
+title: Advent of Code 2021 - Day 4
+author: admin
+date: '2021-12-06'
+slug: []
+categories:
+  - R
+tags:
+  - Advent of Code
+  - R
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2021-12-06T18:22:41+01:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+<script src="{{< blogdown/postref >}}index.en_files/header-attrs/header-attrs.js"></script>
+
+
+<p>Aloha, welcome to fourth day of <em>Advent of Code 2021</em>. Playing Bingo against a giant squid turned out to be more of struggle than I anticipated. I wanted to avoid loops for this puzzle and ended with a solution, which is a little bit hard to understand. Nevertheless, here it comes:</p>
+<pre class="r"><code>rand_n   &lt;- read.csv(file = &quot;day_four_seq&quot;, header = FALSE, sep = &quot;,&quot;)
+rand_seq &lt;- as.integer(rand_n[1,])
+
+#read the matrices
+mat_n &lt;- lapply(1 : 100, function(x){
+  as.matrix(read.csv(file = &quot;day_four_mat&quot;, nrows = 5L, skip = (x - 1L) * 6L , 
+           sep = &quot;&quot;, header = FALSE))
+})</code></pre>
+<p>Part 1:</p>
+<pre class="r"><code>#who wins when
+who_won &lt;- lapply(mat_n, function(x) {
+  mask &lt;- matrix(FALSE, nrow = 5, ncol = 5)
+  m    &lt;- na.omit(arrayInd(match(rand_seq, x), .dim = dim(x)))
+  mask[m[,]] &lt;- TRUE
+  row_sums &lt;- rowSums(mask)
+  col_sums &lt;- colSums(mask)
+  if(any(c(row_sums, col_sums) &gt; 4)){
+    
+    if(any(row_sums &gt; 4)) {
+      row_mat &lt;- x[which(row_sums &gt; 4),,drop = FALSE]
+      max_ind_row &lt;- vector(mode = &quot;integer&quot;, length = nrow(row_mat))
+      for(i in 1:nrow(row_mat)) {
+        max_ind_row[i] &lt;- max(which(rand_seq %in% row_mat[i,])) 
+      }
+      max_ind_row &lt;- min(max_ind_row)
+    } else {
+    max_ind_row &lt;- NA
+    }
+    if(any(col_sums &gt; 4)){
+      col_mat &lt;- x[,which(col_sums &gt; 4), drop = FALSE]
+      max_ind_col &lt;- vector(mode = &quot;integer&quot;, length = ncol(col_mat))
+      for(i in 1:ncol(col_mat)) {
+        max_ind_col[i] &lt;- max(which(rand_seq %in% col_mat[,i])) 
+      }
+      max_ind_col &lt;- min(max_ind_col)
+    } else {
+    max_ind_col &lt;- NA
+    } 
+  min(na.omit(c(max_ind_row, max_ind_col)))
+  } else {
+    NA
+  }
+})
+who_won &lt;- unlist(who_won)</code></pre>
+<pre class="r"><code>index_seq &lt;- min(who_won, na.rm = TRUE)
+last_number_drawn    &lt;- rand_seq[[index_seq]]
+bingo_card_won       &lt;- mat_n[[which.min(who_won)]]
+
+mask &lt;- matrix(FALSE, nrow = 5, ncol = 5)
+m    &lt;- na.omit(arrayInd(match(rand_seq[1:index_seq], bingo_card_won ), .dim = dim(bingo_card_won )))
+mask[m[,]] &lt;- TRUE
+
+sum_not_drawn &lt;- sum(bingo_card_won[!mask])
+(answer &lt;- last_number_drawn * sum_not_drawn)</code></pre>
+<pre><code>## [1] 44088</code></pre>
+<p>Part 2:</p>
+<pre class="r"><code>#who wins last
+index_seq &lt;- max(who_won, na.rm = TRUE)
+last_number_drawn    &lt;- rand_seq[[index_seq]]
+bingo_card_won       &lt;- mat_n[[which.max(who_won)]]
+
+mask &lt;- matrix(FALSE, nrow = 5, ncol = 5)
+m    &lt;- na.omit(arrayInd(match(rand_seq[1:index_seq], bingo_card_won ), .dim = dim(bingo_card_won )))
+mask[m[,]] &lt;- TRUE
+
+sum_not_drawn &lt;- sum(bingo_card_won[!mask])
+(answer &lt;- last_number_drawn * sum_not_drawn)</code></pre>
+<pre><code>## [1] 23670</code></pre>
+<p>That is it. Wrapping the code into functions is advised.
+See you on day 5!</p>

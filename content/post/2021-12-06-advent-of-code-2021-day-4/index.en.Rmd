@@ -1,0 +1,111 @@
+---
+title: Advent of Code 2021 - Day 4
+author: admin
+date: '2021-12-06'
+slug: []
+categories:
+  - R
+tags:
+  - Advent of Code
+  - R
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2021-12-06T18:22:41+01:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+Aloha, welcome to fourth day of *Advent of Code 2021*. Playing Bingo against a giant squid turned out to be more of struggle than I anticipated. I wanted to avoid loops for this puzzle and ended with a solution, which is a little bit hard to understand. Nevertheless, here it comes:
+
+
+
+
+```{r data, warning=FALSE}
+
+rand_n   <- read.csv(file = "day_four_seq", header = FALSE, sep = ",")
+rand_seq <- as.integer(rand_n[1,])
+
+#read the matrices
+mat_n <- lapply(1 : 100, function(x){
+  as.matrix(read.csv(file = "day_four_mat", nrows = 5L, skip = (x - 1L) * 6L , 
+           sep = "", header = FALSE))
+})
+
+```
+
+Part 1:
+
+```{r who-wins-when}
+#who wins when
+who_won <- lapply(mat_n, function(x) {
+  mask <- matrix(FALSE, nrow = 5, ncol = 5)
+  m    <- na.omit(arrayInd(match(rand_seq, x), .dim = dim(x)))
+  mask[m[,]] <- TRUE
+  row_sums <- rowSums(mask)
+  col_sums <- colSums(mask)
+  if(any(c(row_sums, col_sums) > 4)){
+    
+    if(any(row_sums > 4)) {
+      row_mat <- x[which(row_sums > 4),,drop = FALSE]
+      max_ind_row <- vector(mode = "integer", length = nrow(row_mat))
+      for(i in 1:nrow(row_mat)) {
+        max_ind_row[i] <- max(which(rand_seq %in% row_mat[i,])) 
+      }
+      max_ind_row <- min(max_ind_row)
+    } else {
+    max_ind_row <- NA
+    }
+    if(any(col_sums > 4)){
+      col_mat <- x[,which(col_sums > 4), drop = FALSE]
+      max_ind_col <- vector(mode = "integer", length = ncol(col_mat))
+      for(i in 1:ncol(col_mat)) {
+        max_ind_col[i] <- max(which(rand_seq %in% col_mat[,i])) 
+      }
+      max_ind_col <- min(max_ind_col)
+    } else {
+    max_ind_col <- NA
+    } 
+  min(na.omit(c(max_ind_row, max_ind_col)))
+  } else {
+    NA
+  }
+})
+who_won <- unlist(who_won)
+```
+
+```{r win-first-score}
+index_seq <- min(who_won, na.rm = TRUE)
+last_number_drawn    <- rand_seq[[index_seq]]
+bingo_card_won       <- mat_n[[which.min(who_won)]]
+
+mask <- matrix(FALSE, nrow = 5, ncol = 5)
+m    <- na.omit(arrayInd(match(rand_seq[1:index_seq], bingo_card_won ), .dim = dim(bingo_card_won )))
+mask[m[,]] <- TRUE
+
+sum_not_drawn <- sum(bingo_card_won[!mask])
+(answer <- last_number_drawn * sum_not_drawn)
+```
+
+Part 2:
+
+```{r win-last-score}
+#who wins last
+index_seq <- max(who_won, na.rm = TRUE)
+last_number_drawn    <- rand_seq[[index_seq]]
+bingo_card_won       <- mat_n[[which.max(who_won)]]
+
+mask <- matrix(FALSE, nrow = 5, ncol = 5)
+m    <- na.omit(arrayInd(match(rand_seq[1:index_seq], bingo_card_won ), .dim = dim(bingo_card_won )))
+mask[m[,]] <- TRUE
+
+sum_not_drawn <- sum(bingo_card_won[!mask])
+(answer <- last_number_drawn * sum_not_drawn)
+```
+
+That is it. Wrapping the code into functions is advised.
+See you on day 5!
