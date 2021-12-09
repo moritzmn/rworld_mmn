@@ -19,3 +19,42 @@ image:
   preview_only: no
 projects: []
 ---
+
+Aloha, crabs can build and drive submarines. They need fuel though. 
+
+```{r data, warning = FALSE}
+crab_pos <- readLines(con = "day_seven_one")
+crab_pos <- as.integer(unlist(strsplit(crab_pos, split =",")))
+```
+
+Function:
+
+```{r}
+FuelCon <- function(crab_pos) {
+  align_pos <- min(crab_pos): max(crab_pos)
+  fuel_sum     <- sapply(align_pos, function(x){
+    diff_pos   <- abs(x - crab_pos)
+    wrong_fuel <- sum(diff_pos)
+    real_fuel  <- sum(sapply(diff_pos[diff_pos > 0], function(y) sum(1 : y)))
+    list(wrong_fuel, real_fuel)
+  })
+  return(fuel_sum)
+}
+```
+
+Part 1:
+
+```{r compute}
+fuel_con <- FuelCon(crab_pos)
+```
+
+```{r part-one}
+(answer <- min(unlist((fuel_con[1, ]))))
+```
+
+Part 2:
+```{r part-two}
+(answer <- min(unlist((fuel_con[2, ]))))
+```
+
+See you on day 8!

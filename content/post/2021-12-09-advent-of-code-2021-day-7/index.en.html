@@ -23,3 +23,25 @@ projects: []
 <script src="{{< blogdown/postref >}}index.en_files/header-attrs/header-attrs.js"></script>
 
 
+<p>Aloha, crabs can build and drive submarines. They need fuel though.</p>
+<pre class="r"><code>crab_pos &lt;- readLines(con = &quot;day_seven_one&quot;)
+crab_pos &lt;- as.integer(unlist(strsplit(crab_pos, split =&quot;,&quot;)))</code></pre>
+<p>Function:</p>
+<pre class="r"><code>FuelCon &lt;- function(crab_pos) {
+  align_pos &lt;- min(crab_pos): max(crab_pos)
+  fuel_sum     &lt;- sapply(align_pos, function(x){
+    diff_pos   &lt;- abs(x - crab_pos)
+    wrong_fuel &lt;- sum(diff_pos)
+    real_fuel  &lt;- sum(sapply(diff_pos[diff_pos &gt; 0], function(y) sum(1 : y)))
+    list(wrong_fuel, real_fuel)
+  })
+  return(fuel_sum)
+}</code></pre>
+<p>Part 1:</p>
+<pre class="r"><code>fuel_con &lt;- FuelCon(crab_pos)</code></pre>
+<pre class="r"><code>(answer &lt;- min(unlist((fuel_con[1, ]))))</code></pre>
+<pre><code>## [1] 356958</code></pre>
+<p>Part 2:</p>
+<pre class="r"><code>(answer &lt;- min(unlist((fuel_con[2, ]))))</code></pre>
+<pre><code>## [1] 105461913</code></pre>
+<p>See you on day 8!</p>
