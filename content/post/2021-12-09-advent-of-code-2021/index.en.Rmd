@@ -22,7 +22,7 @@ projects: []
 
 Aloha, seems like hydrothermal vents are a problem for our submarine on *Day 5*. Let us avoid them.
 
-```{r data}
+```{r data, warning=FALSE}
 string_vec <- readLines(con = "day_five_one")
 string_vec <- unlist(strsplit(string_vec, split = "->"))
 string_vec <- trimws(string_vec)
@@ -50,13 +50,12 @@ Part 2:
 
 ```{r part-two}
 matrix_vec <- matrix(data = string_vec, ncol = 4, byrow = TRUE)
-
 matrix_vec <- matrix_vec[(matrix_vec[, 1] != matrix_vec[, 3]) & (matrix_vec[, 2] != matrix_vec[, 4]),]
 matrix_vec <- cbind(matrix_vec, (matrix_vec[, 4] - matrix_vec[, 2])/(matrix_vec[, 3]- matrix_vec[, 1]))
 matrix_vec <- cbind(matrix_vec, matrix_vec[, 2] - (matrix_vec[, 1] * matrix_vec[, 5]))
 
 for(i in 1 : nrow(matrix_vec)){
-  print(i)
+
   x_ind <- matrix_vec[i, 1] : matrix_vec[i, 3]
   y_ind <- x_ind * matrix_vec[i, 5] + matrix_vec[i, 6]
   ini_mat[cbind(x_ind, y_ind)] <- ini_mat[cbind(x_ind, y_ind)] + 1
