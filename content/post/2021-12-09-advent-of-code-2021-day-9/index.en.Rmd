@@ -1,0 +1,62 @@
+---
+title: Advent of Code 2021 - Day 9
+author: admin
+date: '2021-12-09'
+slug: []
+categories:
+  - R
+tags:
+  - Advent of Code
+  - R
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2021-12-09T21:00:23+01:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+Aloha, seems like we are stuck in a lava cave.
+
+```{r, warning = FALSE}
+raw_data <- readLines(con = "day_nine")
+integer_split <- lapply(raw_data, function(x){
+  as.integer(strsplit(x, split = "")[[1]])
+})
+```
+
+Part 1:
+
+```{r part-one}
+m <- do.call(rbind, integer_split)
+#add NA
+m_t <- cbind(NA, rbind(NA, m,  NA), NA)
+```
+
+```{r functions}
+#functions
+MNeighbors <- function(mat, i = 2L, j = 3L) {
+  all(mat[i, j] < c(mat[i, j - c(-1L, 1L)], mat[i - c(-1L, 1L), j]), na.rm = TRUE)
+}
+vMNeighbors <- Vectorize(FUN = MNeighbors, "j")
+```
+
+```{r solution}
+#get borders
+rows <- 2L : (nrow(m_t) - 1L)
+cols <- 2L : (ncol(m_t) - 1L)
+
+mask <- lapply(rows, function(y) {
+  vMNeighbors(m_t, i = y, j = cols)
+})
+mask <- do.call(rbind, mask)
+(answer <- sum(m[mask] + 1))
+```
+
+Part 2:
+
+To be updatet

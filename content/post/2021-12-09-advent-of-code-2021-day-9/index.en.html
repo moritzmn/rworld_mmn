@@ -1,0 +1,51 @@
+---
+title: Advent of Code 2021 - Day 9
+author: admin
+date: '2021-12-09'
+slug: []
+categories:
+  - R
+tags:
+  - Advent of Code
+  - R
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2021-12-09T21:00:23+01:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+<script src="{{< blogdown/postref >}}index.en_files/header-attrs/header-attrs.js"></script>
+
+
+<p>Aloha, seems like we are stuck in a lava cave.</p>
+<pre class="r"><code>raw_data &lt;- readLines(con = &quot;day_nine&quot;)
+integer_split &lt;- lapply(raw_data, function(x){
+  as.integer(strsplit(x, split = &quot;&quot;)[[1]])
+})</code></pre>
+<p>Part 1:</p>
+<pre class="r"><code>m &lt;- do.call(rbind, integer_split)
+#add NA
+m_t &lt;- cbind(NA, rbind(NA, m,  NA), NA)</code></pre>
+<pre class="r"><code>#functions
+MNeighbors &lt;- function(mat, i = 2L, j = 3L) {
+  all(mat[i, j] &lt; c(mat[i, j - c(-1L, 1L)], mat[i - c(-1L, 1L), j]), na.rm = TRUE)
+}
+vMNeighbors &lt;- Vectorize(FUN = MNeighbors, &quot;j&quot;)</code></pre>
+<pre class="r"><code>#get borders
+rows &lt;- 2L : (nrow(m_t) - 1L)
+cols &lt;- 2L : (ncol(m_t) - 1L)
+
+mask &lt;- lapply(rows, function(y) {
+  vMNeighbors(m_t, i = y, j = cols)
+})
+mask &lt;- do.call(rbind, mask)
+(answer &lt;- sum(m[mask] + 1))</code></pre>
+<pre><code>## [1] 600</code></pre>
+<p>Part 2:</p>
+<p>To be updatet</p>
