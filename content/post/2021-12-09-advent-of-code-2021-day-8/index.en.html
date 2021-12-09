@@ -1,0 +1,46 @@
+---
+title: Advent of Code 2021- Day 8
+author: admin
+date: '2021-12-09'
+slug: []
+categories:
+  - R
+tags:
+  - Advent of Code
+  - R
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2021-12-09T20:55:15+01:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+<script src="{{< blogdown/postref >}}index.en_files/header-attrs/header-attrs.js"></script>
+
+
+<p>Aloha, the submarine is broken. At least our seven digit display.</p>
+<pre class="r"><code>raw_data &lt;- readLines(con = &quot;day_eight_one&quot;)</code></pre>
+<pre><code>## Warning in readLines(con = &quot;day_eight_one&quot;): unvollständige letzte Zeile in
+## &#39;day_eight_one&#39; gefunden</code></pre>
+<pre class="r"><code>raw_data &lt;- strsplit(raw_data, split = &quot;[|]&quot;)</code></pre>
+<p>Part 1:</p>
+<pre class="r"><code>output_signals &lt;- lapply(raw_data, function(x) {
+  unlist(strsplit(x[2], split = &quot; &quot;))[-1]
+})
+
+# 1, 4, 7, 8 signals
+
+count_chars &lt;- lapply(output_signals, function(x){
+  sum(nchar(x) %in% c(2, 3, 4, 7))
+  
+})
+
+(answer &lt;- sum(unlist(count_chars)))</code></pre>
+<pre><code>## [1] 504</code></pre>
+<p>Part 2:</p>
+<p>To be updatet</p>

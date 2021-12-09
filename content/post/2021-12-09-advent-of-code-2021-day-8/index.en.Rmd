@@ -1,0 +1,49 @@
+---
+title: Advent of Code 2021- Day 8
+author: admin
+date: '2021-12-09'
+slug: []
+categories:
+  - R
+tags:
+  - Advent of Code
+  - R
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2021-12-09T20:55:15+01:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+Aloha, the submarine is broken. At least our seven digit display.
+
+```{r data}
+raw_data <- readLines(con = "day_eight_one")
+raw_data <- strsplit(raw_data, split = "[|]")
+```
+
+Part 1:
+
+```{r part 1}
+output_signals <- lapply(raw_data, function(x) {
+  unlist(strsplit(x[2], split = " "))[-1]
+})
+
+# 1, 4, 7, 8 signals
+
+count_chars <- lapply(output_signals, function(x){
+  sum(nchar(x) %in% c(2, 3, 4, 7))
+  
+})
+
+(answer <- sum(unlist(count_chars)))
+```
+
+Part 2:
+
+To be updatet
