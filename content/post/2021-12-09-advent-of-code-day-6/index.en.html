@@ -1,0 +1,54 @@
+---
+title: ADvent of Code - Day 6
+author: admin
+date: '2021-12-09'
+slug: []
+categories: []
+tags:
+  - Advent of Code
+  - R
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2021-12-09T19:57:26+01:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+<script src="{{< blogdown/postref >}}index.en_files/header-attrs/header-attrs.js"></script>
+
+
+<p>Aloha, who heard of <em>lanternfish</em> before? Me neither.</p>
+<p>Part 1:</p>
+<pre class="r"><code>initial_state &lt;- readLines(con = &quot;day_six_one&quot;)
+initial_state &lt;- as.integer(unlist(strsplit(initial_state, split =&quot;,&quot;)))</code></pre>
+<pre class="r"><code>sim_fish_faster &lt;- function(ini_state = c(3L, 4L, 3L, 1L, 2L), n_run = 18L, vec_length = 1e4) {
+  m &lt;- 1L
+  fish_vec &lt;- rep(NA_integer_, vec_length)
+  fish_vec[1 : length(ini_state)] &lt;- ini_state
+  update_max &lt;- min(which(is.na(fish_vec)))
+  while(m &lt;= n_run) {
+    fish_vec   &lt;- fish_vec - 1L
+    new_fish_n &lt;- sum(fish_vec &lt; 0L, na.rm = TRUE)
+    fish_vec[fish_vec &lt; 0L] &lt;- 6L
+    
+    if(new_fish_n &gt; 0) {
+      fish_vec[update_max: (new_fish_n + update_max - 1L)] &lt;- 8L
+      update_max &lt;- min(which(is.na(fish_vec)))
+    } else {
+      
+    }
+    m &lt;- m + 1L
+  }
+  
+  return(na.omit(fish_vec))
+}</code></pre>
+<pre class="r"><code>fish_state &lt;- sim_fish_faster(ini_state = initial_state, n_run = 80L, vec_length = 1e7)
+length(fish_state)</code></pre>
+<pre><code>## [1] 362740</code></pre>
+<p>Part 2:</p>
+<p>To be updatet</p>

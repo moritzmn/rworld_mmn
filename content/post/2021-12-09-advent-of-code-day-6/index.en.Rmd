@@ -1,0 +1,63 @@
+---
+title: ADvent of Code - Day 6
+author: admin
+date: '2021-12-09'
+slug: []
+categories: []
+tags:
+  - Advent of Code
+  - R
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2021-12-09T19:57:26+01:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+Aloha, who heard of *lanternfish* before? Me neither.
+
+Part 1:
+
+```{r data, warning = FALSE}
+initial_state <- readLines(con = "day_six_one")
+initial_state <- as.integer(unlist(strsplit(initial_state, split =",")))
+```
+
+```{r sim-func}
+sim_fish_faster <- function(ini_state = c(3L, 4L, 3L, 1L, 2L), n_run = 18L, vec_length = 1e4) {
+  m <- 1L
+  fish_vec <- rep(NA_integer_, vec_length)
+  fish_vec[1 : length(ini_state)] <- ini_state
+  update_max <- min(which(is.na(fish_vec)))
+  while(m <= n_run) {
+    fish_vec   <- fish_vec - 1L
+    new_fish_n <- sum(fish_vec < 0L, na.rm = TRUE)
+    fish_vec[fish_vec < 0L] <- 6L
+    
+    if(new_fish_n > 0) {
+      fish_vec[update_max: (new_fish_n + update_max - 1L)] <- 8L
+      update_max <- min(which(is.na(fish_vec)))
+    } else {
+      
+    }
+    m <- m + 1L
+  }
+  
+  return(na.omit(fish_vec))
+}
+```
+
+
+```{r part-one}
+fish_state <- sim_fish_faster(ini_state = initial_state, n_run = 80L, vec_length = 1e7)
+length(fish_state)
+```
+
+Part 2:
+
+To be updatet
