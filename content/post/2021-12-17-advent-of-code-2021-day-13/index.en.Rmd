@@ -1,0 +1,82 @@
+---
+title: Advent of Code 2021 - Day 13
+author: admin
+date: '2021-12-17'
+slug: []
+categories:
+  - R
+tags:
+  - Advent of Code
+  - R
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2021-12-17T00:16:52+01:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+Aloha, today we are going to fold up the manual, which allows us to use the thermal device.
+
+```{r data}
+#maual
+mat <- as.matrix(read.csv(file = "day_thirteen_paper", header = FALSE))
+dot_mat <- matrix(data = NA, ncol = max(mat[, 1] + 1), nrow = max(mat[, 2] + 1))
+dot_mat[cbind(mat[, 2] + 1 , mat[, 1] + 1)] <- 1
+
+#instructions
+instructions <- read.csv(file = "day_thirteen_instructions", sep = " ", header = FALSE)
+instructions <- instructions[["V3"]]
+instructions <- strsplit(instructions, split = "=")
+instructions <- lapply(instructions, function(x) {
+  return(data.frame("axis" = x[1], "value" = as.integer(x[2]) + 1))
+})
+
+```
+
+Next we define a function, which folds the transparent manual, given an axis and the position.
+
+```{r function-fold}
+FoldMatrix <- function(m, ax_is = "y", value) {
+  if(ax_is == "y") {
+    #fold y
+    y <- value
+    
+    y_y <- min(max(seq(nrow(m) - y)), max(y - seq(y)))
+    where_one <- m[y + seq(y_y), ] == 1 
+    
+    m[y-seq(y_y), ][where_one] <- 1
+    
+    m <- m[-c(y : nrow(m)),]
+  } else {
+    y <- value
+    
+    y_y <- min(max(seq(ncol(m) - y)), max(y - seq(y)))
+    where_one <- m[,y + seq(y_y)] == 1 
+    
+    m[,y - seq(y_y)][where_one] <- 1
+    
+    m <- m[,-c(y:ncol(m))]
+  }
+  return(m)
+}
+```
+
+Now we fold the paper given the instruction set.
+
+```{r matrix-folding}
+for(i in seq(instructions)){
+  ins_set <- instructions[[i]]
+  dot_mat <- FoldMatrix(dot_mat, ax_is = ins_set[, 1], value = ins_set[, 2])
+  print(sum(dot_mat, na.rm = TRUE))
+  
+}
+dot_mat
+```
+
+Printing the matrix reveals the code. "ECFHLHZF".
+
