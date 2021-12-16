@@ -24,7 +24,7 @@ projects: []
 
 
 <p>Aloha, today we are going to fold up the manual, which allows us to use the thermal device.</p>
-<pre class="r"><code>#maual
+<pre class="r"><code>#manual
 mat &lt;- as.matrix(read.csv(file = &quot;day_thirteen_paper&quot;, header = FALSE))
 dot_mat &lt;- matrix(data = NA, ncol = max(mat[, 1] + 1), nrow = max(mat[, 2] + 1))
 dot_mat[cbind(mat[, 2] + 1 , mat[, 1] + 1)] &lt;- 1
@@ -45,18 +45,18 @@ instructions &lt;- lapply(instructions, function(x) {
     y_y &lt;- min(max(seq(nrow(m) - y)), max(y - seq(y)))
     where_one &lt;- m[y + seq(y_y), ] == 1 
     
-    m[y-seq(y_y), ][where_one] &lt;- 1
+    m[y - seq(y_y), ][where_one] &lt;- 1
     
-    m &lt;- m[-c(y : nrow(m)),]
+    m &lt;- m[-c(y : nrow(m)), ]
   } else {
     y &lt;- value
     
     y_y &lt;- min(max(seq(ncol(m) - y)), max(y - seq(y)))
-    where_one &lt;- m[,y + seq(y_y)] == 1 
+    where_one &lt;- m[, y + seq(y_y)] == 1 
     
-    m[,y - seq(y_y)][where_one] &lt;- 1
+    m[, y - seq(y_y)][where_one] &lt;- 1
     
-    m &lt;- m[,-c(y:ncol(m))]
+    m &lt;- m[, -c(y : ncol(m))]
   }
   return(m)
 }</code></pre>

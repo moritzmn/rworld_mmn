@@ -22,8 +22,8 @@ projects: []
 
 Aloha, today we are going to fold up the manual, which allows us to use the thermal device.
 
-```{r data}
-#maual
+```{r data, warning=FALSE}
+#manual
 mat <- as.matrix(read.csv(file = "day_thirteen_paper", header = FALSE))
 dot_mat <- matrix(data = NA, ncol = max(mat[, 1] + 1), nrow = max(mat[, 2] + 1))
 dot_mat[cbind(mat[, 2] + 1 , mat[, 1] + 1)] <- 1
@@ -49,18 +49,18 @@ FoldMatrix <- function(m, ax_is = "y", value) {
     y_y <- min(max(seq(nrow(m) - y)), max(y - seq(y)))
     where_one <- m[y + seq(y_y), ] == 1 
     
-    m[y-seq(y_y), ][where_one] <- 1
+    m[y - seq(y_y), ][where_one] <- 1
     
-    m <- m[-c(y : nrow(m)),]
+    m <- m[-c(y : nrow(m)), ]
   } else {
     y <- value
     
     y_y <- min(max(seq(ncol(m) - y)), max(y - seq(y)))
-    where_one <- m[,y + seq(y_y)] == 1 
+    where_one <- m[, y + seq(y_y)] == 1 
     
-    m[,y - seq(y_y)][where_one] <- 1
+    m[, y - seq(y_y)][where_one] <- 1
     
-    m <- m[,-c(y:ncol(m))]
+    m <- m[, -c(y : ncol(m))]
   }
   return(m)
 }
