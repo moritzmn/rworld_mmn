@@ -22,3 +22,78 @@ projects: []
 <script src="{{< blogdown/postref >}}index.en_files/header-attrs/header-attrs.js"></script>
 
 
+<p>Aloha, it turns out that a dumbo octupus can flash. This helps us navigating through the dark.
+More on <a href="https://adventofcode.com/2021/day/11" class="uri">https://adventofcode.com/2021/day/11</a>.</p>
+<p>Data</p>
+<pre class="r"><code>raw_data &lt;- readLines(con = &quot;day_eleven&quot;)
+
+integer_split &lt;- lapply(raw_data, function(x){
+  as.integer(strsplit(x, split = &quot;&quot;)[[1]])
+})
+m &lt;- do.call(rbind, integer_split)
+
+#preparing part 2
+all_flashed &lt;- ncol(m) * nrow(m)
+
+m_t &lt;- cbind(NA, rbind(NA, m,  NA), NA)</code></pre>
+<p>Functions</p>
+<pre class="r"><code>MNeighbors &lt;- function(mat, i = 2L, j = 3L, range_vec = -1 : 1) {
+  mat[i + range_vec, j + range_vec] &lt;- mat[i + range_vec, j + range_vec] + 1L
+
+  mat[c(1, nrow(mat)),] &lt;- NA
+  mat[,c(1, ncol(mat))] &lt;- NA
+  return(mat)
+}</code></pre>
+<p>Part 1:</p>
+<pre class="r"><code>steps &lt;- 100L
+sum_flashes &lt;- integer(length = steps)
+for(k in seq(steps)) {
+  m_t &lt;- m_t + 1L
+  flashes_mat &lt;- which(m_t &gt; 9L, arr.ind = TRUE)
+  flashed     &lt;- flashes_mat
+  while(any(flashes_mat)) {
+    for(i in 1 : nrow(flashes_mat)) {
+      m_t &lt;- MNeighbors(m_t, i = flashes_mat[i, &quot;row&quot;], j = flashes_mat[i, &quot;col&quot;])
+      
+    }
+    flashed &lt;- rbind(flashed, flashes_mat)
+    #update flashes_mat
+    flashes_mat &lt;- which(m_t &gt; 9L, arr.ind = TRUE)
+    flashes_mat &lt;- flashes_mat[!(paste0(flashes_mat[,1], 
+                                        flashes_mat[,2])) %in% (paste0(flashed[, 1], flashed[, 2])),, 
+                               drop = FALSE]
+    
+  }
+  sum_flashes[k] &lt;- sum(m_t &gt; 9L, na.rm = TRUE)
+  m_t[m_t &gt; 9L] &lt;- 0L
+}
+
+sum(sum_flashes)</code></pre>
+<pre><code>## [1] 1640</code></pre>
+<p>Part 2</p>
+<pre class="r"><code>m_t &lt;- cbind(NA, rbind(NA, m,  NA), NA)
+sum_flashes &lt;- 0L
+k &lt;- 0L
+while(sum_flashes &lt; all_flashed) {
+  m_t &lt;- m_t + 1L
+  flashes_mat &lt;- which(m_t &gt; 9L, arr.ind = TRUE)
+  flashed     &lt;- flashes_mat
+  while(any(flashes_mat)) {
+    for(i in 1 : nrow(flashes_mat)) {
+      m_t &lt;- MNeighbors(m_t, i = flashes_mat[i, &quot;row&quot;], j = flashes_mat[i, &quot;col&quot;])
+    }
+    flashed &lt;- rbind(flashed, flashes_mat)
+    #update flashes mat
+    flashes_mat &lt;- which(m_t &gt; 9L, arr.ind = TRUE)
+    flashes_mat &lt;- flashes_mat[!(paste0(flashes_mat[,1], 
+                                        flashes_mat[,2])) %in% (paste0(flashed[, 1], flashed[, 2])),, 
+                               drop = FALSE]
+    
+  }
+  sum_flashes &lt;- sum(m_t &gt; 9L, na.rm = TRUE)
+  m_t[m_t &gt; 9L] &lt;- 0L
+  k &lt;- k + 1L
+}
+
+k</code></pre>
+<pre><code>## [1] 312</code></pre>
