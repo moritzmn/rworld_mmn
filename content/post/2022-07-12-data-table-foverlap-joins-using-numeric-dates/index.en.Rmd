@@ -1,0 +1,206 @@
+---
+title: data.table - foverlap joins using numeric dates
+author: admin
+date: '2022-07-12'
+slug: []
+categories:
+  - R
+tags:
+  - data.table
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2022-07-12T20:30:23+02:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+Hi,
+
+in this post we are going to take a look at the *foverlap* function of the amazing *data.table* package. We start by running the examples, 
+which are provided in the package documentation:
+\linebreak
+
+https://search.r-project.org/CRAN/refmans/data.table/html/foverlaps.html 
+
+Afterwards we are moving to an example, where we have date columns in the two data.table´s which we want to join based on overlaps. We generate the data ourselves, but the workflow is applicable to real world problems, once we understand the logic.
+
+## The foverlaps function
+
+```{r foverlaps, eval=FALSE} 
+foverlaps(x, y, by.x = if (!is.null(key(x))) key(x) else key(y),
+    by.y = key(y), maxgap = 0L, minoverlap = 1L,
+    type = c("any", "within", "start", "end", "equal"),
+    mult = c("all", "first", "last"),
+    nomatch = getOption("datatable.nomatch", NA),
+    which = FALSE, verbose = getOption("datatable.verbose"))
+```
+
+*x* and *y* are the data.table´s you want to join given the columns *start* and *end*, which need to be column names in *x* and *y*.
+*y* needs to be keyed.
+
+Let us assume you have two tables (taken from the docs)
+
+```{r example-1, warning=FALSE}
+library(data.table)
+
+(x = data.table(start=c(5,31,22,16), end=c(8,50,25,18), val2 = 7:10))
+(y = data.table(start=c(10, 20, 30), end=c(15, 35, 45), val1 = 1:3))
+```
+
+In both tables we observe a *start* and an *end* column. The first row in *x* can be interpreted as: In the interval 5 to 8 we observe the value 7 for *val2*. Before calling the *foverlaps* function we need to set a key in *y*
+
+```{r setkey}
+setkey(y, start, end)
+```
+
+
+For better understanding the *type* parameter the documentation provides example intervals [a, b] for table *x*
+and [c, d] for table *y*. Note that [a, b] = [start(x), end(x)] and [c, d] = [start(y), end(y)]
+
+Now we can call the *foverlaps* function. We start by setting the *type* parameter to *any*, which means the intervals overlap as long as c <= b and 
+d >= a. 
+
+```{r type-any}
+foverlaps(x, y, type = "any")
+```
+
+The first three columns of the first row are empty, because [5, 8] in *x* and any of [10, 15], [20, 35], [30, 45] in *y* do not satisfy c <= b and d >= a. The same is true for the last row, where the interval is [16, 18] in *x*, here *i.start*, *i.end*, does not satisfy above rule. Please not that both [31, 50] satisfies both [20, 35] and [30, 45] by that logic. The result therefore is a data.table with 5 rows.
+
+A more intuitive type is *within*, which we are going to explore next.
+The intervals overlap, when a >= c and b <= d.
+
+
+```{r type-within}
+foverlaps(x, y, type = "within")
+```
+The result is a data.table with 4 rows and only one matching row, because 22 >= 20 and 25 <= 35. 
+
+For the types "start" and "end" the intervals overlap, when a == c (start) or b == d (end), respectively. "equal" means a == c and b == d.
+
+## Using numeric dates
+
+We are going to create two data.table´s. One table (x), where we first generate a vector using the *IDate* class. The resolution is in days.
+In table *x* we observe a variable called *val1*, which is going to be a random walk. 
+In *y* we generate random intervals of length 3 to 11 days. In an interval an event (1) occurs. 
+
+```{r date-vec}
+seq_dates  <- seq(as.IDate("1970-01-01"), as.IDate("2022-12-31", origin = "1900-01-01"), by = "days")
+```
+
+We want the dates to be numeric:
+
+```{r}
+seq_dates <- as.numeric(seq_dates)
+```
+
+
+Next we generate us a random walk of *length = length(seq_dates)*.
+
+```{r rw}
+set.seed(1401L)
+random_walk <- cumsum(rnorm(n = length(seq_dates)))
+```
+
+Now we create a data.table from the two vectors and shift the numeric date column by one, meaning we generate a start, end interval of one day.
+This is going to be our data.able *dt_x*.
+
+```{r data-table-x}
+(dt_x <- data.table(val1 = random_walk, start = seq_dates, end = shift(seq_dates, n = 1L, type = "lead")))
+dt_x <- na.omit(dt_x, cols = "end")
+```
+
+For our *y* table (here called *dt_y*) we generate sample of size 25 for the lookup intervals. The variable (val2) is a sample of size *nrow(dt_y)* and of type integer. Our *y* can be read as follows: In the interval [c, d] we observe an event (1).
+
+```{r data-table-y}
+set.seed(1401L)
+sample_start <- sample(1 : nrow(dt_x), size = 25, replace = FALSE)
+sample_end   <- sample_start + sample(100 : 110, size = 25, replace = TRUE)
+
+val2 <- rep(1L, times = 25)
+
+dt_y <- data.table(event = val2, start = sample_start, end = sample_end)
+setkey(dt_y, start, end)
+```
+
+Joining with *foverlaps* and type *within*:
+
+```{r}
+(dt_joined <- foverlaps(dt_x, dt_y, type = "within"))
+```
+
+Since for the NA values we can conclude that we do not observe an event, we fill missing values by 0.
+
+```{r fill-missing}
+setnafill(dt_joined, type = "const", fill = 0, cols = "event")
+dt_joined
+```
+
+## More parameters to set
+
+The *foverlaps* function has three other interesting parameters, which we can set to get a different return value.
+
+* mult: Controls how multiple matches are handled. Default is "all", which means all matches are returned. Also possible are "first" and "last".
+
+* nomatch: What should happen when an interval [a, b] in x has no match in in y. Default is NA, which means that NA is returned for the non-key columns in y and all rows of x are returned. When setting nomatch = NULL, only rows of *x* are returned, when there is a match in *y*.
+
+* which: This parameter is dependent on *mult* and *nomatch*. We explore the behavior in coming examples.
+
+We explore an example where we set *type = within* and *nomatch = NULL*, which means we only return rows, where *x* has a match in *y*. 
+
+### mult
+
+```{r mult-all}
+foverlaps(dt_x, dt_y, type = "within", mult = "all", nomatch = NULL)[,.N]
+```
+
+```{r mult-last}
+foverlaps(dt_x, dt_y, type = "within", mult = "last", nomatch = NULL)[,.N]
+```
+
+```{r mult-first}
+foverlaps(dt_x, dt_y, type = "within", mult = "first", nomatch = NULL)[,.N]
+```
+
+### which
+
+```{r which-mult-all}
+foverlaps(dt_x, dt_y, type = "within", mult = "all", nomatch = NULL, which = TRUE)
+```
+
+```{r which-mult-first}
+head(foverlaps(dt_x, dt_y, type = "within", 
+               mult = "first", nomatch = NULL, which = TRUE))
+```
+
+This returns a vector of *length = nrow(dt_x)*. "0" means for that row in *dt_x*, we did not find a match in *dt_y*. "1" means for that row in *dt_x* we find a math in the first row of *dt_y*
+
+So there you have it. While we did not explore all combinations of parameter sets, this post should provide you an first look at the *foverlaps* function.
+
+## Plot
+
+Using our joined table we can, for example, generate a plot and color areas, based on event occurrence.
+
+```{r ggplot, warning=FALSE}
+library(ggplot2)
+
+ggplot(data = dt_joined) +
+  geom_rect(aes(xmin = start, xmax = end, ymin = -Inf, ymax = Inf, fill = "event"), alpha = 0.3)+
+  geom_point(aes (x = i.start, y = val1)) + theme_minimal()
+
+```
+
+## Conclusion
+
+*foverlaps* is a powerful function, which you can utilize to join two tables based on overlaps. Thanks to all contributors to this cool function and to the mighty *data.table* package authors, contributors and maintainers. Please check out the website at: https://rdatatable.gitlab.io/data.table/ for more information.
+
+See you soon
+
+Moritz
+
+
+

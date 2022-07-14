@@ -1,0 +1,201 @@
+---
+title: data.table - foverlap joins using numeric dates
+author: admin
+date: '2022-07-12'
+slug: []
+categories:
+  - R
+tags:
+  - data.table
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2022-07-12T20:30:23+02:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+<script src="{{< blogdown/postref >}}index.en_files/header-attrs/header-attrs.js"></script>
+
+
+<p>Hi,</p>
+<p>in this post we are going to take a look at the <em>foverlap</em> function of the amazing <em>data.table</em> package. We start by running the examples,
+which are provided in the package documentation:
+</p>
+<p><a href="https://search.r-project.org/CRAN/refmans/data.table/html/foverlaps.html" class="uri">https://search.r-project.org/CRAN/refmans/data.table/html/foverlaps.html</a></p>
+<p>Afterwards we are moving to an example, where we have date columns in the two data.table´s which we want to join based on overlaps. We generate the data ourselves, but the workflow is applicable to real world problems, once we understand the logic.</p>
+<div id="the-foverlaps-function" class="section level2">
+<h2>The foverlaps function</h2>
+<pre class="r"><code>foverlaps(x, y, by.x = if (!is.null(key(x))) key(x) else key(y),
+    by.y = key(y), maxgap = 0L, minoverlap = 1L,
+    type = c(&quot;any&quot;, &quot;within&quot;, &quot;start&quot;, &quot;end&quot;, &quot;equal&quot;),
+    mult = c(&quot;all&quot;, &quot;first&quot;, &quot;last&quot;),
+    nomatch = getOption(&quot;datatable.nomatch&quot;, NA),
+    which = FALSE, verbose = getOption(&quot;datatable.verbose&quot;))</code></pre>
+<p><em>x</em> and <em>y</em> are the data.table´s you want to join given the columns <em>start</em> and <em>end</em>, which need to be column names in <em>x</em> and <em>y</em>.
+<em>y</em> needs to be keyed.</p>
+<p>Let us assume you have two tables (taken from the docs)</p>
+<pre class="r"><code>library(data.table)
+
+(x = data.table(start=c(5,31,22,16), end=c(8,50,25,18), val2 = 7:10))</code></pre>
+<pre><code>##    start end val2
+## 1:     5   8    7
+## 2:    31  50    8
+## 3:    22  25    9
+## 4:    16  18   10</code></pre>
+<pre class="r"><code>(y = data.table(start=c(10, 20, 30), end=c(15, 35, 45), val1 = 1:3))</code></pre>
+<pre><code>##    start end val1
+## 1:    10  15    1
+## 2:    20  35    2
+## 3:    30  45    3</code></pre>
+<p>In both tables we observe a <em>start</em> and an <em>end</em> column. The first row in <em>x</em> can be interpreted as: In the interval 5 to 8 we observe the value 7 for <em>val2</em>. Before calling the <em>foverlaps</em> function we need to set a key in <em>y</em></p>
+<pre class="r"><code>setkey(y, start, end)</code></pre>
+<p>For better understanding the <em>type</em> parameter the documentation provides example intervals [a, b] for table <em>x</em>
+and [c, d] for table <em>y</em>. Note that [a, b] = [start(x), end(x)] and [c, d] = [start(y), end(y)]</p>
+<p>Now we can call the <em>foverlaps</em> function. We start by setting the <em>type</em> parameter to <em>any</em>, which means the intervals overlap as long as c &lt;= b and
+d &gt;= a.</p>
+<pre class="r"><code>foverlaps(x, y, type = &quot;any&quot;)</code></pre>
+<pre><code>##    start end val1 i.start i.end val2
+## 1:    NA  NA   NA       5     8    7
+## 2:    20  35    2      31    50    8
+## 3:    30  45    3      31    50    8
+## 4:    20  35    2      22    25    9
+## 5:    NA  NA   NA      16    18   10</code></pre>
+<p>The first three columns of the first row are empty, because [5, 8] in <em>x</em> and any of [10, 15], [20, 35], [30, 45] in <em>y</em> do not satisfy c &lt;= b and d &gt;= a. The same is true for the last row, where the interval is [16, 18] in <em>x</em>, here <em>i.start</em>, <em>i.end</em>, does not satisfy above rule. Please not that both [31, 50] satisfies both [20, 35] and [30, 45] by that logic. The result therefore is a data.table with 5 rows.</p>
+<p>A more intuitive type is <em>within</em>, which we are going to explore next.
+The intervals overlap, when a &gt;= c and b &lt;= d.</p>
+<pre class="r"><code>foverlaps(x, y, type = &quot;within&quot;)</code></pre>
+<pre><code>##    start end val1 i.start i.end val2
+## 1:    NA  NA   NA       5     8    7
+## 2:    NA  NA   NA      31    50    8
+## 3:    20  35    2      22    25    9
+## 4:    NA  NA   NA      16    18   10</code></pre>
+<p>The result is a data.table with 4 rows and only one matching row, because 22 &gt;= 20 and 25 &lt;= 35.</p>
+<p>For the types “start” and “end” the intervals overlap, when a == c (start) or b == d (end), respectively. “equal” means a == c and b == d.</p>
+</div>
+<div id="using-numeric-dates" class="section level2">
+<h2>Using numeric dates</h2>
+<p>We are going to create two data.table´s. One table (x), where we first generate a vector using the <em>IDate</em> class. The resolution is in days.
+In table <em>x</em> we observe a variable called <em>val1</em>, which is going to be a random walk.
+In <em>y</em> we generate random intervals of length 3 to 11 days. In an interval an event (1) occurs.</p>
+<pre class="r"><code>seq_dates  &lt;- seq(as.IDate(&quot;1970-01-01&quot;), as.IDate(&quot;2022-12-31&quot;, origin = &quot;1900-01-01&quot;), by = &quot;days&quot;)</code></pre>
+<p>We want the dates to be numeric:</p>
+<pre class="r"><code>seq_dates &lt;- as.numeric(seq_dates)</code></pre>
+<p>Next we generate us a random walk of <em>length = length(seq_dates)</em>.</p>
+<pre class="r"><code>set.seed(1401L)
+random_walk &lt;- cumsum(rnorm(n = length(seq_dates)))</code></pre>
+<p>Now we create a data.table from the two vectors and shift the numeric date column by one, meaning we generate a start, end interval of one day.
+This is going to be our data.able <em>dt_x</em>.</p>
+<pre class="r"><code>(dt_x &lt;- data.table(val1 = random_walk, start = seq_dates, end = shift(seq_dates, n = 1L, type = &quot;lead&quot;)))</code></pre>
+<pre><code>##              val1 start   end
+##     1:  0.7734175     0     1
+##     2:  1.1819570     1     2
+##     3:  0.1733981     2     3
+##     4: -0.6709837     3     4
+##     5: -1.3558196     4     5
+##    ---                       
+## 19354: 61.1310895 19353 19354
+## 19355: 60.9261937 19354 19355
+## 19356: 59.4498577 19355 19356
+## 19357: 58.5640610 19356 19357
+## 19358: 58.7591973 19357    NA</code></pre>
+<pre class="r"><code>dt_x &lt;- na.omit(dt_x, cols = &quot;end&quot;)</code></pre>
+<p>For our <em>y</em> table (here called <em>dt_y</em>) we generate sample of size 25 for the lookup intervals. The variable (val2) is a sample of size <em>nrow(dt_y)</em> and of type integer. Our <em>y</em> can be read as follows: In the interval [c, d] we observe an event (1).</p>
+<pre class="r"><code>set.seed(1401L)
+sample_start &lt;- sample(1 : nrow(dt_x), size = 25, replace = FALSE)
+sample_end   &lt;- sample_start + sample(100 : 110, size = 25, replace = TRUE)
+
+val2 &lt;- rep(1L, times = 25)
+
+dt_y &lt;- data.table(event = val2, start = sample_start, end = sample_end)
+setkey(dt_y, start, end)</code></pre>
+<p>Joining with <em>foverlaps</em> and type <em>within</em>:</p>
+<pre class="r"><code>(dt_joined &lt;- foverlaps(dt_x, dt_y, type = &quot;within&quot;))</code></pre>
+<pre><code>##        event start end       val1 i.start i.end
+##     1:    NA    NA  NA  0.7734175       0     1
+##     2:    NA    NA  NA  1.1819570       1     2
+##     3:    NA    NA  NA  0.1733981       2     3
+##     4:    NA    NA  NA -0.6709837       3     4
+##     5:    NA    NA  NA -1.3558196       4     5
+##    ---                                         
+## 19481:    NA    NA  NA 60.7022941   19352 19353
+## 19482:    NA    NA  NA 61.1310895   19353 19354
+## 19483:    NA    NA  NA 60.9261937   19354 19355
+## 19484:    NA    NA  NA 59.4498577   19355 19356
+## 19485:    NA    NA  NA 58.5640610   19356 19357</code></pre>
+<p>Since for the NA values we can conclude that we do not observe an event, we fill missing values by 0.</p>
+<pre class="r"><code>setnafill(dt_joined, type = &quot;const&quot;, fill = 0, cols = &quot;event&quot;)
+dt_joined</code></pre>
+<pre><code>##        event start end       val1 i.start i.end
+##     1:     0    NA  NA  0.7734175       0     1
+##     2:     0    NA  NA  1.1819570       1     2
+##     3:     0    NA  NA  0.1733981       2     3
+##     4:     0    NA  NA -0.6709837       3     4
+##     5:     0    NA  NA -1.3558196       4     5
+##    ---                                         
+## 19481:     0    NA  NA 60.7022941   19352 19353
+## 19482:     0    NA  NA 61.1310895   19353 19354
+## 19483:     0    NA  NA 60.9261937   19354 19355
+## 19484:     0    NA  NA 59.4498577   19355 19356
+## 19485:     0    NA  NA 58.5640610   19356 19357</code></pre>
+</div>
+<div id="more-parameters-to-set" class="section level2">
+<h2>More parameters to set</h2>
+<p>The <em>foverlaps</em> function has three other interesting parameters, which we can set to get a different return value.</p>
+<ul>
+<li><p>mult: Controls how multiple matches are handled. Default is “all”, which means all matches are returned. Also possible are “first” and “last”.</p></li>
+<li><p>nomatch: What should happen when an interval [a, b] in x has no match in in y. Default is NA, which means that NA is returned for the non-key columns in y and all rows of x are returned. When setting nomatch = NULL, only rows of <em>x</em> are returned, when there is a match in <em>y</em>.</p></li>
+<li><p>which: This parameter is dependent on <em>mult</em> and <em>nomatch</em>. We explore the behavior in coming examples.</p></li>
+</ul>
+<p>We explore an example where we set <em>type = within</em> and <em>nomatch = NULL</em>, which means we only return rows, where <em>x</em> has a match in <em>y</em>.</p>
+<div id="mult" class="section level3">
+<h3>mult</h3>
+<pre class="r"><code>foverlaps(dt_x, dt_y, type = &quot;within&quot;, mult = &quot;all&quot;, nomatch = NULL)[,.N]</code></pre>
+<pre><code>## [1] 2640</code></pre>
+<pre class="r"><code>foverlaps(dt_x, dt_y, type = &quot;within&quot;, mult = &quot;last&quot;, nomatch = NULL)[,.N]</code></pre>
+<pre><code>## [1] 2512</code></pre>
+<pre class="r"><code>foverlaps(dt_x, dt_y, type = &quot;within&quot;, mult = &quot;first&quot;, nomatch = NULL)[,.N]</code></pre>
+<pre><code>## [1] 2512</code></pre>
+</div>
+<div id="which" class="section level3">
+<h3>which</h3>
+<pre class="r"><code>foverlaps(dt_x, dt_y, type = &quot;within&quot;, mult = &quot;all&quot;, nomatch = NULL, which = TRUE)</code></pre>
+<pre><code>##         xid yid
+##    1:   316   1
+##    2:   317   1
+##    3:   318   1
+##    4:   319   1
+##    5:   320   1
+##   ---          
+## 2636: 18479  25
+## 2637: 18480  25
+## 2638: 18481  25
+## 2639: 18482  25
+## 2640: 18483  25</code></pre>
+<pre class="r"><code>head(foverlaps(dt_x, dt_y, type = &quot;within&quot;, 
+               mult = &quot;first&quot;, nomatch = NULL, which = TRUE))</code></pre>
+<pre><code>## [1] 0 0 0 0 0 0</code></pre>
+<p>This returns a vector of <em>length = nrow(dt_x)</em>. “0” means for that row in <em>dt_x</em>, we did not find a match in <em>dt_y</em>. “1” means for that row in <em>dt_x</em> we find a math in the first row of <em>dt_y</em></p>
+<p>So there you have it. While we did not explore all combinations of parameter sets, this post should provide you an first look at the <em>foverlaps</em> function.</p>
+</div>
+</div>
+<div id="plot" class="section level2">
+<h2>Plot</h2>
+<p>Using our joined table we can, for example, generate a plot and color areas, based on event occurrence.</p>
+<pre class="r"><code>library(ggplot2)
+
+ggplot(data = dt_joined) +
+  geom_rect(aes(xmin = start, xmax = end, ymin = -Inf, ymax = Inf, fill = &quot;event&quot;), alpha = 0.3)+
+  geom_point(aes (x = i.start, y = val1)) + theme_minimal()</code></pre>
+<p><img src="{{< blogdown/postref >}}index.en_files/figure-html/ggplot-1.png" width="672" /></p>
+</div>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
+<p><em>foverlaps</em> is a powerful function, which you can utilize to join two tables based on overlaps. Thanks to all contributors to this cool function and to the mighty <em>data.table</em> package authors, contributors and maintainers. Please check out the website at: <a href="https://rdatatable.gitlab.io/data.table/" class="uri">https://rdatatable.gitlab.io/data.table/</a> for more information.</p>
+<p>See you soon</p>
+<p>Moritz</p>
+</div>
